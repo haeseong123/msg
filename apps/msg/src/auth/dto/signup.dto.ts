@@ -1,7 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { hashSync } from 'bcrypt';
-import { Transform, Type } from 'class-transformer';
 import { User } from '@app/msg-core/user/user.entity';
+import { hash } from 'bcrypt';
 
 export class SignupDto {
   @IsEmail()
@@ -16,15 +15,12 @@ export class SignupDto {
   @IsNotEmpty()
   nickname: string;
 
-  @Transform(({ value }) => hashSync(value + process.env.PEPPER, 10))
-  passwordHash: string;
-
-  toUser(): User {
+  static async toUser(dto: SignupDto): Promise<User> {
     const user = new User();
-    user.email = this.email;
-    user.password = this.passwordHash;
-    user.address = this.address;
-    user.nickname = this.nickname;
+    user.email = dto.email;
+    user.password = await hash(dto.password + process.env.PEPPER, 10);
+    user.address = dto.address;
+    user.nickname = dto.nickname;
     return user;
   }
 }
