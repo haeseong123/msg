@@ -8,6 +8,7 @@ import { SignupDto } from "./dto/signup.dto";
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
+    @HttpCode(HttpStatus.CREATED)
     @Post('signup')
     async signup(@Body() signupDto: SignupDto): Promise<User> {
         return this.authService.signup(signupDto);
