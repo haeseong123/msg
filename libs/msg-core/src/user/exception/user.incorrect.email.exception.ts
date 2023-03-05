@@ -3,6 +3,6 @@ import { NotFoundException } from "@nestjs/common";
 
 export class UserIncorrectEmailException extends NotFoundException {
     constructor() {
-        super(ErrorMessage.LOGIN_INPUT_INVALID_ID)
+        super(ErrorMessage.LOGIN_INPUT_INVALID_EMAIL)
     }
 }

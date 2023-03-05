@@ -3,7 +3,7 @@ import { UserIncorrectEmailException } from "@app/msg-core/user/exception/user.i
 import { UserIncorrectPasswordException } from "@app/msg-core/user/exception/user.incorrect.password.exception";
 import { User } from "@app/msg-core/user/user.entity";
 import { Injectable } from "@nestjs/common";
-import { compare } from "bcrypt";
+import { verifyPassword } from "../util/password.utils";
 import { SigninDto } from "./dto/signin.dto";
 import { SignupDto } from "./dto/signup.dto";
 
@@ -28,7 +28,7 @@ export class AuthService {
             throw new UserIncorrectEmailException();
         }
 
-        const isMatch = await compare(dto.password + process.env.PEPPER, user.password);
+        const isMatch = await verifyPassword(dto.password, user.password)
 
         if (!isMatch) {
             throw new UserIncorrectPasswordException();
