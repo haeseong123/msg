@@ -4,25 +4,26 @@ import { UserIncorrectPasswordException } from "@app/msg-core/user/exception/use
 import { User } from "@app/msg-core/user/user.entity";
 import { Injectable } from "@nestjs/common";
 import { verifyPassword } from "../util/password.utils";
+import { AuthRepository } from "./auth.repository";
 import { SigninDto } from "./dto/signin.dto";
 import { SignupDto } from "./dto/signup.dto";
 
 @Injectable()
 export class AuthService {
-    constructor() { }
+    constructor(private authRepository: AuthRepository) { }
 
     async signup(dto: SignupDto): Promise<User> {
-        const user = await User.findOneBy({ email: dto.email });
+        const user = await this.authRepository.findOneBy({ 'email': dto.email })
 
         if (user) {
             throw new UserEmailConflictException();
         }
 
-        return User.save(await SignupDto.toUser(dto));
+        return this.authRepository.save(await SignupDto.toUser(dto))
     }
 
     async signin(dto: SigninDto): Promise<User> {
-        const user = await User.findOneBy({ email: dto.email });
+        const user = await this.authRepository.findOneBy({ email: dto.email });
 
         if (!user) {
             throw new UserIncorrectEmailException();

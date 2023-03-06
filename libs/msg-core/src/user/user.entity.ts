@@ -19,4 +19,12 @@ export class User extends AssignedIdBaseEntity {
     @IsNotEmpty()
     @Column('varchar', { length: 50 })
     nickname: string;
+
+    constructor(email: string, password: string, address: string, nickname: string) {
+        super()
+        this.email = email;
+        this.password = password;
+        this.address = address;
+        this.nickname = nickname;
+    }
 }

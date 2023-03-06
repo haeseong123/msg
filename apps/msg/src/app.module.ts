@@ -1,3 +1,4 @@
+import { User } from '@app/msg-core/user/user.entity';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +10,7 @@ import { ResponseInterceptor } from './interceptor/response.interceptor';
 @Module({
   imports: [
     TypeOrmModule.forRoot(databaseConfig),
+    TypeOrmModule.forFeature([User]),
     AuthModule
   ],
   providers: [

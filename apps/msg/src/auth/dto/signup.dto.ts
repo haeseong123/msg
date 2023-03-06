@@ -16,11 +16,11 @@ export class SignupDto {
   nickname: string;
 
   static async toUser(dto: SignupDto): Promise<User> {
-    const user = new User();
-    user.email = dto.email;
-    user.password = await hashPassword(dto.password);
-    user.address = dto.address;
-    user.nickname = dto.nickname;
-    return user;
+    return new User(
+      dto.email,
+      await hashPassword(dto.password),
+      dto.address,
+      dto.nickname
+    );
   }
 }
