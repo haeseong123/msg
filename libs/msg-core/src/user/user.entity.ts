@@ -20,6 +20,9 @@ export class User extends AssignedIdBaseEntity {
     @Column('varchar', { length: 50 })
     nickname: string;
 
+    @Column('varchar', { nullable: true })
+    refreshToken: string;
+
     constructor(email: string, password: string, address: string, nickname: string) {
         super()
         this.email = email;

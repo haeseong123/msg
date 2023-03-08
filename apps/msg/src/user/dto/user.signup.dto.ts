@@ -1,8 +1,8 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { User } from '@app/msg-core/user/user.entity';
-import { hashPassword } from '../../util/password.utils';
+import { hashString } from 'apps/msg/src/util/hash.utils';
 
-export class SignupDto {
+export class UserSignupDto {
   @IsEmail()
   email: string;
 
@@ -15,10 +15,10 @@ export class SignupDto {
   @IsNotEmpty()
   nickname: string;
 
-  static async toUser(dto: SignupDto): Promise<User> {
+  static async toUser(dto: UserSignupDto): Promise<User> {
     return new User(
       dto.email,
-      await hashPassword(dto.password),
+      await hashString(dto.password),
       dto.address,
       dto.nickname
     );

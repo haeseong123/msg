@@ -1,8 +1,8 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpException, HttpStatus } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpStatus } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-export interface Response<T> {
+export interface MsgResponse<T> {
     statusCode: number,
     message: string,
     result: T | null,
@@ -10,30 +10,20 @@ export interface Response<T> {
 }
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
-    intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
-        const timestamp = new Date().toISOString();
-
+export class ResponseInterceptor<T> implements NestInterceptor<T, MsgResponse<T>> {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<MsgResponse<T>> {
         return next.handle().pipe(
             map((result: T) => {
                 const statusCode = context.switchToHttp().getResponse().statusCode || 200;
                 const message = getSuccessResponseMessageForStatusCode(statusCode)
-                const successResponse: Response<T> = {
+                const timestamp = new Date().toISOString();
+                const successResponse: MsgResponse<T> = {
                     statusCode,
                     message,
-                    result,
+                    result: result || null,
                     timestamp,
                 };
                 return successResponse;
-            }),
-            catchError((error: HttpException) => {
-                const errorResponse: Response<T> = {
-                    statusCode: error.getStatus(),
-                    message: error.message,
-                    result: null,
-                    timestamp,
-                };
-                return throwError(() => new HttpException(errorResponse, error.getStatus()));
             }),
         );
     }
