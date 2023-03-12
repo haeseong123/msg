@@ -25,6 +25,7 @@
 ## 관련 질문
 
 - [NestJS - Guards](https://hs-archive.tistory.com/98)
+- [NestJS & Passport](https://hs-archive.tistory.com/99)
 
 ## Description
 
