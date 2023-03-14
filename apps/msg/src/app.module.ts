@@ -1,6 +1,7 @@
+import { ArgumentInvalidException } from '@app/msg-core/exception/argument.invalid.exception';
 import { User } from '@app/msg-core/user/user.entity';
-import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { Module, ValidationPipe } from '@nestjs/common';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { databaseConfig } from './config/database.config';
@@ -14,7 +15,20 @@ import { ResponseInterceptor } from './interceptor/response.interceptor';
     AuthModule
   ],
   providers: [
-    // INTERCEPTOR -> CONTROLLER -> INTERCEPTOR -> FILTER(IF THROW ERROR)
+    /** Incoming request
+     *    -> Middleware -> Guards -> Interceptors 
+     *    -> Pipes -> Controller -> Service 
+     *    -> Interceptor -> filters -> Server Response
+    */
+    {
+      provide: APP_PIPE,
+      useFactory: () => new ValidationPipe({
+        transformOptions: {
+          enableImplicitConversion: true
+        },
+        exceptionFactory: (_error) => new ArgumentInvalidException()
+      })
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor
