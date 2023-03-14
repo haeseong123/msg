@@ -3,28 +3,29 @@ import { JwtService } from '@nestjs/jwt';
 import { UserEmailConflictException } from "@app/msg-core/user/exception/user.email.conflict.exception";
 import { UserIncorrectEmailException } from "@app/msg-core/user/exception/user.incorrect.email.exception";
 import { UserIncorrectPasswordException } from "@app/msg-core/user/exception/user.incorrect.password.exception";
-import { MsgToken } from "apps/msg/src/auth/msg.token";
-import { JwtPayload } from "./jwt.payload";
+import { MsgToken } from "apps/msg/src/auth/jwt/msg.token";
 import { UnauthorizedAccessException } from "@app/msg-core/auth/exception/unauthorized.access.exception";
 import { TokenExpiredException } from "@app/msg-core/auth/exception/token.expired.exception";
-import { UsersService } from "../user/user.service";
+import { UserService } from "../user/user.service";
 import { UserSignupDto } from "../user/dto/user.signup.dto";
 import { UserSigninDto } from "../user/dto/user.signin.dto";
-import { hashString, verifyString } from "../util/hash.utils";
+import { JwtPayload } from "./jwt/jwt.payload";
+import { User } from "@app/msg-core/user/user.entity";
+import { compare } from "bcrypt";
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly userService: UsersService,
+        private readonly userService: UserService,
         private readonly jwtService: JwtService
     ) { }
 
-    async signup(dto: UserSignupDto) {
+    async signup(dto: UserSignupDto): Promise<User> {
         if (await this.userService.findUserByEmail(dto.email)) {
             throw new UserEmailConflictException();
         }
 
-        await this.userService.saveUser(dto);
+        return await this.userService.saveUserByDto(dto);
     }
 
     async signin(dto: UserSigninDto): Promise<MsgToken> {
@@ -34,7 +35,7 @@ export class AuthService {
             throw new UserIncorrectEmailException();
         }
 
-        const isMatch = await verifyString(dto.password, user.password);
+        const isMatch = await compare(dto.password, user.password);
 
         if (!isMatch) {
             throw new UserIncorrectPasswordException();
@@ -45,8 +46,9 @@ export class AuthService {
         return msgToken;
     }
 
-    async logout(id: number) {
+    async logout(id: number): Promise<boolean> {
         await this.userService.updateUser(id, { refreshToken: null });
+        return true
     }
 
     async refreshToken(id: number, email: string, refreshToken: string): Promise<MsgToken> {
@@ -78,7 +80,6 @@ export class AuthService {
     }
 
     private async updateRefreshToken(id: number, refreshToken: string) {
-        const hashedRefreshToken = await hashString(refreshToken);
         return await this.userService.updateUser(id, { refreshToken });
     }
 }

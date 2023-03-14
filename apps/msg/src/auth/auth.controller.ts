@@ -1,10 +1,11 @@
-import { MsgToken } from "apps/msg/src/auth/msg.token";
+import { MsgToken } from "apps/msg/src/auth/jwt/msg.token";
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Req } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { JwtGuard } from "./guard/jwt.auth.guard";
-import { JwtRefreshGuard } from "./guard/jwt.refresh.guard";
+import { JwtGuard } from "./jwt/guard/jwt.auth.guard";
+import { JwtRefreshGuard } from "./jwt/guard/jwt.refresh.guard";
 import { UserSignupDto } from "../user/dto/user.signup.dto";
 import { UserSigninDto } from "../user/dto/user.signin.dto";
+import { User } from "@app/msg-core/user/user.entity";
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +13,7 @@ export class AuthController {
 
     @Post('signup')
     @HttpCode(HttpStatus.CREATED)
-    async signup(@Body() signupDto: UserSignupDto): Promise<void> {
+    async signup(@Body() signupDto: UserSignupDto): Promise<User> {
         return this.authService.signup(signupDto);
     }
 
@@ -25,8 +26,8 @@ export class AuthController {
     @Post('logout')
     @UseGuards(JwtGuard)
     @HttpCode(HttpStatus.OK)
-    async logout(@Req() { payload: { sub } }) {
-        return this.authService.logout(sub)
+    async logout(@Req() { user }): Promise<boolean> {
+        return this.authService.logout(user.sub)
     }
 
     @Post('refresh-token')

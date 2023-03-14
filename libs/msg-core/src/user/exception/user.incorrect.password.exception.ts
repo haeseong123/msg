@@ -1,4 +1,4 @@
-import { ErrorMessage } from "@app/msg-core/error.message";
+import { ErrorMessage } from "@app/msg-core/exception/error.message";
 import { NotFoundException } from "@nestjs/common";
 
 export class UserIncorrectPasswordException extends NotFoundException {

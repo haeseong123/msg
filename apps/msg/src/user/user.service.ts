@@ -4,7 +4,7 @@ import { UserSignupDto } from './dto/user.signup.dto';
 import { UserRepository } from './user.repository';
 
 @Injectable()
-export class UsersService {
+export class UserService {
     constructor(private userRepository: UserRepository) { }
 
     async findUserByEmail(email: string): Promise<User | undefined> {
@@ -15,11 +15,11 @@ export class UsersService {
         return await this.userRepository.findOneBy({ id })
     }
 
-    async saveUser(signupDto: UserSignupDto) {
+    async saveUserByDto(signupDto: UserSignupDto): Promise<User> {
         return await this.userRepository.save(await UserSignupDto.toUser(signupDto))
     }
 
-    async updateUser(id: number, data: Partial<User>) {
-        return await this.userRepository.update(id, data);
+    async updateUser(id: number, data: Partial<User>): Promise<number | undefined> {
+        return (await this.userRepository.update(id, data)).affected
     }
 }
