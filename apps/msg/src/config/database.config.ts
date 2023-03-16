@@ -1,4 +1,4 @@
-import { User } from '@app/msg-core/user/user.entity';
+import { User } from '@app/msg-core/entities/user/user.entity';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 

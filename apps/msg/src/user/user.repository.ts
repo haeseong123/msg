@@ -1,4 +1,4 @@
-import { User } from "@app/msg-core/user/user.entity";
+import { User } from "@app/msg-core/entities/user/user.entity";
 import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 

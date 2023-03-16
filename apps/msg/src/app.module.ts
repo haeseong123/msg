@@ -1,11 +1,11 @@
-import { ArgumentInvalidException } from '@app/msg-core/exception/argument.invalid.exception';
-import { User } from '@app/msg-core/user/user.entity';
+import { ArgumentInvalidException } from '@app/msg-core/exceptions/argument-invalid.exception';
+import { User } from '@app/msg-core/entities/user/user.entity';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { databaseConfig } from './config/database.config';
-import { GlobalExceptionFIlter } from './global.exception.filter';
+import { GlobalExceptionFIlter } from './global-exception.filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 
 @Module({

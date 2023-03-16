@@ -1,11 +1,11 @@
-import { User } from "@app/msg-core/user/user.entity";
+import { User } from "@app/msg-core/entities/user/user.entity";
 import { Test, TestingModule } from "@nestjs/testing";
-import { UserSigninDto } from "../../user/dto/user.signin.dto";
-import { UserSignupDto } from "../../user/dto/user.signup.dto";
+import { UserSigninDto } from "../../user/dto/user-signin.dto";
+import { UserSignupDto } from "../../user/dto/user-signup.dto";
 import { AuthController } from "../auth.controller"
 import { AuthService } from "../auth.service";
-import { JwtPayload } from "../jwt/jwt.payload";
-import { MsgToken } from "../jwt/msg.token";
+import { JwtPayload } from "../jwt/jwt-payload";
+import { MsgToken } from "../jwt/msg-token";
 
 describe('AuthController', () => {
     let authController: AuthController;
