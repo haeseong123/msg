@@ -1,5 +1,5 @@
-import { ErrorMessage } from "@app/msg-core/exception/error.message";
 import { NotFoundException } from "@nestjs/common";
+import { ErrorMessage } from "../error-message";
 
 export class UserIncorrectEmailException extends NotFoundException {
     constructor() {

@@ -1,11 +1,11 @@
-import { MsgToken } from "apps/msg/src/auth/jwt/msg.token";
+import { MsgToken } from "apps/msg/src/auth/jwt/msg-token";
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Req } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { JwtGuard } from "./jwt/guard/jwt.auth.guard";
-import { JwtRefreshGuard } from "./jwt/guard/jwt.refresh.guard";
-import { UserSignupDto } from "../user/dto/user.signup.dto";
-import { UserSigninDto } from "../user/dto/user.signin.dto";
-import { User } from "@app/msg-core/user/user.entity";
+import { JwtGuard } from "./jwt/guard/jwt.guard";
+import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
+import { UserSignupDto } from "../user/dto/user-signup.dto";
+import { UserSigninDto } from "../user/dto/user-signin.dto";
+import { User } from "@app/msg-core/entities/user/user.entity";
 
 @Controller('auth')
 export class AuthController {

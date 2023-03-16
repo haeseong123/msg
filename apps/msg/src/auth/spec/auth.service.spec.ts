@@ -1,17 +1,17 @@
-import { UserEmailConflictException } from "@app/msg-core/user/exception/user.email.conflict.exception";
-import { UserIncorrectEmailException } from "@app/msg-core/user/exception/user.incorrect.email.exception";
-import { UserIncorrectPasswordException } from "@app/msg-core/user/exception/user.incorrect.password.exception";
-import { User } from "@app/msg-core/user/user.entity";
+import { UserEmailConflictException } from "@app/msg-core/exceptions/user/user-email-conflict.exception";
+import { User } from "@app/msg-core/entities/user/user.entity";
 import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as bcrypt from "bcrypt";
-import { UserSigninDto } from "../../user/dto/user.signin.dto";
-import { UserSignupDto } from "../../user/dto/user.signup.dto";
+import { UserSigninDto } from "../../user/dto/user-signin.dto";
+import { UserSignupDto } from "../../user/dto/user-signup.dto";
 import { UserService } from "../../user/user.service";
 import { hashString } from "../../util/hash.utils";
 import { AuthService } from "../auth.service"
-import { JwtPayload } from "../jwt/jwt.payload";
-import { MsgToken } from "../jwt/msg.token";
+import { JwtPayload } from "../jwt/jwt-payload";
+import { MsgToken } from "../jwt/msg-token";
+import { UserIncorrectEmailException } from "@app/msg-core/exceptions/user/user-incorrect-email.exception";
+import { UserIncorrectPasswordException } from "@app/msg-core/exceptions/user/user-incorrect-password.exception";
 
 describe('AuthService', () => {
     let authService: AuthService;

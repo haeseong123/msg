@@ -1,9 +1,9 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
 import { Column, Entity } from "typeorm";
-import { AssignedIdBaseEntity } from "../assigned.id.base.entity";
+import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 
 @Entity()
-export class User extends AssignedIdBaseEntity {
+export class User extends AssignedIdAndTimestampBaseEntity {
     @IsEmail()
     @Column('varchar', { unique: true })
     email: string;
