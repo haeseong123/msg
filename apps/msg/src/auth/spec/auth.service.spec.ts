@@ -6,10 +6,8 @@ import * as bcrypt from "bcrypt";
 import { UserSigninDto } from "../../user/dto/user-signin.dto";
 import { UserSignupDto } from "../../user/dto/user-signup.dto";
 import { UserService } from "../../user/user.service";
-import { hashString } from "../../util/hash.utils";
 import { AuthService } from "../auth.service"
 import { JwtPayload } from "../jwt/jwt-payload";
-import { MsgToken } from "../jwt/msg-token";
 import { UserIncorrectEmailException } from "@app/msg-core/exceptions/user/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "@app/msg-core/exceptions/user/user-incorrect-password.exception";
 
@@ -59,6 +57,8 @@ describe('AuthService', () => {
             address: 'test_address',
             nickname: 'hs',
             refreshToken: null,
+            userChatRooms: [],
+            messages: [],
             createdAt: new Date(),
             updatedAt: new Date()
         }
@@ -101,6 +101,8 @@ describe('AuthService', () => {
             address: 'test_address',
             nickname: 'hs',
             refreshToken: null,
+            userChatRooms: [],
+            messages: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         }
@@ -186,6 +188,8 @@ describe('AuthService', () => {
             address: 'test_address',
             nickname: 'hs',
             refreshToken: 'refresh_token',
+            userChatRooms: [],
+            messages: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         }

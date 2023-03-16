@@ -18,12 +18,6 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/library": [
-        "libs/library/src"
-      ],
-      "@app/library/*": [
-        "libs/library/src/*"
-      ],
       "@app/msg-core": [
         "libs/msg-core/src"
       ],

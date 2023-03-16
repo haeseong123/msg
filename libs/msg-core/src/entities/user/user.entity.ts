@@ -1,6 +1,8 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
+import { Message } from "../message/message.entity";
+import { UserChatRoom } from "../user-chat-room/user-chat-room.entity";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
@@ -22,6 +24,12 @@ export class User extends AssignedIdAndTimestampBaseEntity {
 
     @Column('varchar', { nullable: true })
     refreshToken: string;
+
+    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.user)
+    userChatRooms!: UserChatRoom[]
+
+    @OneToMany(() => Message, message => message.sender)
+    messages!: Message[]
 
     constructor(email: string, password: string, address: string, nickname: string) {
         super()
