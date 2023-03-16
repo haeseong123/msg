@@ -47,8 +47,10 @@ describe('AuthController', () => {
                 address: 'test_address',
                 nickname: 'hs',
                 refreshToken: null,
+                userChatRooms: [],
+                messages: [],
                 createdAt: new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
             }
             const signupDto: UserSignupDto = { ...user, };
             const signupSpy = jest.spyOn(authService, 'signup').mockResolvedValue(user);
