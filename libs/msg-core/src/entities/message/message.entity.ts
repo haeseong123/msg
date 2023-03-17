@@ -23,7 +23,6 @@ export class Message extends AssignedIdAndTimestampBaseEntity {
     @Column({ nullable: true })
     deleted_at: Date;
 
-    
     @ManyToOne(() => User, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'sender_id' })
     sender!: User;
