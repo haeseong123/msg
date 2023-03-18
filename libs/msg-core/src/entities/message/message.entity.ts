@@ -23,11 +23,11 @@ export class Message extends AssignedIdAndTimestampBaseEntity {
     @Column({ nullable: true })
     deleted_at: Date;
 
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, user => user.sentMessages, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'sender_id' })
     sender!: User;
 
-    @ManyToOne(() => ChatRoom, { onDelete: 'CASCADE' })
+    @ManyToOne(() => ChatRoom, chatRoom => chatRoom.messages, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'chat_room_id' })
     chatRoom!: ChatRoom;
 }

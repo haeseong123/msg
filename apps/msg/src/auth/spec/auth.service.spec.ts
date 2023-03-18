@@ -58,7 +58,10 @@ describe('AuthService', () => {
             nickname: 'hs',
             refreshToken: null,
             userChatRooms: [],
-            messages: [],
+            sentMessages: [],
+            sentFriendRequests: [],
+            receivedFriendRequests: [],
+            notifications: [],
             createdAt: new Date(),
             updatedAt: new Date()
         }
@@ -102,7 +105,10 @@ describe('AuthService', () => {
             nickname: 'hs',
             refreshToken: null,
             userChatRooms: [],
-            messages: [],
+            sentMessages: [],
+            sentFriendRequests: [],
+            receivedFriendRequests: [],
+            notifications: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         }
@@ -189,7 +195,10 @@ describe('AuthService', () => {
             nickname: 'hs',
             refreshToken: 'refresh_token',
             userChatRooms: [],
-            messages: [],
+            sentMessages: [],
+            sentFriendRequests: [],
+            receivedFriendRequests: [],
+            notifications: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         }
