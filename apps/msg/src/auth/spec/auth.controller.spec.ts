@@ -48,7 +48,10 @@ describe('AuthController', () => {
                 nickname: 'hs',
                 refreshToken: null,
                 userChatRooms: [],
-                messages: [],
+                sentMessages: [],
+                sentFriendRequests: [],
+                receivedFriendRequests: [],
+                notifications: [],
                 createdAt: new Date(),
                 updatedAt: new Date(),
             }
