@@ -1,4 +1,6 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { MandatoryArgumentNullException } from "../exceptions/argument/mandatory-argument-null.exception";
+import { UserRelationshipConflictException } from "../exceptions/user-relationship/user-relationship-confilict-exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipRepository } from "./user-relationship.repository";
 
@@ -22,10 +24,10 @@ export class UserRelationshipService {
         const userRelationship = await this.userRelationshipRepository.findOneBy({
             fromUserId: dto.fromUserId,
             toUserId: dto.toUserId
-        })
+        });
 
         if (userRelationship) {
-            throw new BadRequestException("이미 관계가 존재합니다.")
+            throw new UserRelationshipConflictException();
         }
 
         const result = await this.userRelationshipRepository.save(UserRelationshipDto.toUserRelationship(dto));
@@ -41,10 +43,10 @@ export class UserRelationshipService {
 
     async updateUserRelationship(dto: UserRelationshipDto): Promise<UserRelationshipDto> {
         if (dto.id === undefined || dto.id === null) {
-            throw new BadRequestException('dto.id 필요함')
+            throw new MandatoryArgumentNullException();
         }
 
-        await this.userRelationshipRepository.update(dto.id, dto)
+        await this.userRelationshipRepository.update(dto.id, dto);
 
         return dto;
     }

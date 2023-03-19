@@ -1,7 +1,7 @@
-import { NotFoundException } from "@nestjs/common";
+import { UnauthorizedException } from "@nestjs/common";
 import { ErrorMessage } from "../error-message";
 
-export class UserIncorrectEmailException extends NotFoundException {
+export class UserIncorrectEmailException extends UnauthorizedException {
     constructor() {
         super(ErrorMessage.LOGIN_INPUT_INVALID_EMAIL)
     }
