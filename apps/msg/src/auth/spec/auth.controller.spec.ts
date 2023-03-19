@@ -1,7 +1,7 @@
-import { User } from "@app/msg-core/entities/user/user.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UserSigninDto } from "../../user/dto/user-signin.dto";
 import { UserSignupDto } from "../../user/dto/user-signup.dto";
+import { UserDto } from "../../user/dto/user.dto";
 import { AuthController } from "../auth.controller"
 import { AuthService } from "../auth.service";
 import { JwtPayload } from "../jwt/jwt-payload";
@@ -38,87 +38,91 @@ describe('AuthController', () => {
     });
 
     describe('회원_가입', () => {
-        it('회원_가입_성공', async () => {
+        it('성공', async () => {
             // Given
-            const user: User = {
-                id: 1,
-                email: 'test@example.com',
-                password: 'password123',
-                address: 'test_address',
-                nickname: 'hs',
-                refreshToken: null,
-                userChatRooms: [],
-                sentMessages: [],
-                relationshipFromMe: [],
-                relationshipToMe: [],
-                notifications: [],
-                createdAt: new Date(),
-                updatedAt: new Date(),
+            const signupDto: UserSignupDto = {
+                email: "email",
+                password: "password",
+                address: "address",
+                nickname: "nickname",
             }
-            const signupDto: UserSignupDto = { ...user, };
-            const signupSpy = jest.spyOn(authService, 'signup').mockResolvedValue(user);
+            const userDto: UserDto = {
+                id: 1,
+                email: signupDto.email,
+                address: signupDto.address,
+                nickname: signupDto.nickname,
+            }
+            const signupControllerSpy = jest.spyOn(authController, 'signup');
+            const signupServiceSpy = jest.spyOn(authService, 'signup').mockResolvedValue(userDto);
 
             // When
-            const signupResult = await authController.signup(signupDto)
+            const result = await authController.signup(signupDto)
 
             // Then
-            expect(signupResult).toBe(user)
-            expect(signupSpy).toHaveBeenCalledWith(signupDto)
+            expect(signupControllerSpy).toHaveBeenCalledWith(signupDto);
+            expect(signupServiceSpy).toHaveBeenCalledWith(signupDto);
+            expect(result).toBe(userDto);
         });
     });
 
-    describe('signin', () => {
-        it('로그인', async () => {
+    describe('로그인', () => {
+        it('성공', async () => {
             // Given
             const signinDto: UserSigninDto = {
                 email: 'test@test.com',
                 password: 'test123',
             };
-            const msgToken: MsgToken = { accessToken: 'access token', refreshToken: 'refresh token' }
-            const signinSpy = jest.spyOn(authService, 'signin').mockResolvedValue(msgToken)
+            const msgToken: MsgToken = { accessToken: 'access token', refreshToken: 'refresh token' };
+            const signinControllerSpy = jest.spyOn(authController, 'signin');
+            const signinServiceSpy = jest.spyOn(authService, 'signin').mockResolvedValue(msgToken)
 
             // When
-            const signinResult = await authController.signin(signinDto)
+            const result = await authController.signin(signinDto);
 
             // Then
-            expect(signinResult).toBe(msgToken)
-            expect(signinSpy).toHaveBeenCalledWith(signinDto)
-        })
-    })
-
-    describe('logout', () => {
-        it('로그 아웃', async () => {
-            // Given
-            const sub = 1
-            const logoutSpy = jest.spyOn(authService, 'logout').mockResolvedValue(true);
-
-            // When
-            const logoutResult = await authController.logout(sub);
-
-            // Then
-            expect(logoutResult).toBe(true);
-            expect(logoutSpy).toHaveBeenCalledWith(sub)
-        })
+            expect(signinControllerSpy).toHaveBeenCalledWith(signinDto);
+            expect(signinServiceSpy).toHaveBeenCalledWith(signinDto);
+            expect(result).toBe(msgToken);
+        });
     });
 
-    describe('refresh-token', () => {
-        it('토큰 갱신', async () => {
+    describe('로그아웃', () => {
+        it('성공', async () => {
+            // Given
+            const sub = 1
+            const logoutControllerSpy = jest.spyOn(authController, 'logout');
+            const logoutServiceSpy = jest.spyOn(authService, 'logout').mockResolvedValue(true);
+
+            // When
+            const result = await authController.logout(sub);
+
+            // Then
+            expect(logoutControllerSpy).toHaveBeenCalledWith(sub);
+            expect(logoutServiceSpy).toHaveBeenCalledWith(sub);
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('토큰_갱신', () => {
+        it('성공', async () => {
             // Given
             const mockPayload: JwtPayload & { refreshToken: string } = {
                 sub: 1,
                 email: 'test@example.com',
-                refreshToken: 'refresh token'
+                refreshToken: 'refresh_token'
             }
-            const msgToken: MsgToken = { accessToken: 'access_token', refreshToken: 'refresh_tokeb' }
-            const refreshTokenSpy = jest.spyOn(authService, 'refreshToken').mockResolvedValue(msgToken)
+            const msgToken: MsgToken = { accessToken: 'new_access_token', refreshToken: 'new_refresh_tokeb' }
+            const refreshTokenControllerSpy = jest.spyOn(authController, 'refreshToken');
+            const refreshTokenServiceSpy = jest.spyOn(authService, 'refreshToken').mockResolvedValue(msgToken);
 
             // When
-            const refreshTokenResult = await authController.refreshToken(mockPayload)
+            const result = await authController.refreshToken(mockPayload)
 
             // Then
-            expect(refreshTokenResult.accessToken).toBe(msgToken.accessToken)
-            expect(refreshTokenResult.refreshToken).toBe(msgToken.refreshToken)
-            expect(refreshTokenSpy).toHaveBeenCalledWith(mockPayload.sub, mockPayload.email, mockPayload.refreshToken)
+            expect(refreshTokenControllerSpy).toHaveBeenCalledWith(mockPayload);
+            expect(refreshTokenServiceSpy).toHaveBeenCalledWith(mockPayload.sub, mockPayload.email, mockPayload.refreshToken);
+            expect(result.accessToken).toBe(msgToken.accessToken);
+            expect(result.refreshToken).toBe(msgToken.refreshToken);
         })
     })
 })

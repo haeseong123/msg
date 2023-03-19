@@ -5,8 +5,8 @@ import { JwtGuard } from "./jwt/guard/jwt.guard";
 import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
 import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
-import { User } from "@app/msg-core/entities/user/user.entity";
 import { CurrentUser } from "./decorator/current-userdecorator";
+import { UserDto } from "../user/dto/user.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +14,7 @@ export class AuthController {
 
     @Post('signup')
     @HttpCode(HttpStatus.CREATED)
-    async signup(@Body() signupDto: UserSignupDto): Promise<User> {
+    async signup(@Body() signupDto: UserSignupDto): Promise<UserDto> {
         return this.authService.signup(signupDto);
     }
 

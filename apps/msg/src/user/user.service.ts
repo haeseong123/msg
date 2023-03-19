@@ -1,6 +1,8 @@
 import { User } from '@app/msg-core/entities/user/user.entity';
 import { Injectable } from '@nestjs/common';
+import { UserEmailConflictException } from '../exceptions/user/user-email-conflict.exception';
 import { UserSignupDto } from './dto/user-signup.dto';
+import { UserDto } from './dto/user.dto';
 import { UserRepository } from './user.repository';
 
 @Injectable()
@@ -15,11 +17,23 @@ export class UserService {
         return await this.userRepository.findOneBy({ id })
     }
 
-    async saveUserByDto(signupDto: UserSignupDto): Promise<User> {
-        return await this.userRepository.save(await UserSignupDto.toUser(signupDto))
+    async save(dto: UserSignupDto): Promise<UserDto> {
+        if (await this.findUserByEmail(dto.email)) {
+            throw new UserEmailConflictException();
+        }
+
+        const result = await this.userRepository.save(await UserSignupDto.toUser(dto));
+        return new UserDto(
+            result.id,
+            result.email,
+            result.address,
+            result.nickname
+        );
     }
 
-    async updateUser(id: number, data: Partial<User>): Promise<number | undefined> {
-        return (await this.userRepository.update(id, data)).affected
+    async update(id: number, data: Partial<User>): Promise<Partial<User>> {
+        await this.userRepository.update(id, data);
+
+        return data;
     }
 }

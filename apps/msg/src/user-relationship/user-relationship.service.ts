@@ -8,7 +8,7 @@ import { UserRelationshipRepository } from "./user-relationship.repository";
 export class UserRelationshipService {
     constructor(private readonly userRelationshipRepository: UserRelationshipRepository) { }
 
-    async getUserRelationship(userId: number): Promise<UserRelationshipDto[]> {
+    async findUserRelationship(userId: number): Promise<UserRelationshipDto[]> {
         const result = await this.userRelationshipRepository.findBy({ fromUserId: userId });
         const resultDto = result.map(userRelationship => new UserRelationshipDto(
             userRelationship.fromUserId,
@@ -20,7 +20,7 @@ export class UserRelationshipService {
         return resultDto;
     }
 
-    async createUserRelationship(dto: UserRelationshipDto): Promise<UserRelationshipDto> {
+    async saveUserRelationship(dto: UserRelationshipDto): Promise<UserRelationshipDto> {
         const userRelationship = await this.userRelationshipRepository.findOneBy({
             fromUserId: dto.fromUserId,
             toUserId: dto.toUserId
@@ -46,7 +46,7 @@ export class UserRelationshipService {
             throw new MandatoryArgumentNullException();
         }
 
-        await this.userRelationshipRepository.update(dto.id, dto);
+        await this.userRelationshipRepository.update(dto.id, { status: dto.status });
 
         return dto;
     }
