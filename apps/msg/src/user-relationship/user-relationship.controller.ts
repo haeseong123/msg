@@ -12,14 +12,14 @@ export class UserRelationshipController {
     constructor(private readonly userRelationshipService: UserRelationshipService) { }
 
     @Get()
-    async getUserRelationship(
+    async findUserRelationship(
         @CurrentUser('sub') sub: number
     ): Promise<UserRelationshipDto[]> {
-        return this.userRelationshipService.getUserRelationship(sub);
+        return this.userRelationshipService.findUserRelationship(sub);
     }
 
     @Post()
-    async createUserRelationship(
+    async saveUserRelationship(
         @CurrentUser('sub') sub: number,
         @Body() dto: UserRelationshipDto
     ): Promise<UserRelationshipDto> {
@@ -27,7 +27,7 @@ export class UserRelationshipController {
             throw new UserRelationshipIdTokenIdMismatchException();
         }
 
-        return this.userRelationshipService.createUserRelationship(dto);
+        return this.userRelationshipService.saveUserRelationship(dto);
     }
 
     @Put(':userRelationshipId')
