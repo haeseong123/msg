@@ -1,7 +1,7 @@
-import { TokenExpiredException } from "@app/msg-core/exceptions/auth/token-expired.exception";
-import { UnauthorizedAccessException } from "@app/msg-core/exceptions/auth/unauthorized-access.exception";
 import { Injectable } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { TokenExpiredException } from "../../../exceptions/auth/token-expired.exception";
+import { UnauthorizedAccessException } from "../../../exceptions/auth/unauthorized-access.exception";
 
 @Injectable()
 export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {

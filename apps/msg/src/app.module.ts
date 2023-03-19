@@ -1,10 +1,10 @@
-import { ArgumentInvalidException } from '@app/msg-core/exceptions/argument-invalid.exception';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ChatRoomModule } from './chat-room/chat-room.module';
 import { databaseConfig } from './config/database.config';
+import { ArgumentInvalidException } from './exceptions/argument/argument-invalid.exception';
 import { GlobalExceptionFIlter } from './global-exception.filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 import { UserRelationshipModule } from './user-relationship/user-relationship.module';

@@ -1,4 +1,3 @@
-import { UserEmailConflictException } from "@app/msg-core/exceptions/user/user-email-conflict.exception";
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -8,8 +7,9 @@ import { UserSignupDto } from "../../user/dto/user-signup.dto";
 import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service"
 import { JwtPayload } from "../jwt/jwt-payload";
-import { UserIncorrectEmailException } from "@app/msg-core/exceptions/user/user-incorrect-email.exception";
-import { UserIncorrectPasswordException } from "@app/msg-core/exceptions/user/user-incorrect-password.exception";
+import { UserIncorrectEmailException } from "../../exceptions/user/user-incorrect-email.exception";
+import { UserIncorrectPasswordException } from "../../exceptions/user/user-incorrect-password.exception";
+import { UserEmailConflictException } from "../../exceptions/user/user-email-conflict.exception";
 
 describe('AuthService', () => {
     let authService: AuthService;

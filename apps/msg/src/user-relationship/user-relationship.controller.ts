@@ -1,6 +1,8 @@
-import { BadRequestException, Body, Controller, Get, HttpException, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorator/current-userdecorator";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
+import { UserRelationshipIdParamMismatchException } from "../exceptions/user-relationship/user-relationship-id-param-mismatch.exception";
+import { UserRelationshipIdTokenIdMismatchException } from "../exceptions/user-relationship/user-relationship-id-token-id-mismatch.exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipService } from "./user-relationship.service";
 
@@ -22,7 +24,7 @@ export class UserRelationshipController {
         @Body() dto: UserRelationshipDto
     ): Promise<UserRelationshipDto> {
         if (sub !== dto.fromUserId) {
-            throw new BadRequestException("토큰에 담긴 유저 id와 바디에 담긴 요청자 id가 다릅니다.");
+            throw new UserRelationshipIdTokenIdMismatchException();
         }
 
         return this.userRelationshipService.createUserRelationship(dto);
@@ -34,8 +36,12 @@ export class UserRelationshipController {
         @Param('userRelationshipId', ParseIntPipe) userRelationshipId: number,
         @Body() dto: UserRelationshipDto
     ): Promise<UserRelationshipDto> {
-        if (sub !== dto.fromUserId || userRelationshipId !== dto.id) {
-            throw new BadRequestException("토큰에 담긴 유저 ~@!~@~")
+        if (sub !== dto.fromUserId) {
+            throw new UserRelationshipIdTokenIdMismatchException();
+        }
+
+        if (userRelationshipId !== dto.id) {
+            throw new UserRelationshipIdParamMismatchException();
         }
 
         return await this.userRelationshipService.updateUserRelationship(dto)

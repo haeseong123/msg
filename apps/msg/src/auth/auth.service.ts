@@ -1,17 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
-import { UserEmailConflictException } from "@app/msg-core/exceptions/user/user-email-conflict.exception";
 import { MsgToken } from "apps/msg/src/auth/jwt/msg-token";
-import { TokenExpiredException } from "@app/msg-core/exceptions/auth/token-expired.exception";
 import { UserService } from "../user/user.service";
 import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { JwtPayload } from "./jwt/jwt-payload";
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { compare } from "bcrypt";
-import { UserIncorrectEmailException } from "@app/msg-core/exceptions/user/user-incorrect-email.exception";
-import { UserIncorrectPasswordException } from "@app/msg-core/exceptions/user/user-incorrect-password.exception";
-import { UnauthorizedAccessException } from "@app/msg-core/exceptions/auth/unauthorized-access.exception";
+import { UserEmailConflictException } from "../exceptions/user/user-email-conflict.exception";
+import { UserIncorrectEmailException } from "../exceptions/user/user-incorrect-email.exception";
+import { UserIncorrectPasswordException } from "../exceptions/user/user-incorrect-password.exception";
+import { UnauthorizedAccessException } from "../exceptions/auth/unauthorized-access.exception";
+import { TokenExpiredException } from "../exceptions/auth/token-expired.exception";
 
 @Injectable()
 export class AuthService {

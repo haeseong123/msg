@@ -1,6 +1,7 @@
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
-import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { MandatoryArgumentNullException } from "../../exceptions/argument/mandatory-argument-null.exception";
+import { UserRelationshipConflictException } from "../../exceptions/user-relationship/user-relationship-confilict-exception";
 import { UserRelationshipDto } from "../dto/user-relationship.dto";
 import { UserRelationshipRepository } from "../user-relationship.repository"
 import { UserRelationshipService } from "../user-relationship.service"
@@ -101,7 +102,7 @@ describe('UserRelationshipService', () => {
             const result = userRelationshipService.createUserRelationship(dto);
 
             // Then
-            await expect(result).rejects.toThrow(BadRequestException);
+            await expect(result).rejects.toThrow(UserRelationshipConflictException);
             expect(createServiceSpy).toHaveBeenCalledWith(dto);
             expect(findOneBySpy).toHaveBeenCalledWith({
                 fromUserId: dto.fromUserId,
@@ -145,7 +146,7 @@ describe('UserRelationshipService', () => {
             const result = userRelationshipService.updateUserRelationship(dto);
 
             // Then
-            await expect(result).rejects.toThrow(BadRequestException);
+            await expect(result).rejects.toThrow(MandatoryArgumentNullException);
             expect(updateServiceSpy).toHaveBeenCalledWith(dto);
         })
     })
