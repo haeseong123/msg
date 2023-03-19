@@ -6,6 +6,7 @@ import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
 import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { User } from "@app/msg-core/entities/user/user.entity";
+import { CurrentUser } from "./decorator/current-userdecorator";
 
 @Controller('auth')
 export class AuthController {
@@ -26,13 +27,13 @@ export class AuthController {
     @Post('logout')
     @UseGuards(JwtGuard)
     @HttpCode(HttpStatus.OK)
-    async logout(@Req() { user }): Promise<boolean> {
-        return this.authService.logout(user.sub)
+    async logout(@CurrentUser('sub') sub: number): Promise<boolean> {
+        return this.authService.logout(sub)
     }
 
     @Post('refresh-token')
     @UseGuards(JwtRefreshGuard)
-    async refreshToken(@Req() { user }): Promise<MsgToken> {
+    async refreshToken(@CurrentUser() user): Promise<MsgToken> {
         const { sub: id, email, refreshToken } = user;
         return this.authService.refreshToken(id, email, refreshToken)
     }

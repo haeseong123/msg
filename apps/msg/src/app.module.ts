@@ -7,6 +7,7 @@ import { ChatRoomModule } from './chat-room/chat-room.module';
 import { databaseConfig } from './config/database.config';
 import { GlobalExceptionFIlter } from './global-exception.filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
+import { UserRelationshipModule } from './user-relationship/user-relationship.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
     ChatRoomModule,
+    UserRelationshipModule,
   ],
   providers: [
     /** Incoming request

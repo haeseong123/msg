@@ -8,26 +8,26 @@ import { User } from "../user/user.entity";
 export class Message extends AssignedIdAndTimestampBaseEntity {
     @Column()
     @IsNotEmpty()
-    sender_id: number;
+    senderId: number;
 
     @Column()
     @IsNotEmpty()
-    chat_room_id: number;
+    chatRoomId: number;
 
     @Column()
     content: string;
 
     @Column()
-    sent_at: Date;
+    sentAt: Date;
 
     @Column({ nullable: true })
-    deleted_at: Date;
+    deletedAt: Date;
 
     @ManyToOne(() => User, user => user.sentMessages, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'sender_id' })
+    @JoinColumn({ name: 'senderId' })
     sender!: User;
 
     @ManyToOne(() => ChatRoom, chatRoom => chatRoom.messages, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'chat_room_id' })
+    @JoinColumn({ name: 'chatRoomId' })
     chatRoom!: ChatRoom;
 }

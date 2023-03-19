@@ -6,16 +6,14 @@ import { User } from "../user/user.entity";
 @Entity()
 export class UserChatRoom extends CompositeKeyAndTimestampBaseEntity {
     @PrimaryColumn()
-    user_id: number;
+    userId: number;
 
     @PrimaryColumn()
-    chat_room_id: number;
+    chatRoomId: number;
 
     @ManyToOne(() => User)
-    @JoinColumn({ name: 'user_id' })
     user!: User;
 
     @ManyToOne(() => ChatRoom)
-    @JoinColumn({ name: 'chat_room_id' })
     chatRoom!: ChatRoom;
 }

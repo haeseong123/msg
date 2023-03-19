@@ -1,8 +1,8 @@
 import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
-import { FriendRequest } from '@app/msg-core/entities/friend-request/friend-request.entity';
 import { Message } from '@app/msg-core/entities/message/message.entity';
 import { Notification } from '@app/msg-core/entities/notification/notification.entity';
 import { UserChatRoom } from '@app/msg-core/entities/user-chat-room/user-chat-room.entity';
+import { UserRelationship } from '@app/msg-core/entities/user-relationship/user-relationship.entity';
 import { User } from '@app/msg-core/entities/user/user.entity';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
@@ -21,7 +21,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
     ChatRoom,
     UserChatRoom,
     Message,
-    FriendRequest,
+    UserRelationship,
     Notification
   ],
   synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
