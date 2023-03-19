@@ -5,7 +5,6 @@ import { User } from "../user/user.entity";
 @Entity()
 export class Notification extends AssignedIdAndTimestampBaseEntity {
     @ManyToOne(() => User, (user) => user.notifications)
-    @JoinColumn({ name: 'user_id' })
     user!: User;
 
     @Column({ nullable: false })

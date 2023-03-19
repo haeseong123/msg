@@ -1,10 +1,10 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
 import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
-import { FriendRequest } from "../friend-request/friend-request.entity";
 import { Message } from "../message/message.entity";
 import { Notification } from "../notification/notification.entity";
 import { UserChatRoom } from "../user-chat-room/user-chat-room.entity";
+import { UserRelationship } from "../user-relationship/user-relationship.entity";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
@@ -33,11 +33,11 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     @OneToMany(() => Message, message => message.sender)
     sentMessages!: Message[]
 
-    @OneToMany(() => FriendRequest, (friendRequest) => friendRequest.requester)
-    sentFriendRequests!: FriendRequest[];
+    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.fromUser)
+    relationshipFromMe!: UserRelationship[];
 
-    @OneToMany(() => FriendRequest, (friendRequest) => friendRequest.receiver)
-    receivedFriendRequests!: FriendRequest[];
+    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.toUser)
+    relationshipToMe!: UserRelationship[];
 
     @OneToMany(() => Notification, notification => notification.user)
     notifications!: Notification[]

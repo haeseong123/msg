@@ -49,8 +49,8 @@ describe('AuthController', () => {
                 refreshToken: null,
                 userChatRooms: [],
                 sentMessages: [],
-                sentFriendRequests: [],
-                receivedFriendRequests: [],
+                relationshipFromMe: [],
+                relationshipToMe: [],
                 notifications: [],
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -89,16 +89,15 @@ describe('AuthController', () => {
     describe('logout', () => {
         it('로그 아웃', async () => {
             // Given
-            const mockPayload: JwtPayload = { sub: 1, email: 'test@example.com' }
-            const req = { user: mockPayload }
+            const sub = 1
             const logoutSpy = jest.spyOn(authService, 'logout').mockResolvedValue(true);
 
             // When
-            const logoutResult = await authController.logout(req);
+            const logoutResult = await authController.logout(sub);
 
             // Then
             expect(logoutResult).toBe(true);
-            expect(logoutSpy).toHaveBeenCalledWith(mockPayload.sub)
+            expect(logoutSpy).toHaveBeenCalledWith(sub)
         })
     });
 
@@ -110,12 +109,11 @@ describe('AuthController', () => {
                 email: 'test@example.com',
                 refreshToken: 'refresh token'
             }
-            const request = { user: mockPayload }
             const msgToken: MsgToken = { accessToken: 'access_token', refreshToken: 'refresh_tokeb' }
             const refreshTokenSpy = jest.spyOn(authService, 'refreshToken').mockResolvedValue(msgToken)
 
             // When
-            const refreshTokenResult = await authController.refreshToken(request)
+            const refreshTokenResult = await authController.refreshToken(mockPayload)
 
             // Then
             expect(refreshTokenResult.accessToken).toBe(msgToken.accessToken)
