@@ -22,7 +22,7 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## 프로젝트 만들며 작성한 포스팅
+## 프로젝트 관련 포스팅
 
 - [NestJS - Guards](https://hs-archive.tistory.com/98)
 - [NestJS - Passport](https://hs-archive.tistory.com/99)
