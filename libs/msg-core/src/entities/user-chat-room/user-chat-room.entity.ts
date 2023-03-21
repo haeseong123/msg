@@ -11,9 +11,15 @@ export class UserChatRoom extends CompositeKeyAndTimestampBaseEntity {
     @PrimaryColumn()
     chatRoomId: number;
 
-    @ManyToOne(() => User)
-    user!: User;
+    @ManyToOne(() => User, user => user.userChatRooms, { onDelete: 'CASCADE' })
+    user: User;
 
-    @ManyToOne(() => ChatRoom)
-    chatRoom!: ChatRoom;
+    @ManyToOne(() => ChatRoom, chatRoom => chatRoom.userChatRooms, { onDelete: 'CASCADE' })
+    chatRoom: ChatRoom;
+
+    constructor(userId: number, chatRoomId: number) {
+        super();
+        this.userId = userId;
+        this.chatRoomId = chatRoomId;
+    }
 }

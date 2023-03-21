@@ -24,7 +24,7 @@ export class AuthService {
     }
 
     async signin(dto: UserSigninDto): Promise<MsgToken> {
-        const user = await this.userService.findUserByEmail(dto.email);
+        const user = await this.userService.findUserEntityByEmail(dto.email);
 
         if (!user) {
             throw new UserIncorrectEmailException();
@@ -45,7 +45,7 @@ export class AuthService {
     }
 
     async refreshToken(id: number, email: string, refreshToken: string): Promise<MsgToken> {
-        const user = await this.userService.findUserById(id);
+        const user = await this.userService.findUserEntityById(id);
 
         if (!user) {
             throw new UnauthorizedAccessException();

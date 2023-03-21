@@ -16,4 +16,8 @@ export enum ErrorMessage {
     USER_RELATIONSHIP_ID_TOKEN_ID_MISMATCH = '관계 id와 token id가 일치하지 않습니다.',
     USER_RELATIONSHIP_ID_PARAM_MISMATCH = '관계 id와 parameter가 일치하지 않습니다.',
     USER_RELATIONSHIP_CONFLICT = '이미 존재하는 관계입니다.',
+
+    // CHAT-ROOM
+    UNAUTHORIZED_INVITATION = '친구가 아닌 유저를 초대할 수 없습니다.',
+    USER_NOT_IN_CHAT_ROOM = '해당 채팅방에 참여중이지 않습니다.',
 }

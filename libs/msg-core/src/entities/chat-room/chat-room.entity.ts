@@ -9,8 +9,13 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
     name: string;
 
     @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.chatRoom)
-    userChatRooms!: UserChatRoom[]
+    userChatRooms: UserChatRoom[];
 
     @OneToMany(() => Message, message => message.chatRoom)
-    messages!: Message[]
+    messages: Message[];
+
+    constructor(name: string) {
+        super();
+        this.name = name;
+    }
 }
