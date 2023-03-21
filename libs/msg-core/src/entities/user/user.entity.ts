@@ -28,10 +28,10 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     refreshToken: string;
 
     @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.user)
-    userChatRooms!: UserChatRoom[]
+    userChatRooms!: UserChatRoom[];
 
     @OneToMany(() => Message, message => message.sender)
-    sentMessages!: Message[]
+    sentMessages!: Message[];
 
     @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.fromUser)
     relationshipFromMe!: UserRelationship[];
@@ -40,7 +40,7 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     relationshipToMe!: UserRelationship[];
 
     @OneToMany(() => Notification, notification => notification.user)
-    notifications!: Notification[]
+    notifications!: Notification[];
 
     constructor(email: string, password: string, address: string, nickname: string) {
         super()

@@ -34,7 +34,7 @@ describe('AuthController', () => {
     });
 
     afterEach(() => {
-        jest.clearAllMocks()
+        jest.clearAllMocks();
     });
 
     describe('회원_가입', () => {

@@ -7,6 +7,7 @@ import { databaseConfig } from './config/database.config';
 import { ArgumentInvalidException } from './exceptions/argument/argument-invalid.exception';
 import { GlobalExceptionFIlter } from './global-exception.filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
+import { UserChatRoomModule } from './user-chat-room/user-chat-room.module';
 import { UserRelationshipModule } from './user-relationship/user-relationship.module';
 import { UserModule } from './user/user.module';
 
@@ -17,6 +18,7 @@ import { UserModule } from './user/user.module';
     UserModule,
     ChatRoomModule,
     UserRelationshipModule,
+    UserChatRoomModule,
   ],
   providers: [
     /** Incoming request
