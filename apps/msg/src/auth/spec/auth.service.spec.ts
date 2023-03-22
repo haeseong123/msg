@@ -7,11 +7,11 @@ import { UserSignupDto } from "../../user/dto/user-signup.dto";
 import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service"
 import { JwtPayload } from "../jwt/jwt-payload";
-import { UserIncorrectEmailException } from "../../exceptions/user/user-incorrect-email.exception";
-import { UserIncorrectPasswordException } from "../../exceptions/user/user-incorrect-password.exception";
 import { UserDto } from "../../user/dto/user.dto";
-import { UnauthorizedAccessException } from "../../exceptions/auth/unauthorized-access.exception";
-import { TokenExpiredException } from "../../exceptions/auth/token-expired.exception";
+import { TokenExpiredException } from "../exceptions/token-expired.exception";
+import { UserIncorrectEmailException } from "../exceptions/user-incorrect-email.exception";
+import { UserIncorrectPasswordException } from "../exceptions/user-incorrect-password.exception";
+import { UnauthorizedAccessException } from "../exceptions/unauthorized-access.exception";
 
 describe('AuthService', () => {
     let authService: AuthService;

@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { MandatoryArgumentNullException } from "../exceptions/argument/mandatory-argument-null.exception";
-import { UserRelationshipConflictException } from "../exceptions/user-relationship/user-relationship-confilict-exception";
+import { UserRelationshipConflictException } from "./exceptions/user-relationship-confilict-exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipRepository } from "./user-relationship.repository";
+import { MandatoryArgumentNullException } from "../exceptions/mandatory-argument-null.exception";
 
 @Injectable()
 export class UserRelationshipService {
@@ -21,6 +21,9 @@ export class UserRelationshipService {
     }
 
     async saveUserRelationship(dto: UserRelationshipDto): Promise<UserRelationshipDto> {
+        /**
+         * fromUserId와 toUserId에 해당되는 userId가 있는지 확인해야 함.
+         */
         const userRelationship = await this.userRelationshipRepository.findOneBy({
             fromUserId: dto.fromUserId,
             toUserId: dto.toUserId

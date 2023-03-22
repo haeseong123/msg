@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ChatRoomModule } from './chat-room/chat-room.module';
 import { databaseConfig } from './config/database.config';
-import { ArgumentInvalidException } from './exceptions/argument/argument-invalid.exception';
+import { ArgumentInvalidException } from './exceptions/argument-invalid.exception';
 import { GlobalExceptionFIlter } from './global-exception.filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 import { UserChatRoomModule } from './user-chat-room/user-chat-room.module';

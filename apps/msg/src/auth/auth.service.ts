@@ -6,11 +6,11 @@ import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { JwtPayload } from "./jwt/jwt-payload";
 import { compare } from "bcrypt";
-import { UserIncorrectEmailException } from "../exceptions/user/user-incorrect-email.exception";
-import { UserIncorrectPasswordException } from "../exceptions/user/user-incorrect-password.exception";
-import { UnauthorizedAccessException } from "../exceptions/auth/unauthorized-access.exception";
-import { TokenExpiredException } from "../exceptions/auth/token-expired.exception";
+import { TokenExpiredException } from "./exceptions/token-expired.exception";
 import { UserDto } from "../user/dto/user.dto";
+import { UserIncorrectEmailException } from "./exceptions/user-incorrect-email.exception";
+import { UserIncorrectPasswordException } from "./exceptions/user-incorrect-password.exception";
+import { UnauthorizedAccessException } from "./exceptions/unauthorized-access.exception";
 
 @Injectable()
 export class AuthService {

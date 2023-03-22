@@ -2,8 +2,7 @@ import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
 import { UserChatRoom } from "@app/msg-core/entities/user-chat-room/user-chat-room.entity";
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { Test, TestingModule } from "@nestjs/testing";
-import { UnauthorizedInvitationException } from "../../exceptions/chat-room/unauthorized-invitation.exception";
-import { UserNotInChatRoomException } from "../../exceptions/chat-room/user-not-in-chat-room.exception";
+import { UnauthorizedInvitationException } from "../exceptions/unauthorized-invitation.exception";
 import { UserChatRoomDto } from "../../user-chat-room/dto/user-chat-room.dto";
 import { UserChatRoomService } from "../../user-chat-room/user-chat-room.service";
 import { UserWithRelationshipDto } from "../../user/dto/user-with-relationship.dto";
@@ -15,6 +14,7 @@ import { ChatRoomSaveDto } from "../dto/chat-room-save.dto";
 import { ChatRoomSavedResultDto } from "../dto/chat-room-saved-result.dto";
 import { ChatRoomUserDto } from "../dto/chat-room-user.dto";
 import { ChatRoomDto } from "../dto/chat-room.dto";
+import { UserNotInChatRoomException } from "../exceptions/user-not-in-chat-room.exception";
 
 describe('ChatRoomService', () => {
     let chatRoomService: ChatRoomService;

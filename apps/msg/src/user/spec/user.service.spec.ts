@@ -3,7 +3,7 @@ import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { In, UpdateResult } from "typeorm";
-import { UserEmailConflictException } from "../../exceptions/user/user-email-conflict.exception";
+import { UserEmailConflictException } from "../../auth/exceptions/user-email-conflict.exception";
 import { RelationshipDto } from "../dto/relationship.dto";
 import { UserSignupDto } from "../dto/user-signup.dto";
 import { UserWithRelationshipDto } from "../dto/user-with-relationship.dto";

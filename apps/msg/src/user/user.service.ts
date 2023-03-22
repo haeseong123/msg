@@ -1,8 +1,8 @@
 import { User } from '@app/msg-core/entities/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
-import { ArgumentInvalidException } from '../exceptions/argument/argument-invalid.exception';
-import { UserEmailConflictException } from '../exceptions/user/user-email-conflict.exception';
+import { UserEmailConflictException } from '../auth/exceptions/user-email-conflict.exception';
+import { ArgumentInvalidException } from '../exceptions/argument-invalid.exception';
 import { RelationshipDto } from './dto/relationship.dto';
 import { UserSignupDto } from './dto/user-signup.dto';
 import { UserWithRelationshipDto } from './dto/user-with-relationship.dto';
@@ -14,9 +14,13 @@ export class UserService {
     constructor(private userRepository: UserRepository) { }
 
     async findUserByEmail(email: string): Promise<UserDto | undefined> {
-        const result = await this.userRepository.findOneBy({ email });
-        const resultDto = new UserDto(result.id, result.email, result.address, result.nickname);
-        return resultDto;
+        const user = await this.userRepository.findOneBy({ email });
+
+        if (!user) {
+            return undefined;
+        }
+
+        return new UserDto(user.id, user.email, user.address, user.nickname);
     }
 
     async findUserEntityByEmail(email: string): Promise<User | undefined> {
@@ -38,9 +42,9 @@ export class UserService {
             throw new UserEmailConflictException();
         }
 
-        const result = await this.userRepository.save(await UserSignupDto.toUser(dto));
-        const resultDto = new UserDto(result.id, result.email, result.address, result.nickname);
-        return resultDto;
+        const user = await this.userRepository.save(await UserSignupDto.toUser(dto));
+        const userDto = new UserDto(user.id, user.email, user.address, user.nickname);
+        return userDto;
     }
 
     async update(id: number, data: Partial<User>): Promise<Partial<User>> {

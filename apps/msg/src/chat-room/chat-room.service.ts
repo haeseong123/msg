@@ -1,7 +1,6 @@
 import { UserRelationshipStatus } from '@app/msg-core/entities/user-relationship/user-relationship-status';
 import { Injectable } from '@nestjs/common';
-import { UnauthorizedInvitationException } from '../exceptions/chat-room/unauthorized-invitation.exception';
-import { UserNotInChatRoomException } from '../exceptions/chat-room/user-not-in-chat-room.exception';
+import { UnauthorizedInvitationException } from './exceptions/unauthorized-invitation.exception';
 import { UserChatRoomDto } from '../user-chat-room/dto/user-chat-room.dto';
 import { UserChatRoomService } from '../user-chat-room/user-chat-room.service';
 import { UserService } from '../user/user.service';
@@ -12,6 +11,7 @@ import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
 import { ChatRoomSavedResultDto } from './dto/chat-room-saved-result.dto';
 import { ChatRoomUserDto } from './dto/chat-room-user.dto';
 import { ChatRoomDto } from './dto/chat-room.dto';
+import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
 
 @Injectable()
 export class ChatRoomService {

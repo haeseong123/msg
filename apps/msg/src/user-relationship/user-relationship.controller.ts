@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorator/current-userdecorator";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
-import { UserRelationshipIdParamMismatchException } from "../exceptions/user-relationship/user-relationship-id-param-mismatch.exception";
-import { UserRelationshipIdTokenIdMismatchException } from "../exceptions/user-relationship/user-relationship-id-token-id-mismatch.exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
+import { UserRelationshipIdParamMismatchException } from "./exceptions/user-relationship-id-param-mismatch.exception";
+import { UserRelationshipIdTokenIdMismatchException } from "./exceptions/user-relationship-id-token-id-mismatch.exception";
 import { UserRelationshipService } from "./user-relationship.service";
 
 @UseGuards(JwtGuard)
