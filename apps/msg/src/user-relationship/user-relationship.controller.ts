@@ -7,7 +7,7 @@ import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipService } from "./user-relationship.service";
 
 @UseGuards(JwtGuard)
-@Controller('user-relationship')
+@Controller('user-relationships')
 export class UserRelationshipController {
     constructor(private readonly userRelationshipService: UserRelationshipService) { }
 
@@ -30,20 +30,20 @@ export class UserRelationshipController {
         return this.userRelationshipService.saveUserRelationship(dto);
     }
 
-    @Put(':userRelationshipId')
+    @Put(':id')
     async updateUserRelationship(
         @CurrentUser('sub') sub: number,
-        @Param('userRelationshipId', ParseIntPipe) userRelationshipId: number,
+        @Param('id', ParseIntPipe) id: number,
         @Body() dto: UserRelationshipDto
     ): Promise<UserRelationshipDto> {
         if (sub !== dto.fromUserId) {
             throw new UserRelationshipIdTokenIdMismatchException();
         }
 
-        if (userRelationshipId !== dto.id) {
+        if (id !== dto.id) {
             throw new UserRelationshipIdParamMismatchException();
         }
 
-        return await this.userRelationshipService.updateUserRelationship(dto)
+        return await this.userRelationshipService.updateUserRelationship(dto);
     }
 }

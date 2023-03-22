@@ -62,7 +62,7 @@ export class ChatRoomService {
         ];
         const resultDto: ChatRoomSavedResultDto = new ChatRoomSavedResultDto(chatRoom.id, chatRoom.name, participants);
 
-        return resultDto
+        return resultDto;
     }
 
     async delete(chatRoomId: number, userId: number): Promise<ChatRoomDeletedDto> {
