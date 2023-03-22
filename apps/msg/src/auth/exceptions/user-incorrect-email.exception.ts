@@ -1,5 +1,5 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { ErrorMessage } from "../error-message";
+import { ErrorMessage } from "../../exceptions/error-message";
 
 export class UserIncorrectEmailException extends UnauthorizedException {
     constructor() {

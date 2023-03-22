@@ -1,5 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
-import { ErrorMessage } from "../error-message";
+import { ErrorMessage } from "../../exceptions/error-message";
 
 export class UserNotInChatRoomException extends BadRequestException {
     constructor() {

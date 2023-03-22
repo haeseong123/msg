@@ -3,11 +3,11 @@ import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UpdateResult } from "typeorm";
-import { MandatoryArgumentNullException } from "../../exceptions/argument/mandatory-argument-null.exception";
-import { UserRelationshipConflictException } from "../../exceptions/user-relationship/user-relationship-confilict-exception";
+import { UserRelationshipConflictException } from "../exceptions/user-relationship-confilict-exception";
 import { UserRelationshipDto } from "../dto/user-relationship.dto";
 import { UserRelationshipRepository } from "../user-relationship.repository"
 import { UserRelationshipService } from "../user-relationship.service"
+import { MandatoryArgumentNullException } from "../../exceptions/mandatory-argument-null.exception";
 
 describe('UserRelationshipService', () => {
     let userRelationshipService: UserRelationshipService;

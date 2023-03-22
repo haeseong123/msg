@@ -1,5 +1,5 @@
 import { ConflictException } from "@nestjs/common";
-import { ErrorMessage } from "../error-message";
+import { ErrorMessage } from "../../exceptions/error-message";
 
 export class UserEmailConflictException extends ConflictException {
     constructor() {

@@ -1,9 +1,9 @@
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { UserRelationshipIdParamMismatchException } from "../../exceptions/user-relationship/user-relationship-id-param-mismatch.exception";
-import { UserRelationshipIdTokenIdMismatchException } from "../../exceptions/user-relationship/user-relationship-id-token-id-mismatch.exception";
 import { UserRelationshipDto } from "../dto/user-relationship.dto";
+import { UserRelationshipIdParamMismatchException } from "../exceptions/user-relationship-id-param-mismatch.exception";
+import { UserRelationshipIdTokenIdMismatchException } from "../exceptions/user-relationship-id-token-id-mismatch.exception";
 import { UserRelationshipController } from "../user-relationship.controller";
 import { UserRelationshipService } from "../user-relationship.service";
 

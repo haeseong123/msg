@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { UnauthorizedAccessException } from "../../exceptions/auth/unauthorized-access.exception";
+import { UnauthorizedAccessException } from "../../auth/exceptions/unauthorized-access.exception";
 import { ChatRoomController } from "../chat-room.controller";
 import { ChatRoomService } from "../chat-room.service";
 import { ChatRoomSaveDto } from "../dto/chat-room-save.dto";
