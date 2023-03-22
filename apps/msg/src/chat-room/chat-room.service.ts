@@ -7,6 +7,7 @@ import { UserChatRoomService } from '../user-chat-room/user-chat-room.service';
 import { UserService } from '../user/user.service';
 import { ChatRoomRepository } from './chat-room.repository';
 import { ChatRoomDeletedDto } from './dto/chat-room-deleted-dto';
+import { ChatRoomMessageDto } from './dto/chat-room-message.dto';
 import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
 import { ChatRoomSavedResultDto } from './dto/chat-room-saved-result.dto';
 import { ChatRoomUserDto } from './dto/chat-room-user.dto';
@@ -22,7 +23,12 @@ export class ChatRoomService {
 
     async findChatRooms(userId: number): Promise<ChatRoomDto[]> {
         const chatRooms = await this.chatRoomRepository.findChatRoomsByUserId(userId);
-        const chatRoomDtos: ChatRoomDto[] = chatRooms.map(cr => new ChatRoomDto(cr.id, cr.name, [], []));
+        const chatRoomDtos: ChatRoomDto[] = chatRooms.map(cr => new ChatRoomDto(
+            cr.id,
+            cr.name,
+            cr.userChatRooms.map(ucr => new ChatRoomUserDto(ucr.user.id, ucr.user.email, ucr.user.nickname)),
+            cr.messages.map(msg => new ChatRoomMessageDto(msg.id, msg.senderId, msg.content, msg.sentAt)),
+        ));
         return chatRoomDtos;
     }
 
@@ -38,13 +44,15 @@ export class ChatRoomService {
             throw new UnauthorizedInvitationException();
         }
 
+        // Transaction Start
         const chatRoom = await this.chatRoomRepository.save(ChatRoomSaveDto.toChatRoom(dto));
         const userChatRooms: UserChatRoomDto[] = [
             { userId: founder.id, chatRoomId: chatRoom.id },
             ...invitedUserIds.map(userId => new UserChatRoomDto(userId, chatRoom.id))
-        ]
+        ];
 
         await this.userChatRoomService.saveAll(userChatRooms);
+        // Transaction Commit
 
         const participants: ChatRoomUserDto[] = [
             new ChatRoomUserDto(founder.id, founder.email, founder.nickname),
