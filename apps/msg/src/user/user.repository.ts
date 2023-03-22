@@ -16,11 +16,11 @@ export class UserRepository extends Repository<User> {
 
     async findUserWithRelationship(userId: number): Promise<User | undefined> {
         return await this.createQueryBuilder('u')
-            .innerJoinAndSelect('u.relationshipFromMe', 'from')
-            .innerJoinAndSelect('from.toUser', 't')
-            .innerJoinAndSelect('u.relationshipToMe', 'to')
-            .innerJoinAndSelect('to.fromUser', 'f')
-            .where('u.id = : userId', { userId })
+            .leftJoinAndSelect('u.relationshipFromMe', 'relationFromMe')
+            .innerJoinAndSelect('relationFromMe.toUser', 'follow')
+            .leftJoinAndSelect('u.relationshipToMe', 'relationToMe')
+            .innerJoinAndSelect('relationToMe.fromUser', 'follower')
+            .where('u.id = :userId', { userId })
             .getOne();
     }
 }
