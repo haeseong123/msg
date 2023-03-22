@@ -20,13 +20,13 @@ export class ChatRoomRepository extends Repository<ChatRoom> {
                     .select('userChatRoom.chatRoomId')
                     .from(UserChatRoom, 'userChatRoom')
                     .where('userChatRoom.userId = :userId')
-                    .getQuery()
-                return 'cr.id IN ' + subQuery
+                    .getQuery();
+                return 'cr.id IN ' + subQuery;
             })
             .setParameter('userId', userId)
-            .getMany()
+            .getMany();
 
-        return result
+        return result;
     }
 
     async findChatRoomWithUserChatRoomsById(id: number): Promise<ChatRoom | null> {

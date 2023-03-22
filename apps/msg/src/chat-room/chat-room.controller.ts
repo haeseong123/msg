@@ -8,7 +8,7 @@ import { ChatRoomSavedResultDto } from "./dto/chat-room-saved-result.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
 
 @UseGuards(JwtGuard)
-@Controller('chat-room')
+@Controller('chat-rooms')
 export class ChatRoomController {
     constructor(private chatRoomService: ChatRoomService) { }
 

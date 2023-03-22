@@ -41,7 +41,7 @@ export class AuthService {
 
     async logout(id: number): Promise<boolean> {
         await this.userService.update(id, { refreshToken: null });
-        return true
+        return true;
     }
 
     async refreshToken(id: number, email: string, refreshToken: string): Promise<MsgToken> {
@@ -61,7 +61,7 @@ export class AuthService {
     }
 
     private async generateToken(id: number, email: string): Promise<MsgToken> {
-        const payload: JwtPayload = { sub: id, email: email }
+        const payload: JwtPayload = { sub: id, email: email };
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.sign(payload, { secret: process.env.JWT_ACCESS_SECRET, expiresIn: process.env.JWT_ACCESS_EXPIRATION_TIME }),
             this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME })

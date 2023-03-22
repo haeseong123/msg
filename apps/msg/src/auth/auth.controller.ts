@@ -21,20 +21,20 @@ export class AuthController {
     @Post('signin')
     @HttpCode(HttpStatus.OK)
     async signin(@Body() signinDto: UserSigninDto): Promise<MsgToken> {
-        return this.authService.signin(signinDto)
+        return this.authService.signin(signinDto);
     }
 
     @Post('logout')
     @UseGuards(JwtGuard)
     @HttpCode(HttpStatus.OK)
     async logout(@CurrentUser('sub') sub: number): Promise<boolean> {
-        return this.authService.logout(sub)
+        return this.authService.logout(sub);
     }
 
     @Post('refresh-token')
     @UseGuards(JwtRefreshGuard)
     async refreshToken(@CurrentUser() user): Promise<MsgToken> {
         const { sub: id, email, refreshToken } = user;
-        return this.authService.refreshToken(id, email, refreshToken)
+        return this.authService.refreshToken(id, email, refreshToken);
     }
 }
