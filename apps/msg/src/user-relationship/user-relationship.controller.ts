@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
-import { CurrentUser } from "../auth/decorator/current-userdecorator";
+import { CurrentUser } from "../auth/decorator/current-user.decorator";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipIdParamMismatchException } from "./exceptions/user-relationship-id-param-mismatch.exception";

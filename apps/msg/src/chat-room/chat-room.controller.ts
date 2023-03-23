@@ -1,5 +1,5 @@
 import { Body, Controller, Get, UseGuards, Post, Delete, Param, ParseIntPipe } from "@nestjs/common";
-import { CurrentUser } from "../auth/decorator/current-userdecorator";
+import { CurrentUser } from "../auth/decorator/current-user.decorator";
 import { UnauthorizedAccessException } from "../auth/exceptions/unauthorized-access.exception";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { ChatRoomService } from "./chat-room.service";

@@ -5,7 +5,7 @@ import { JwtGuard } from "./jwt/guard/jwt.guard";
 import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
 import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
-import { CurrentUser } from "./decorator/current-userdecorator";
+import { CurrentUser } from "./decorator/current-user.decorator";
 import { UserDto } from "../user/dto/user.dto";
 
 @Controller('auth')
