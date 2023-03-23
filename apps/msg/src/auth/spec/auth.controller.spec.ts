@@ -1,3 +1,4 @@
+import { User } from "@app/msg-core/entities/user/user.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UserSigninDto } from "../../user/dto/user-signin.dto";
 import { UserSignupDto } from "../../user/dto/user-signup.dto";
@@ -46,14 +47,21 @@ describe('AuthController', () => {
                 address: "address",
                 nickname: "nickname",
             }
-            const userDto: UserDto = {
-                id: 1,
-                email: signupDto.email,
-                address: signupDto.address,
-                nickname: signupDto.nickname,
-            }
+            const user: User = User.of(
+                signupDto.email,
+                signupDto.password,
+                signupDto.address,
+                signupDto.nickname
+            );
+            user.id = 1;
+            const userDto: UserDto = UserDto.of(
+                user.id,
+                user.email,
+                user.address,
+                user.nickname
+            );
             const signupControllerSpy = jest.spyOn(authController, 'signup');
-            const signupServiceSpy = jest.spyOn(authService, 'signup').mockResolvedValue(userDto);
+            const signupServiceSpy = jest.spyOn(authService, 'signup').mockResolvedValue(user);
 
             // When
             const result = await authController.signup(signupDto)
@@ -61,7 +69,7 @@ describe('AuthController', () => {
             // Then
             expect(signupControllerSpy).toHaveBeenCalledWith(signupDto);
             expect(signupServiceSpy).toHaveBeenCalledWith(signupDto);
-            expect(result).toBe(userDto);
+            expect(result).toStrictEqual(userDto);
         });
     });
 
@@ -91,7 +99,7 @@ describe('AuthController', () => {
             // Given
             const sub = 1
             const logoutControllerSpy = jest.spyOn(authController, 'logout');
-            const logoutServiceSpy = jest.spyOn(authService, 'logout').mockResolvedValue(true);
+            const logoutServiceSpy = jest.spyOn(authService, 'logout');
 
             // When
             const result = await authController.logout(sub);
@@ -99,14 +107,14 @@ describe('AuthController', () => {
             // Then
             expect(logoutControllerSpy).toHaveBeenCalledWith(sub);
             expect(logoutServiceSpy).toHaveBeenCalledWith(sub);
-            expect(result).toBe(true);
+            expect(result).toBe(undefined);
         });
     });
 
     describe('토큰_갱신', () => {
         it('성공', async () => {
             // Given
-            const mockPayload: JwtPayload & { refreshToken: string } = {
+            const tokenPayload: JwtPayload & { refreshToken: string } = {
                 sub: 1,
                 email: 'test@example.com',
                 refreshToken: 'refresh_token'
@@ -116,13 +124,12 @@ describe('AuthController', () => {
             const refreshTokenServiceSpy = jest.spyOn(authService, 'refreshToken').mockResolvedValue(msgToken);
 
             // When
-            const result = await authController.refreshToken(mockPayload)
+            const result = await authController.refreshToken(tokenPayload)
 
             // Then
-            expect(refreshTokenControllerSpy).toHaveBeenCalledWith(mockPayload);
-            expect(refreshTokenServiceSpy).toHaveBeenCalledWith(mockPayload.sub, mockPayload.email, mockPayload.refreshToken);
-            expect(result.accessToken).toBe(msgToken.accessToken);
-            expect(result.refreshToken).toBe(msgToken.refreshToken);
+            expect(refreshTokenControllerSpy).toHaveBeenCalledWith(tokenPayload);
+            expect(refreshTokenServiceSpy).toHaveBeenCalledWith(tokenPayload.sub, tokenPayload.email, tokenPayload.refreshToken);
+            expect(result).toStrictEqual(msgToken);
         })
     })
 })

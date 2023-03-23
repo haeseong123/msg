@@ -5,13 +5,9 @@ import { UserChatRoomDto } from '../user-chat-room/dto/user-chat-room.dto';
 import { UserChatRoomService } from '../user-chat-room/user-chat-room.service';
 import { UserService } from '../user/user.service';
 import { ChatRoomRepository } from './chat-room.repository';
-import { ChatRoomDeletedDto } from './dto/chat-room-deleted-dto';
-import { ChatRoomMessageDto } from './dto/chat-room-message.dto';
 import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
-import { ChatRoomSavedResultDto } from './dto/chat-room-saved-result.dto';
-import { ChatRoomUserDto } from './dto/chat-room-user.dto';
-import { ChatRoomDto } from './dto/chat-room.dto';
 import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
+import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
 
 @Injectable()
 export class ChatRoomService {
@@ -21,19 +17,12 @@ export class ChatRoomService {
         private userService: UserService,
     ) { }
 
-    async findChatRooms(userId: number): Promise<ChatRoomDto[]> {
-        const chatRooms = await this.chatRoomRepository.findChatRoomsByUserId(userId);
-        const chatRoomDtos: ChatRoomDto[] = chatRooms.map(cr => new ChatRoomDto(
-            cr.id,
-            cr.name,
-            cr.userChatRooms.map(ucr => new ChatRoomUserDto(ucr.user.id, ucr.user.email, ucr.user.nickname)),
-            cr.messages.map(msg => new ChatRoomMessageDto(msg.id, msg.senderId, msg.content, msg.sentAt)),
-        ));
-        return chatRoomDtos;
+    async findAll(userId: number): Promise<ChatRoom[]> {
+        return await this.chatRoomRepository.findChatRoomsByUserId(userId);
     }
 
-    async save(userId: number, dto: ChatRoomSaveDto): Promise<ChatRoomSavedResultDto> {
-        const founder = await this.userService.findUserWithRelationship(userId);
+    async save(userId: number, dto: ChatRoomSaveDto): Promise<ChatRoom> {
+        const founder = await this.userService.findUserWithRelationshipById(userId);
         const invitedUserIds = dto.invitedUserIds;
         const invitedUserIdsSet = new Set(invitedUserIds);
         const invitedByFounder = founder.relationshipFromMe.filter(
@@ -46,26 +35,18 @@ export class ChatRoomService {
 
         // Transaction Start
         const chatRoom = await this.chatRoomRepository.save(ChatRoomSaveDto.toChatRoom(dto));
-        const userChatRooms: UserChatRoomDto[] = [
+        const userChatRoomDtos: UserChatRoomDto[] = [
             { userId: founder.id, chatRoomId: chatRoom.id },
             ...invitedUserIds.map(userId => new UserChatRoomDto(userId, chatRoom.id))
         ];
-
-        await this.userChatRoomService.saveAll(userChatRooms);
+        const userChatRooms = await this.userChatRoomService.saveAll(userChatRoomDtos);
         // Transaction Commit
 
-        const participants: ChatRoomUserDto[] = [
-            new ChatRoomUserDto(founder.id, founder.email, founder.nickname),
-            ...invitedByFounder.map(
-                invitation => new ChatRoomUserDto(invitation.toUser.id, invitation.toUser.email, invitation.toUser.nickname)
-            )
-        ];
-        const resultDto: ChatRoomSavedResultDto = new ChatRoomSavedResultDto(chatRoom.id, chatRoom.name, participants);
-
-        return resultDto;
+        chatRoom.userChatRooms = userChatRooms;
+        return chatRoom;
     }
 
-    async delete(chatRoomId: number, userId: number): Promise<ChatRoomDeletedDto> {
+    async delete(chatRoomId: number, userId: number) {
         const chatRoom = await this.chatRoomRepository.findChatRoomWithUserChatRoomsById(chatRoomId);
         const userChatRoom = chatRoom?.userChatRooms.find(ucr => ucr.userId === userId);
 
@@ -79,8 +60,6 @@ export class ChatRoomService {
             await this.userChatRoomService.remove(userChatRoom);
         }
 
-        const resultDto: ChatRoomDeletedDto = new ChatRoomDeletedDto(chatRoom.id, chatRoom.name);
-
-        return resultDto;
+        return
     }
 }

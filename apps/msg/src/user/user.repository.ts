@@ -14,7 +14,7 @@ export class UserRepository extends Repository<User> {
             .getMany();
     }
 
-    async findUserWithRelationship(userId: number): Promise<User | undefined> {
+    async findUserWithRelationshipById(userId: number): Promise<User | undefined> {
         return await this.createQueryBuilder('u')
             .leftJoinAndSelect('u.relationshipFromMe', 'relationFromMe')
             .leftJoinAndSelect('relationFromMe.toUser', 'follow')

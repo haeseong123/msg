@@ -1,13 +1,10 @@
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
-import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-relationship.entity";
-import { User } from "@app/msg-core/entities/user/user.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UpdateResult } from "typeorm";
 import { UserRelationshipConflictException } from "../exceptions/user-relationship-confilict-exception";
 import { UserRelationshipDto } from "../dto/user-relationship.dto";
 import { UserRelationshipRepository } from "../user-relationship.repository"
 import { UserRelationshipService } from "../user-relationship.service"
-import { MandatoryArgumentNullException } from "../../exceptions/mandatory-argument-null.exception";
 
 describe('UserRelationshipService', () => {
     let userRelationshipService: UserRelationshipService;
@@ -19,7 +16,7 @@ describe('UserRelationshipService', () => {
             findOneBy: jest.fn(),
             save: jest.fn(),
             update: jest.fn(),
-        }
+        };
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 UserRelationshipService,
@@ -36,21 +33,23 @@ describe('UserRelationshipService', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
-    })
+    });
 
     describe('유저_관계_가져오기', () => {
         it('성공', async () => {
             // Given
             const userId = 0;
-            const findUserRelationship = jest.spyOn(userRelationshipService, 'findUserRelationship');
-            const findBySpy = jest.spyOn(userRelationshipRepository, 'findBy').mockResolvedValue([]);
+            const findAllSpy = jest.spyOn(userRelationshipService, 'findAll');
+            const findByFollowSpy = jest.spyOn(userRelationshipRepository, 'findBy').mockResolvedValueOnce([]);
+            const findByFollowerSpy = jest.spyOn(userRelationshipRepository, 'findBy').mockResolvedValueOnce([]);
 
             // When
-            const result = await userRelationshipService.findUserRelationship(userId);
+            const result = await userRelationshipService.findAll(userId);
 
             // Then
-            expect(findUserRelationship).toHaveBeenCalledWith(userId);
-            expect(findBySpy).toHaveBeenCalledWith({ fromUserId: userId });
+            expect(findAllSpy).toHaveBeenCalledWith(userId);
+            expect(findByFollowSpy).toHaveBeenCalledWith({ fromUserId: userId });
+            expect(findByFollowerSpy).toHaveBeenCalledWith({ toUserId: userId, status: UserRelationshipStatus.FOLLOW });
             expect(result).toStrictEqual([]);
         });
     });
@@ -63,24 +62,15 @@ describe('UserRelationshipService', () => {
                 toUserId: 1,
                 status: UserRelationshipStatus.FOLLOW,
             };
-            const dao = UserRelationshipDto.toUserRelationship(dto);
-            const savedUserRelationship: UserRelationship = {
-                id: 2,
-                ...dao
-            }
-            const saveResultDto = new UserRelationshipDto(
-                savedUserRelationship.fromUserId,
-                savedUserRelationship.toUserId,
-                savedUserRelationship.status,
-                savedUserRelationship.id
-            );
-            const saveServiceSpy = jest.spyOn(userRelationshipService, 'saveUserRelationship');
+            const entity = UserRelationshipDto.toUserRelationship(dto);
+
+            const saveServiceSpy = jest.spyOn(userRelationshipService, 'save');
             const findOneBySpy = jest.spyOn(userRelationshipRepository, 'findOneBy').mockResolvedValue(null);
-            const toUserRelationshipSpy = jest.spyOn(UserRelationshipDto, 'toUserRelationship').mockReturnValue(dao);
-            const saveRepositorySpy = jest.spyOn(userRelationshipRepository, 'save').mockResolvedValue(savedUserRelationship);
+            const toUserRelationshipSpy = jest.spyOn(UserRelationshipDto, 'toUserRelationship').mockReturnValue(entity);
+            const saveRepositorySpy = jest.spyOn(userRelationshipRepository, 'save').mockResolvedValue(entity);
 
             // When
-            const result = await userRelationshipService.saveUserRelationship(dto);
+            const result = await userRelationshipService.save(dto);
 
             // Then
             expect(saveServiceSpy).toHaveBeenCalledWith(dto);
@@ -89,8 +79,8 @@ describe('UserRelationshipService', () => {
                 toUserId: dto.toUserId
             });
             expect(toUserRelationshipSpy).toHaveBeenCalledWith(dto);
-            expect(saveRepositorySpy).toHaveBeenCalledWith(dao);
-            expect(result).toStrictEqual(saveResultDto);
+            expect(saveRepositorySpy).toHaveBeenCalledWith(entity);
+            expect(result).toStrictEqual(entity);
         });
 
         it('실패_이미_존재하는_관계', async () => {
@@ -101,12 +91,12 @@ describe('UserRelationshipService', () => {
                 status: UserRelationshipStatus.FOLLOW,
             };
             const alreadyExistingRelationship = UserRelationshipDto.toUserRelationship(dto);
-            alreadyExistingRelationship.id = 2;
-            const saveServiceSpy = jest.spyOn(userRelationshipService, 'saveUserRelationship');
+
+            const saveServiceSpy = jest.spyOn(userRelationshipService, 'save');
             const findOneBySpy = jest.spyOn(userRelationshipRepository, 'findOneBy').mockResolvedValue(alreadyExistingRelationship);
 
             // When
-            const result = userRelationshipService.saveUserRelationship(dto);
+            const result = userRelationshipService.save(dto);
 
             // Then
             await expect(result).rejects.toThrow(UserRelationshipConflictException);
@@ -115,8 +105,8 @@ describe('UserRelationshipService', () => {
                 fromUserId: dto.fromUserId,
                 toUserId: dto.toUserId
             });
-        })
-    })
+        });
+    });
 
     describe('유저_관계_수정하기', () => {
         it('성공', async () => {
@@ -131,52 +121,18 @@ describe('UserRelationshipService', () => {
                 raw: 'abc',
                 affected: 1,
                 generatedMaps: []
-            }
-            const updateServiceSpy = jest.spyOn(userRelationshipService, 'updateUserRelationship');
+            };
+
+            const updateServiceSpy = jest.spyOn(userRelationshipService, 'update');
             const updateRepositorySpy = jest.spyOn(userRelationshipRepository, 'update').mockResolvedValue(updateResult);
 
             // When
-            const result = await userRelationshipService.updateUserRelationship(dto);
+            const result = await userRelationshipService.update(dto);
 
             // Then
             expect(updateServiceSpy).toHaveBeenCalledWith(dto);
             expect(updateRepositorySpy).toHaveBeenCalledWith(dto.id, { status: dto.status });
-            expect(result).toBe(dto);
-        });
-
-        it('실패_dto.id에_undefined가_들어감', async () => {
-            // Given
-            const dto: UserRelationshipDto = {
-                fromUserId: 1,
-                toUserId: 2,
-                status: UserRelationshipStatus.FOLLOW,
-            };
-            const updateServiceSpy = jest.spyOn(userRelationshipService, 'updateUserRelationship');
-
-            // When
-            const result = userRelationshipService.updateUserRelationship(dto);
-
-            // Then
-            await expect(result).rejects.toThrow(MandatoryArgumentNullException);
-            expect(updateServiceSpy).toHaveBeenCalledWith(dto);
-        });
-
-        it('실패_dto.id에_null이_들어감', async () => {
-            // Given
-            const dto: UserRelationshipDto = {
-                id: null,
-                fromUserId: 1,
-                toUserId: 2,
-                status: UserRelationshipStatus.FOLLOW,
-            };
-            const updateServiceSpy = jest.spyOn(userRelationshipService, 'updateUserRelationship');
-
-            // When
-            const result = userRelationshipService.updateUserRelationship(dto);
-
-            // Then
-            await expect(result).rejects.toThrow(MandatoryArgumentNullException);
-            expect(updateServiceSpy).toHaveBeenCalledWith(dto);
+            expect(result).toBe(updateResult);
         });
     });
 });

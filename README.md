@@ -27,7 +27,7 @@
 - [NestJS - Guards](https://hs-archive.tistory.com/98)
 - [NestJS - Passport](https://hs-archive.tistory.com/99)
 - [NestJS - @Module(), @Injectable(), @InjectRepository()](https://hs-archive.tistory.com/100)
-- [RDB - 사용자 관계 테이블 작성](https://hs-archive.tistory.com/101)
+- [Entity -> Dto 변환은 어디서?](https://hs-archive.tistory.com/102)
 
 ## Description
 

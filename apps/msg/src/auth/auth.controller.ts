@@ -5,7 +5,7 @@ import { JwtGuard } from "./jwt/guard/jwt.guard";
 import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
 import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
-import { CurrentUser } from "./decorator/current-userdecorator";
+import { CurrentUser } from "./decorator/current-user.decorator";
 import { UserDto } from "../user/dto/user.dto";
 
 @Controller('auth')
@@ -15,7 +15,13 @@ export class AuthController {
     @Post('signup')
     @HttpCode(HttpStatus.CREATED)
     async signup(@Body() signupDto: UserSignupDto): Promise<UserDto> {
-        return this.authService.signup(signupDto);
+        const user = await this.authService.signup(signupDto);
+        return UserDto.of(
+            user.id,
+            user.email,
+            user.address,
+            user.nickname
+        );
     }
 
     @Post('signin')
@@ -28,7 +34,8 @@ export class AuthController {
     @UseGuards(JwtGuard)
     @HttpCode(HttpStatus.OK)
     async logout(@CurrentUser('sub') sub: number): Promise<boolean> {
-        return this.authService.logout(sub);
+        await this.authService.logout(sub);
+        return;
     }
 
     @Post('refresh-token')

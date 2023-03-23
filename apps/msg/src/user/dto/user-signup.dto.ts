@@ -16,7 +16,7 @@ export class UserSignupDto {
   nickname: string;
 
   static async toUser(dto: UserSignupDto): Promise<User> {
-    return new User(
+    return User.of(
       dto.email,
       await hashString(dto.password),
       dto.address,

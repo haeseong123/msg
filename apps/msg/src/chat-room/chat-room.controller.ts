@@ -1,10 +1,12 @@
 import { Body, Controller, Get, UseGuards, Post, Delete, Param, ParseIntPipe } from "@nestjs/common";
-import { CurrentUser } from "../auth/decorator/current-userdecorator";
+import { CurrentUser } from "../auth/decorator/current-user.decorator";
 import { UnauthorizedAccessException } from "../auth/exceptions/unauthorized-access.exception";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { ChatRoomService } from "./chat-room.service";
+import { ChatRoomMessageDto } from "./dto/chat-room-message.dto";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
 import { ChatRoomSavedResultDto } from "./dto/chat-room-saved-result.dto";
+import { ChatRoomUserDto } from "./dto/chat-room-user.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
 
 @UseGuards(JwtGuard)
@@ -13,22 +15,33 @@ export class ChatRoomController {
     constructor(private chatRoomService: ChatRoomService) { }
 
     @Get()
-    async findChatRooms(
+    async findAll(
         @CurrentUser('sub') sub: number
     ): Promise<ChatRoomDto[]> {
-        return this.chatRoomService.findChatRooms(sub);
+        const chatRooms = await this.chatRoomService.findAll(sub);
+        return chatRooms.map(cr => new ChatRoomDto(
+            cr.id,
+            cr.name,
+            cr.userChatRooms.map(ucr => new ChatRoomUserDto(ucr.user.id, ucr.user.email, ucr.user.nickname)),
+            cr.messages.map(msg => new ChatRoomMessageDto(msg.id, msg.senderId, msg.content, msg.sentAt)),
+        ));
     }
 
     @Post()
-    async saveChatRoom(
+    async save(
         @CurrentUser('sub') sub: number,
         @Body() dto: ChatRoomSaveDto,
     ): Promise<ChatRoomSavedResultDto> {
-        return this.chatRoomService.save(sub, dto);
+        const chatRoom = await this.chatRoomService.save(sub, dto);
+        return new ChatRoomSavedResultDto(
+            chatRoom.id,
+            chatRoom.name,
+            chatRoom.userChatRooms.map(ucr => ucr.userId)
+        );
     }
 
     @Delete(':id/user/:userId')
-    async deleteUserFromChatRoom(
+    async delete(
         @CurrentUser('sub') sub: number,
         @Param('id', ParseIntPipe) id: number,
         @Param('userId', ParseIntPipe) userId: number,
@@ -37,6 +50,7 @@ export class ChatRoomController {
             throw new UnauthorizedAccessException();
         }
 
-        return this.chatRoomService.delete(id, userId)
+        await this.chatRoomService.delete(id, userId);
+        return;
     }
 }

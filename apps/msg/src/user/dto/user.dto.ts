@@ -4,10 +4,20 @@ export class UserDto {
     address: string;
     nickname: string;
 
-    constructor(id: number, email: string, address: string, nickname: string) {
-        this.id = id;
-        this.email = email;
-        this.address = address;
-        this.nickname = nickname;
+    constructor() { }
+
+    static of(
+        id: number,
+        email: string,
+        address: string,
+        nickname: string
+    ): UserDto {
+        const dto = new UserDto();
+        dto.id = id;
+        dto.email = email;
+        dto.address = address;
+        dto.nickname = nickname;
+
+        return dto;
     }
 }

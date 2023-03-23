@@ -7,10 +7,12 @@ import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { JwtPayload } from "./jwt/jwt-payload";
 import { compare } from "bcrypt";
 import { TokenExpiredException } from "./exceptions/token-expired.exception";
-import { UserDto } from "../user/dto/user.dto";
 import { UserIncorrectEmailException } from "./exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "./exceptions/user-incorrect-password.exception";
 import { UnauthorizedAccessException } from "./exceptions/unauthorized-access.exception";
+import { UserEmailConflictException } from "./exceptions/user-email-conflict.exception";
+import { User } from "@app/msg-core/entities/user/user.entity";
+import { UpdateResult } from "typeorm";
 
 @Injectable()
 export class AuthService {
@@ -19,12 +21,18 @@ export class AuthService {
         private readonly jwtService: JwtService
     ) { }
 
-    async signup(dto: UserSignupDto): Promise<UserDto> {
-        return await this.userService.save(dto);
+    async signup(dto: UserSignupDto): Promise<User> {
+        const user = await this.userService.findUserByEmail(dto.email);
+
+        if (user) {
+            throw new UserEmailConflictException();
+        }
+
+        return await this.userService.save(await UserSignupDto.toUser(dto));
     }
 
     async signin(dto: UserSigninDto): Promise<MsgToken> {
-        const user = await this.userService.findUserEntityByEmail(dto.email);
+        const user = await this.userService.findUserByEmail(dto.email);
 
         if (!user) {
             throw new UserIncorrectEmailException();
@@ -39,13 +47,18 @@ export class AuthService {
         return msgToken;
     }
 
-    async logout(id: number): Promise<boolean> {
-        await this.userService.update(id, { refreshToken: null });
-        return true;
+    async logout(id: number): Promise<UpdateResult> {
+        const user = await this.userService.findUserById(id);
+
+        if (!user) {
+            throw new UnauthorizedAccessException();
+        }
+
+        return await this.userService.update(id, { refreshToken: null });
     }
 
     async refreshToken(id: number, email: string, refreshToken: string): Promise<MsgToken> {
-        const user = await this.userService.findUserEntityById(id);
+        const user = await this.userService.findUserById(id);
 
         if (!user) {
             throw new UnauthorizedAccessException();
