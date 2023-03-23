@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorator/current-user.decorator";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
+import { MandatoryArgumentNullException } from "../exceptions/mandatory-argument-null.exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipIdParamMismatchException } from "./exceptions/user-relationship-id-param-mismatch.exception";
 import { UserRelationshipIdTokenIdMismatchException } from "./exceptions/user-relationship-id-token-id-mismatch.exception";
@@ -12,14 +13,20 @@ export class UserRelationshipController {
     constructor(private readonly userRelationshipService: UserRelationshipService) { }
 
     @Get()
-    async findUserRelationship(
+    async findAll(
         @CurrentUser('sub') sub: number
     ): Promise<UserRelationshipDto[]> {
-        return this.userRelationshipService.findUserRelationship(sub);
+        const relationships = await this.userRelationshipService.findAll(sub);
+        return relationships.map(r => UserRelationshipDto.of(
+            r.id,
+            r.fromUserId,
+            r.toUserId,
+            r.status
+        ));
     }
 
     @Post()
-    async saveUserRelationship(
+    async save(
         @CurrentUser('sub') sub: number,
         @Body() dto: UserRelationshipDto
     ): Promise<UserRelationshipDto> {
@@ -27,15 +34,25 @@ export class UserRelationshipController {
             throw new UserRelationshipIdTokenIdMismatchException();
         }
 
-        return this.userRelationshipService.saveUserRelationship(dto);
+        const relationship = await this.userRelationshipService.save(dto);
+        return UserRelationshipDto.of(
+            relationship.id,
+            relationship.fromUserId,
+            relationship.toUserId,
+            relationship.status
+        );
     }
 
     @Put(':id')
-    async updateUserRelationship(
+    async update(
         @CurrentUser('sub') sub: number,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UserRelationshipDto
-    ): Promise<UserRelationshipDto> {
+    ) {
+        if (dto.id === undefined || dto.id === null) {
+            throw new MandatoryArgumentNullException();
+        }
+
         if (sub !== dto.fromUserId) {
             throw new UserRelationshipIdTokenIdMismatchException();
         }
@@ -44,6 +61,8 @@ export class UserRelationshipController {
             throw new UserRelationshipIdParamMismatchException();
         }
 
-        return await this.userRelationshipService.updateUserRelationship(dto);
+        await this.userRelationshipService.update(dto);
+
+        return;
     }
 }

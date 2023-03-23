@@ -42,11 +42,18 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     @OneToMany(() => Notification, notification => notification.user)
     notifications!: Notification[];
 
-    constructor(email: string, password: string, address: string, nickname: string) {
+    constructor() {
         super()
-        this.email = email;
-        this.password = password;
-        this.address = address;
-        this.nickname = nickname;
+    }
+
+    static of(email: string, password: string, address: string, nickname: string): User {
+        const user = new User();
+        user.email = email;
+        user.password = password;
+        user.address = address;
+        user.nickname = nickname;
+        user.refreshToken = null;
+
+        return user;
     }
 }

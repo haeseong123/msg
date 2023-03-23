@@ -3,18 +3,15 @@ import { UserChatRoom } from "@app/msg-core/entities/user-chat-room/user-chat-ro
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UnauthorizedInvitationException } from "../exceptions/unauthorized-invitation.exception";
-import { UserChatRoomDto } from "../../user-chat-room/dto/user-chat-room.dto";
 import { UserChatRoomService } from "../../user-chat-room/user-chat-room.service";
-import { UserWithRelationshipDto } from "../../user/dto/user-with-relationship.dto";
 import { UserService } from "../../user/user.service";
 import { ChatRoomRepository } from "../chat-room.repository";
 import { ChatRoomService } from "../chat-room.service";
-import { ChatRoomDeletedDto } from "../dto/chat-room-deleted-dto";
 import { ChatRoomSaveDto } from "../dto/chat-room-save.dto";
-import { ChatRoomSavedResultDto } from "../dto/chat-room-saved-result.dto";
-import { ChatRoomUserDto } from "../dto/chat-room-user.dto";
-import { ChatRoomDto } from "../dto/chat-room.dto";
 import { UserNotInChatRoomException } from "../exceptions/user-not-in-chat-room.exception";
+import { User } from "@app/msg-core/entities/user/user.entity";
+import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-relationship.entity";
+import { UserChatRoomDto } from "../../user-chat-room/dto/user-chat-room.dto";
 
 describe('ChatRoomService', () => {
     let chatRoomService: ChatRoomService;
@@ -51,7 +48,7 @@ describe('ChatRoomService', () => {
                         save: jest.fn(),
                         update: jest.fn(),
                         findUserByIds: jest.fn(),
-                        findUserWithRelationship: jest.fn(),
+                        findUserWithRelationshipById: jest.fn(),
                     }
                 },
             ]
@@ -71,103 +68,70 @@ describe('ChatRoomService', () => {
         it('성공', async () => {
             // Given
             const userId: number = 0;
-            const chatRooms: ChatRoom[] = [
-                { id: 1, name: '1_chat_room', userChatRooms: [], messages: [], createdAt: new Date(), updatedAt: new Date() },
-                { id: 2, name: '2_chat_room', userChatRooms: [], messages: [], createdAt: new Date(), updatedAt: new Date() },
-            ];
-            const resultChatRoomDtos: ChatRoomDto[] = [
-                new ChatRoomDto(1, '1_chat_room', [], []),
-                new ChatRoomDto(2, '2_chat_room', [], []),
-            ]
-
-            const findChatRoomsSpy = jest.spyOn(chatRoomService, 'findChatRooms');
-            const findChatRoomsByUserIdSpy = jest.spyOn(chatRoomRepository, 'findChatRoomsByUserId').mockResolvedValue(chatRooms);
+            const findChatRoomsSpy = jest.spyOn(chatRoomService, 'findAll');
+            const findChatRoomsByUserIdSpy = jest.spyOn(chatRoomRepository, 'findChatRoomsByUserId').mockResolvedValue([]);
 
             // When
-            const result = await chatRoomService.findChatRooms(userId);
+            const result = await chatRoomService.findAll(userId);
 
             // Then
             expect(findChatRoomsSpy).toHaveBeenCalledWith(userId);
             expect(findChatRoomsByUserIdSpy).toHaveBeenCalledWith(userId);
-            expect(result).toStrictEqual(resultChatRoomDtos);
+            expect(result).toStrictEqual([]);
         });
     });
 
     describe('채팅방_만들기', () => {
-        const userId: number = 1;
-        const friendId1: number = 2;
-        const friendId2: number = 3;
+        // 유저
+        const founder: User = User.of('f@asd.com', 'password', 'add', 'nick');
+        const friend1: User = User.of('test@asd.com2', 'password2', "add2", 'nick2');
+        const friend2: User = User.of('test@asd.com3', 'password3', "add3", 'nick3');
+        founder.id = 1;
+        friend1.id = 2;
+        friend2.id = 3;
+
+        // 관계
+        const relationship1 = new UserRelationship(founder.id, friend1.id, UserRelationshipStatus.FOLLOW);
+        const relationship2 = new UserRelationship(founder.id, friend2.id, UserRelationshipStatus.FOLLOW);
+        relationship1.id = 10;
+        relationship2.id = 20;
+        relationship1.toUser = friend1;
+        relationship2.toUser = friend2;
+        founder.relationshipFromMe = [relationship1, relationship2];
+        founder.relationshipToMe = [];
+
+        // 채팅방
         const chatRoomSaveDto: ChatRoomSaveDto = {
             name: 'chat_room_name',
-            invitedUserIds: [friendId1, friendId2],
-        };
-        const founder: UserWithRelationshipDto = {
-            id: userId,
-            email: "test@asd.com",
-            address: "add",
-            nickname: "nick",
-            relationshipFromMe: [
-                {
-                    id: 10,
-                    fromUserId: userId,
-                    toUserId: friendId1,
-                    status: UserRelationshipStatus.FOLLOW,
-                    toUser: { id: friendId1, email: '2test@asd.com', address: "add2", nickname: 'nick2' },
-                },
-                {
-                    id: 20,
-                    fromUserId: userId,
-                    toUserId: friendId2,
-                    status: UserRelationshipStatus.FOLLOW,
-                    toUser: { id: friendId2, email: '3test@asd.com', address: "add3", nickname: 'nick3' },
-                },
-            ],
-            relationshipToMe: [],
+            invitedUserIds: [friend1.id, friend2.id],
         };
         const chatRoom: ChatRoom = new ChatRoom(chatRoomSaveDto.name);
         chatRoom.id = 30;
-        const userChatRooms: UserChatRoomDto[] = [
-            new UserChatRoomDto(userId, chatRoom.id),
-            new UserChatRoomDto(friendId1, chatRoom.id),
-            new UserChatRoomDto(friendId2, chatRoom.id)
+        const userChatRoomDtos: UserChatRoomDto[] = [
+            new UserChatRoomDto(founder.id, chatRoom.id),
+            new UserChatRoomDto(friend1.id, chatRoom.id),
+            new UserChatRoomDto(friend2.id, chatRoom.id)
         ];
-        const resultDto: ChatRoomSavedResultDto = new ChatRoomSavedResultDto(
-            chatRoom.id,
-            chatRoom.name,
-            [
-                new ChatRoomUserDto(
-                    founder.id,
-                    founder.email,
-                    founder.nickname
-                ),
-                new ChatRoomUserDto(
-                    founder.relationshipFromMe[0].toUser.id,
-                    founder.relationshipFromMe[0].toUser.email,
-                    founder.relationshipFromMe[0].toUser.nickname
-                ),
-                new ChatRoomUserDto(
-                    founder.relationshipFromMe[1].toUser.id,
-                    founder.relationshipFromMe[1].toUser.email,
-                    founder.relationshipFromMe[1].toUser.nickname
-                ),
-            ]
-        );
+        const userChatRooms: UserChatRoom[] = userChatRoomDtos.map(ucrd => new UserChatRoom(ucrd.userId, ucrd.chatRoomId));
+
         it('성공', async () => {
             // Given
             const ChatRoomServiceSaveSpy = jest.spyOn(chatRoomService, 'save');
-            const findUserWithRelationshipSpy = jest.spyOn(userService, 'findUserWithRelationship').mockResolvedValue(founder);
+            const findUserWithRelationshipByIdSpy = jest.spyOn(userService, 'findUserWithRelationshipById').mockResolvedValue(founder);
+            const toChatRoomSpy = jest.spyOn(ChatRoomSaveDto, 'toChatRoom').mockReturnValue(chatRoom);
             const chatRoomRepositorySaveSpy = jest.spyOn(chatRoomRepository, 'save').mockResolvedValue(chatRoom);
-            const userChatRoomServiceSaveAllSpy = jest.spyOn(userChatRoomService, 'saveAll');
+            const userChatRoomServiceSaveAllSpy = jest.spyOn(userChatRoomService, 'saveAll').mockResolvedValue(userChatRooms);
 
             // When
-            const result = await chatRoomService.save(userId, chatRoomSaveDto);
+            const result = await chatRoomService.save(founder.id, chatRoomSaveDto);
 
             // Then
-            expect(ChatRoomServiceSaveSpy).toHaveBeenCalledWith(userId, chatRoomSaveDto);
-            expect(findUserWithRelationshipSpy).toHaveBeenCalledWith(userId);
-            expect(chatRoomRepositorySaveSpy).toHaveBeenCalledWith(ChatRoomSaveDto.toChatRoom(chatRoomSaveDto));
-            expect(userChatRoomServiceSaveAllSpy).toHaveBeenCalledWith(userChatRooms);
-            expect(result).toStrictEqual(resultDto);
+            expect(ChatRoomServiceSaveSpy).toHaveBeenCalledWith(founder.id, chatRoomSaveDto);
+            expect(findUserWithRelationshipByIdSpy).toHaveBeenCalledWith(founder.id);
+            expect(toChatRoomSpy).toHaveBeenCalledWith(chatRoomSaveDto);
+            expect(chatRoomRepositorySaveSpy).toHaveBeenCalledWith(chatRoom);
+            expect(userChatRoomServiceSaveAllSpy).toHaveBeenCalledWith(userChatRoomDtos);
+            expect(result).toStrictEqual(chatRoom);
         });
 
         it('실패_초대할_유저가_내_친구가_아님', async () => {
@@ -179,19 +143,19 @@ describe('ChatRoomService', () => {
             };
 
             const ChatRoomServiceSaveSpy = jest.spyOn(chatRoomService, 'save');
-            const findUserWithRelationshipSpy = jest.spyOn(userService, 'findUserWithRelationship').mockResolvedValue(founder);
+            const findUserWithRelationshipByIdSpy = jest.spyOn(userService, 'findUserWithRelationshipById').mockResolvedValue(founder);
 
             // When
-            const resultPromise = chatRoomService.save(userId, chatRoomSaveDto);
+            const resultPromise = chatRoomService.save(founder.id, chatRoomSaveDto);
 
             // Then
             await expect(resultPromise).rejects.toThrow(UnauthorizedInvitationException);
-            expect(ChatRoomServiceSaveSpy).toHaveBeenCalledWith(userId, chatRoomSaveDto);
-            expect(findUserWithRelationshipSpy).toHaveBeenCalledWith(userId);
+            expect(ChatRoomServiceSaveSpy).toHaveBeenCalledWith(founder.id, chatRoomSaveDto);
+            expect(findUserWithRelationshipByIdSpy).toHaveBeenCalledWith(founder.id);
         });
     });
 
-    describe('채팅방_전부_나가기', () => {
+    describe('채팅방_나가기', () => {
         it('성공', async () => {
             // Given
             const chatRoomId: number = 1;
@@ -201,15 +165,9 @@ describe('ChatRoomService', () => {
                 new UserChatRoom(userId, chatRoomId),
                 new UserChatRoom(otherparticipantId, chatRoomId),
             ];
-            const chatRoom: ChatRoom = {
-                id: chatRoomId,
-                name: '채팅방_이름',
-                userChatRooms: userChatRooms,
-                messages: [],
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
-            const resultDto: ChatRoomDeletedDto = new ChatRoomDeletedDto(chatRoom.id, chatRoom.name);
+            const chatRoom: ChatRoom = new ChatRoom('채팅방 이름');
+            chatRoom.id = chatRoomId;
+            chatRoom.userChatRooms = userChatRooms;
 
             const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'delete');
             const findChatRoomWithUserChatRoomsByIdSpy = jest.spyOn(chatRoomRepository, 'findChatRoomWithUserChatRoomsById').mockResolvedValue(chatRoom);
@@ -224,7 +182,7 @@ describe('ChatRoomService', () => {
             expect(findChatRoomWithUserChatRoomsByIdSpy).toHaveBeenCalledWith(chatRoomId);
             expect(chatRoomRepositoryRemoveSpy).not.toHaveBeenCalled();
             expect(userChatRoomServiceRemoveSpy).toHaveBeenCalledWith(userChatRooms[0]);
-            expect(result).toStrictEqual(resultDto);
+            expect(result).toStrictEqual(undefined);
         });
 
         it('성공_채팅방_나가고_아무도_없는_채팅방_삭제', async () => {
@@ -234,15 +192,10 @@ describe('ChatRoomService', () => {
             const userChatRooms: UserChatRoom[] = [
                 new UserChatRoom(userId, chatRoomId),
             ];
-            const chatRoom: ChatRoom = {
-                id: chatRoomId,
-                name: '채팅방_이름',
-                userChatRooms: userChatRooms,
-                messages: [],
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
-            const resultDto: ChatRoomDeletedDto = new ChatRoomDeletedDto(chatRoom.id, chatRoom.name);
+            const chatRoom: ChatRoom = new ChatRoom('채팅방 이름');
+            chatRoom.id = chatRoomId;
+            chatRoom.userChatRooms = userChatRooms;
+
             const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'delete');
             const findChatRoomWithUserChatRoomsByIdSpy = jest.spyOn(chatRoomRepository, 'findChatRoomWithUserChatRoomsById').mockResolvedValue(chatRoom);
             const chatRoomRepositoryRemoveSpy = jest.spyOn(chatRoomRepository, 'remove');
@@ -256,7 +209,7 @@ describe('ChatRoomService', () => {
             expect(findChatRoomWithUserChatRoomsByIdSpy).toHaveBeenCalledWith(chatRoomId);
             expect(chatRoomRepositoryRemoveSpy).toHaveBeenCalledWith(chatRoom);
             expect(userChatRoomServiceRemoveSpy).not.toHaveBeenCalled();
-            expect(result).toStrictEqual(resultDto);
+            expect(result).toStrictEqual(undefined);
         });
 
         it('실패_해당_채팅방_참여자가_아님', async () => {
@@ -267,14 +220,10 @@ describe('ChatRoomService', () => {
             const userChatRooms: UserChatRoom[] = [
                 new UserChatRoom(otherparticipantId, chatRoomId),
             ];
-            const chatRoom: ChatRoom = {
-                id: chatRoomId,
-                name: '채팅방_이름',
-                userChatRooms: userChatRooms,
-                messages: [],
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
+            const chatRoom: ChatRoom = new ChatRoom('채팅방 이름');
+            chatRoom.id = chatRoomId;
+            chatRoom.userChatRooms = userChatRooms;
+
             const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'delete');
             const findChatRoomWithUserChatRoomsByIdSpy = jest.spyOn(chatRoomRepository, 'findChatRoomWithUserChatRoomsById').mockResolvedValue(chatRoom);
 

@@ -7,28 +7,16 @@ import { UserChatRoomRepository } from './user-chat-room.repository';
 export class UserChatRoomService {
     constructor(private userChatRoomRepository: UserChatRoomRepository) { }
 
-    async save(dto: UserChatRoomDto): Promise<UserChatRoomDto> {
-        const result = await this.userChatRoomRepository.save(UserChatRoomDto.toUserChatRoom(dto));
-        const resultDto: UserChatRoomDto = new UserChatRoomDto(result.userId, result.chatRoomId);
-        return resultDto;
+    async save(dto: UserChatRoomDto): Promise<UserChatRoom> {
+        return await this.userChatRoomRepository.save(UserChatRoomDto.toUserChatRoom(dto));
     }
 
-    async saveAll(dtos: UserChatRoomDto[]): Promise<UserChatRoomDto[]> {
+    async saveAll(dtos: UserChatRoomDto[]): Promise<UserChatRoom[]> {
         const entities: UserChatRoom[] = dtos.map(dto => UserChatRoomDto.toUserChatRoom(dto));
-        const userChatRooms = await this.userChatRoomRepository.save(entities);
-        const resultDto: UserChatRoomDto[] = userChatRooms.map(ucr => new UserChatRoomDto(
-            ucr.userId,
-            ucr.chatRoomId
-        ));
-        return resultDto;
+        return await this.userChatRoomRepository.save(entities);
     }
 
-    async remove(entity: UserChatRoom) {
-        const removedEntity = await this.userChatRoomRepository.remove(entity);
-        const resultDto: UserChatRoomDto = new UserChatRoomDto(
-            removedEntity.userId,
-            removedEntity.chatRoomId,
-        )
-        return resultDto;
+    async remove(entity: UserChatRoom): Promise<UserChatRoom> {
+        return await this.userChatRoomRepository.remove(entity);
     }
 }

@@ -7,11 +7,13 @@ import { UserSignupDto } from "../../user/dto/user-signup.dto";
 import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service"
 import { JwtPayload } from "../jwt/jwt-payload";
-import { UserDto } from "../../user/dto/user.dto";
 import { TokenExpiredException } from "../exceptions/token-expired.exception";
 import { UserIncorrectEmailException } from "../exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "../exceptions/user-incorrect-password.exception";
 import { UnauthorizedAccessException } from "../exceptions/unauthorized-access.exception";
+import { UserEmailConflictException } from "../exceptions/user-email-conflict.exception";
+import { MsgToken } from "../jwt/msg-token";
+import { UpdateResult } from "typeorm";
 
 describe('AuthService', () => {
     let authService: AuthService;
@@ -21,9 +23,9 @@ describe('AuthService', () => {
     beforeEach(async () => {
         const userServiceMock = {
             save: jest.fn(),
-            findUserEntityByEmail: jest.fn(),
+            findUserByEmail: jest.fn(),
             update: jest.fn(),
-            findUserEntityById: jest.fn()
+            findUserById: jest.fn()
         };
         const jwtServiceMock = {
             sign: jest.fn()
@@ -54,69 +56,98 @@ describe('AuthService', () => {
     describe('회원_가입', () => {
         it('성공', async () => {
             // Given
-            const signupDto: UserSignupDto = {
+            const dto: UserSignupDto = {
                 email: "test@asd.com",
                 password: "123qwe",
                 address: "address",
                 nickname: "nickname",
             };
-            const userDto: UserDto = {
-                id: 1,
-                email: signupDto.email,
-                address: signupDto.address,
-                nickname: signupDto.nickname,
-            };
+            const entity: User = User.of(
+                dto.email,
+                dto.password,
+                dto.address,
+                dto.nickname
+            );
             const signupSpy = jest.spyOn(authService, 'signup');
-            const saveSpy = jest.spyOn(userService, 'save').mockResolvedValue(userDto);
+            const findSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
+            const toUserSpy = jest.spyOn(UserSignupDto, 'toUser').mockResolvedValue(entity);
+            const saveSpy = jest.spyOn(userService, 'save').mockResolvedValue(entity);
 
             // When
-            const result = await authService.signup(signupDto);
+            const result = await authService.signup(dto);
 
             // Then
-            expect(signupSpy).toHaveBeenCalledWith(signupDto);
-            expect(saveSpy).toHaveBeenCalledWith(signupDto);
-            expect(result).toBe(userDto);
+            expect(signupSpy).toHaveBeenCalledWith(dto);
+            expect(findSpy).toHaveBeenCalledWith(dto.email);
+            expect(toUserSpy).toHaveBeenCalledWith(dto);
+            expect(saveSpy).toHaveBeenCalledWith(entity);
+            expect(result).toBe(entity);
+        });
+
+        it('실패_이메일이_겹침', async () => {
+            // Given
+            const dto: UserSignupDto = {
+                email: "test@asd.com",
+                password: "123qwe",
+                address: "address",
+                nickname: "nickname",
+            };
+            const user: User = User.of(
+                dto.email,
+                dto.password,
+                dto.address,
+                dto.nickname
+            );
+            const signupSpy = jest.spyOn(authService, 'signup');
+            const findSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(user);
+
+            // When
+            const resultPromise = authService.signup(dto);
+
+            // Then
+            await expect(resultPromise).rejects.toThrow(UserEmailConflictException);
+            expect(signupSpy).toHaveBeenCalledWith(dto);
+            expect(findSpy).toHaveBeenCalledWith(dto.email);
         });
     })
 
     describe('로그인', () => {
-        const user: User = {
-            id: 1,
-            email: 'test@test.com',
-            password: 'password123',
-            address: 'test_address',
-            nickname: 'hs',
-            refreshToken: null,
-            userChatRooms: [],
-            sentMessages: [],
-            relationshipFromMe: [],
-            relationshipToMe: [],
-            notifications: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
-        const userSigninDto: UserSigninDto = {
-            ...user
+        const user: User = User.of(
+            'a@a.com',
+            'password',
+            'add',
+            'nick'
+        );
+        const dto: UserSigninDto = {
+            email: user.email,
+            password: user.password
         };
 
         it('성공', async () => {
             // Given
-            const tokenString = 'token';
+            const accessToken = 'access_token';
+            const refreshToken = 'refresh_token';
+            const msgToken: MsgToken = {
+                accessToken,
+                refreshToken
+            }
             const payload: JwtPayload = { sub: user.id, email: user.email };
 
             const signinSpy = jest.spyOn(authService, 'signin');
-            const findUserEntityByEmailSpy = jest.spyOn(userService, 'findUserEntityByEmail').mockResolvedValue(user);
+            const findUserByEmailSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(user);
             const compareSpy = jest.spyOn(bcrypt, 'compare').mockImplementation(() => true);
-            const jwtSignSpy = jest.spyOn(jwtService, 'sign').mockImplementation(() => tokenString);
-            const updateSpy = jest.spyOn(userService, 'update').mockResolvedValue({ refreshToken: tokenString });
+            const jwtSignSpy = jest.spyOn(jwtService, 'sign')
+                .mockImplementationOnce(() => accessToken)
+                .mockImplementationOnce(() => refreshToken);
+            const updateSpy = jest.spyOn(userService, 'update');
 
             // When
-            const result = await authService.signin(userSigninDto);
+            const result = await authService.signin(dto);
 
             // Then
-            expect(signinSpy).toHaveBeenCalledWith(userSigninDto);
-            expect(findUserEntityByEmailSpy).toHaveBeenCalledWith(userSigninDto.email);
-            expect(compareSpy).toHaveBeenCalledWith(userSigninDto.password, user.password);
+            expect(signinSpy).toHaveBeenCalledWith(dto);
+            expect(findUserByEmailSpy).toHaveBeenCalledWith(dto.email);
+            expect(compareSpy).toHaveBeenCalledWith(dto.password, user.password);
             expect(jwtSignSpy).toHaveBeenCalledTimes(2);
             expect(jwtSignSpy).toHaveBeenCalledWith(
                 payload,
@@ -126,92 +157,113 @@ describe('AuthService', () => {
                 payload,
                 { secret: process.env.JWT_REFRESH_SECRET, expiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME }
             );
-            expect(updateSpy).toHaveBeenCalledWith(user.id, { refreshToken: tokenString });
-            expect(result.accessToken).toBe(tokenString);
-            expect(result.refreshToken).toBe(tokenString);
+            expect(updateSpy).toHaveBeenCalledWith(user.id, { refreshToken });
+            expect(result).toStrictEqual(msgToken);
         });
 
         it('실패_이메일_불일치', async () => {
             // Given
             const signinSpy = jest.spyOn(authService, 'signin');
-            const findUserEntityByEmailSpy = jest.spyOn(userService, 'findUserEntityByEmail').mockResolvedValue(undefined);
+            const findUserByEmailSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(undefined);
 
             // When
-            const result = authService.signin(userSigninDto);
+            const resultPromise = authService.signin(dto);
 
             // Then
-            await expect(result).rejects.toThrow(UserIncorrectEmailException);
-            expect(signinSpy).toHaveBeenCalledWith(userSigninDto);
-            expect(findUserEntityByEmailSpy).toHaveBeenCalledWith(userSigninDto.email);
+            await expect(resultPromise).rejects.toThrow(UserIncorrectEmailException);
+            expect(signinSpy).toHaveBeenCalledWith(dto);
+            expect(findUserByEmailSpy).toHaveBeenCalledWith(dto.email);
         });
 
         it('실패_비밀번호_불일치', async () => {
             // Given
             const signinSpy = jest.spyOn(authService, 'signin');
-            const findUserEntityByEmailSpy = jest.spyOn(userService, 'findUserEntityByEmail').mockResolvedValue(user);
-            const compareSpy = jest.spyOn(bcrypt, 'compare').mockImplementation((_dtoPassword, _userPassword) => false);
+            const findUserByEmailSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(user);
+            const compareSpy = jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
 
             // When
-            const resultPromise = authService.signin(userSigninDto);
+            const resultPromise = authService.signin(dto);
 
             // Then
             await expect(resultPromise).rejects.toThrow(UserIncorrectPasswordException);
-            expect(signinSpy).toHaveBeenCalledWith(userSigninDto);
-            expect(findUserEntityByEmailSpy).toHaveBeenCalledWith(userSigninDto.email);
-            expect(compareSpy).toHaveBeenCalledWith(userSigninDto.password, user.password);
+            expect(signinSpy).toHaveBeenCalledWith(dto);
+            expect(findUserByEmailSpy).toHaveBeenCalledWith(dto.email);
+            expect(compareSpy).toHaveBeenCalledWith(dto.password, user.password);
         });
     })
 
     describe('로그_아웃', () => {
         it('성공', async () => {
             // Given
-            const id = 10;
+            const userId = 10;
+            const user: User = User.of('ema@a.com', 'pass', 'add', 'nick');
+            const updateResult: UpdateResult = {
+                raw: 'asd',
+                affected: 1,
+                generatedMaps: [],
+            }
             const logoutSpy = jest.spyOn(authService, 'logout');
-            const updateSpy = jest.spyOn(userService, 'update').mockResolvedValue({ refreshToken: null });
+            const findByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(user);
+            const updateSpy = jest.spyOn(userService, 'update').mockResolvedValue(updateResult);
 
             // When
-            const result = await authService.logout(id);
+            const result = await authService.logout(userId);
 
             // Then
-            expect(logoutSpy).toHaveBeenCalledWith(id);
-            expect(updateSpy).toHaveBeenCalledWith(id, { refreshToken: null });
-            expect(result).toBe(true);
+            expect(logoutSpy).toHaveBeenCalledWith(userId);
+            expect(findByIdSpy).toHaveBeenCalledWith(userId);
+            expect(updateSpy).toHaveBeenCalledWith(userId, { refreshToken: null });
+            expect(result).toBe(updateResult);
+        })
+
+        it('실패_userId와_일치하는_유저_없음', async () => {
+            // Given
+            const userId = 10;
+            const logoutSpy = jest.spyOn(authService, 'logout');
+            const findByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(null);
+
+            // When
+            const resultPromise = authService.logout(userId);
+
+            // Then
+            await expect(resultPromise).rejects.toThrow(UnauthorizedAccessException);
+            expect(logoutSpy).toHaveBeenCalledWith(userId);
+            expect(findByIdSpy).toHaveBeenCalledWith(userId);
         })
     })
 
     describe('토큰_재발급', () => {
-        const user: User = {
-            id: 1,
-            email: 'test@test.com',
-            password: 'password123',
-            address: 'test_address',
-            nickname: 'hs',
-            refreshToken: 'refresh_token',
-            userChatRooms: [],
-            sentMessages: [],
-            relationshipFromMe: [],
-            relationshipToMe: [],
-            notifications: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+        const user: User = User.of(
+            'a@a.com',
+            'password',
+            'add',
+            'nick'
+        );
+        user.refreshToken = 'some_refresh_token';
 
         it('성공', async () => {
             // Given
-            const tokenString = 'token';
+            const accessToken = 'access_token';
+            const refreshToken = 'refresh_token';
+            const msgToken: MsgToken = {
+                accessToken,
+                refreshToken
+            };
             const payload: JwtPayload = { sub: user.id, email: user.email };
 
             const refreshTokenSpy = jest.spyOn(authService, 'refreshToken');
-            const findUserEntityByIdSpy = jest.spyOn(userService, 'findUserEntityById').mockResolvedValue(user);
-            const jwtSignSpy = jest.spyOn(jwtService, 'sign').mockImplementation(() => tokenString);
-            const updateSpy = jest.spyOn(userService, 'update').mockResolvedValue({ refreshToken: tokenString });
+            const findUserByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(user);
+            const jwtSignSpy = jest.spyOn(jwtService, 'sign')
+                .mockImplementationOnce(() => accessToken)
+                .mockImplementationOnce(() => refreshToken);
+            const updateSpy = jest.spyOn(userService, 'update');
 
             // When
             const result = await authService.refreshToken(user.id, user.email, user.refreshToken);
 
             // Then
             expect(refreshTokenSpy).toBeCalledWith(user.id, user.email, user.refreshToken);
-            expect(findUserEntityByIdSpy).toBeCalledWith(user.id);
+            expect(findUserByIdSpy).toBeCalledWith(user.id);
             expect(jwtSignSpy).toHaveBeenCalledTimes(2);
             expect(jwtSignSpy).toHaveBeenCalledWith(
                 payload,
@@ -221,15 +273,14 @@ describe('AuthService', () => {
                 payload,
                 { secret: process.env.JWT_REFRESH_SECRET, expiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME }
             );
-            expect(updateSpy).toBeCalledWith(user.id, { refreshToken: tokenString });
-            expect(result.accessToken).toBe(tokenString);
-            expect(result.refreshToken).toBe(tokenString);
+            expect(updateSpy).toBeCalledWith(user.id, { refreshToken });
+            expect(result).toStrictEqual(msgToken);
         });
 
         it('실패_id와_일치하는_user가_없음', async () => {
             // Given
             const refreshTokenSpy = jest.spyOn(authService, 'refreshToken');
-            const findUserEntityByIdSpy = jest.spyOn(userService, 'findUserEntityById').mockResolvedValue(null);
+            const findUserByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(null);
 
             // When
             const resultPromise = authService.refreshToken(user.id, user.email, user.refreshToken);
@@ -237,14 +288,14 @@ describe('AuthService', () => {
             // Then
             await expect(resultPromise).rejects.toThrow(UnauthorizedAccessException);
             expect(refreshTokenSpy).toBeCalledWith(user.id, user.email, user.refreshToken);
-            expect(findUserEntityByIdSpy).toBeCalledWith(user.id);
+            expect(findUserByIdSpy).toBeCalledWith(user.id);
         });
 
-        it('실패_client가_보낸_refreshToken과_DB에_저장된_refreshToken_값이_다름', async () => {
+        it('실패_refreshToken_값이_서로_다름', async () => {
             // Given
             const otherRefreshToken = 'other_refresh_token';
             const refreshTokenSpy = jest.spyOn(authService, 'refreshToken');
-            const findUserEntityByIdSpy = jest.spyOn(userService, 'findUserEntityById').mockResolvedValue(user);
+            const findUserByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(user);
 
             // When
             const resultPromise = authService.refreshToken(user.id, user.email, otherRefreshToken);
@@ -252,7 +303,7 @@ describe('AuthService', () => {
             // Then
             await expect(resultPromise).rejects.toThrow(TokenExpiredException);
             expect(refreshTokenSpy).toBeCalledWith(user.id, user.email, otherRefreshToken);
-            expect(findUserEntityByIdSpy).toBeCalledWith(user.id);
+            expect(findUserByIdSpy).toBeCalledWith(user.id);
         });
     });
 });
