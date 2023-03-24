@@ -32,6 +32,9 @@ import { UserModule } from './user/user.module';
         transformOptions: {
           enableImplicitConversion: true
         },
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
         exceptionFactory: (_error) => new ArgumentInvalidException()
       })
     },

@@ -8,7 +8,7 @@ export class ChatRoomSaveDto {
     @IsNotEmpty()
     invitedUserIds: number[];
 
-    static toChatRoom(dto: ChatRoomSaveDto): ChatRoom {
-        return new ChatRoom(dto.name);
+    toEntity(): ChatRoom {
+        return new ChatRoom(this.name);
     }
 }

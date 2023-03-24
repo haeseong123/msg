@@ -1,8 +1,10 @@
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-relationship.entity";
-import { IsEnum, IsNotEmpty } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 
 export class UserRelationshipDto {
+    @IsNumber()
+    @IsOptional()
     id?: number;
 
     @IsNotEmpty()
@@ -17,10 +19,6 @@ export class UserRelationshipDto {
 
     constructor() { }
 
-    static toUserRelationship(dto: UserRelationshipDto): UserRelationship {
-        return new UserRelationship(dto.fromUserId, dto.toUserId, dto.status)
-    }
-
     static of(
         id: number,
         fromUserId: number,
@@ -34,5 +32,13 @@ export class UserRelationshipDto {
         dto.status = status;
 
         return dto;
+    }
+
+    toEntity(): UserRelationship {
+        return new UserRelationship(
+            this.fromUserId,
+            this.toUserId,
+            this.status
+        );
     }
 }

@@ -28,7 +28,7 @@ export class AuthService {
             throw new UserEmailConflictException();
         }
 
-        return await this.userService.save(await UserSignupDto.toUser(dto));
+        return await this.userService.save(await dto.toEntity());
     }
 
     async signin(dto: UserSigninDto): Promise<MsgToken> {
