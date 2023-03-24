@@ -8,6 +8,7 @@ import { ChatRoomRepository } from './chat-room.repository';
 import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
 import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
 import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
+import { UserDuplicateInvitationException } from './exceptions/user-duplicate-invitation.exceptin';
 
 @Injectable()
 export class ChatRoomService {
@@ -22,9 +23,16 @@ export class ChatRoomService {
     }
 
     async save(userId: number, dto: ChatRoomSaveDto): Promise<ChatRoom> {
-        const founder = await this.userService.findUserWithRelationshipById(userId);
+        // 함수 따로 빼내기
+        
         const invitedUserIds = dto.invitedUserIds;
         const invitedUserIdsSet = new Set(invitedUserIds);
+
+        if (invitedUserIdsSet.size < invitedUserIds.length) {
+            throw new UserDuplicateInvitationException();
+        }
+
+        const founder = await this.userService.findUserWithRelationshipById(userId);
         const invitedByFounder = founder.relationshipFromMe.filter(
             r => r.status === UserRelationshipStatus.FOLLOW && invitedUserIdsSet.has(r.toUserId)
         );
