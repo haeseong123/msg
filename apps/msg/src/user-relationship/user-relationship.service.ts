@@ -30,7 +30,7 @@ export class UserRelationshipService {
             throw new UserRelationshipConflictException();
         }
 
-        return await this.userRelationshipRepository.save(UserRelationshipDto.toUserRelationship(dto));
+        return await this.userRelationshipRepository.save(dto.toEntity());
     }
 
     async update(dto: UserRelationshipDto): Promise<UpdateResult> {

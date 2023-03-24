@@ -9,7 +9,7 @@ export class UserChatRoomDto {
         this.chatRoomId = chatRoomId;
     }
 
-    static toUserChatRoom(dto: UserChatRoomDto): UserChatRoom {
-        return new UserChatRoom(dto.userId, dto.chatRoomId);
+    toEntity(): UserChatRoom {
+        return new UserChatRoom(this.userId, this.chatRoomId);
     }
 }

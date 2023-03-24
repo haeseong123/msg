@@ -8,11 +8,11 @@ export class UserChatRoomService {
     constructor(private userChatRoomRepository: UserChatRoomRepository) { }
 
     async save(dto: UserChatRoomDto): Promise<UserChatRoom> {
-        return await this.userChatRoomRepository.save(UserChatRoomDto.toUserChatRoom(dto));
+        return await this.userChatRoomRepository.save(dto.toEntity());
     }
 
     async saveAll(dtos: UserChatRoomDto[]): Promise<UserChatRoom[]> {
-        const entities: UserChatRoom[] = dtos.map(dto => UserChatRoomDto.toUserChatRoom(dto));
+        const entities: UserChatRoom[] = dtos.map(dto => dto.toEntity());
         return await this.userChatRoomRepository.save(entities);
     }
 

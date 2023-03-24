@@ -34,9 +34,9 @@ export class ChatRoomService {
         }
 
         // Transaction Start
-        const chatRoom = await this.chatRoomRepository.save(ChatRoomSaveDto.toChatRoom(dto));
+        const chatRoom = await this.chatRoomRepository.save(dto.toEntity());
         const userChatRoomDtos: UserChatRoomDto[] = [
-            { userId: founder.id, chatRoomId: chatRoom.id },
+            new UserChatRoomDto(founder.id, chatRoom.id),
             ...invitedUserIds.map(userId => new UserChatRoomDto(userId, chatRoom.id))
         ];
         const userChatRooms = await this.userChatRoomService.saveAll(userChatRoomDtos);

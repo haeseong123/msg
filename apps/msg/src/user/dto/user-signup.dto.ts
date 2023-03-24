@@ -15,12 +15,12 @@ export class UserSignupDto {
   @IsNotEmpty()
   nickname: string;
 
-  static async toUser(dto: UserSignupDto): Promise<User> {
+  async toEntity(): Promise<User> {
     return User.of(
-      dto.email,
-      await hashString(dto.password),
-      dto.address,
-      dto.nickname
+      this.email,
+      await hashString(this.password),
+      this.address,
+      this.nickname
     );
   }
 }
