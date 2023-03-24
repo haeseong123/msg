@@ -16,7 +16,7 @@ export class UserSignupDto {
   nickname: string;
 
   async toEntity(): Promise<User> {
-    return User.of(
+    return new User(
       this.email,
       await hashString(this.password),
       this.address,

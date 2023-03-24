@@ -14,19 +14,17 @@ export class ChatRoomSaveDto {
     @ArrayMinSize(1)
     invitedUserIds: number[];
 
-    toEntity(): ChatRoom {
-        return new ChatRoom(this.name);
-    }
-
-    static of(
+    constructor(
         id: number,
         name: string,
         invitedUserIds: number[],
-    ): ChatRoomSaveDto {
-        const chatRoomSaveDto: ChatRoomSaveDto = new ChatRoomSaveDto();
-        chatRoomSaveDto.id = id;
-        chatRoomSaveDto.name = name;
-        chatRoomSaveDto.invitedUserIds = invitedUserIds;
-        return chatRoomSaveDto;
+    ) {
+        this.id = id;
+        this.name = name;
+        this.invitedUserIds = invitedUserIds;
+    }
+
+    toEntity(): ChatRoom {
+        return new ChatRoom(this.name);
     }
 }

@@ -17,7 +17,7 @@ export class UserRelationshipController {
         @CurrentUser('sub') sub: number
     ): Promise<UserRelationshipDto[]> {
         const relationships = await this.userRelationshipService.findAll(sub);
-        return relationships.map(r => UserRelationshipDto.of(
+        return relationships.map(r => new UserRelationshipDto(
             r.id,
             r.fromUserId,
             r.toUserId,
@@ -35,7 +35,7 @@ export class UserRelationshipController {
         }
 
         const relationship = await this.userRelationshipService.save(dto);
-        return UserRelationshipDto.of(
+        return new UserRelationshipDto(
             relationship.id,
             relationship.fromUserId,
             relationship.toUserId,

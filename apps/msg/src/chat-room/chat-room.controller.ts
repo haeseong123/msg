@@ -32,7 +32,7 @@ export class ChatRoomController {
         @Body() dto: ChatRoomSaveDto,
     ): Promise<ChatRoomSaveDto> {
         const chatRoom = await this.chatRoomService.save(sub, dto);
-        return ChatRoomSaveDto.of(
+        return new ChatRoomSaveDto(
             chatRoom.id,
             chatRoom.name,
             chatRoom.userChatRooms.map(ucr => ucr.userId)
