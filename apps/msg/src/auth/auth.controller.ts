@@ -1,5 +1,5 @@
 import { MsgToken } from "apps/msg/src/auth/jwt/msg-token";
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Req } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { JwtGuard } from "./jwt/guard/jwt.guard";
 import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
@@ -27,21 +27,20 @@ export class AuthController {
     @Post('signin')
     @HttpCode(HttpStatus.OK)
     async signin(@Body() signinDto: UserSigninDto): Promise<MsgToken> {
-        return this.authService.signin(signinDto);
+        return await this.authService.signin(signinDto);
     }
 
     @Post('logout')
     @UseGuards(JwtGuard)
     @HttpCode(HttpStatus.OK)
-    async logout(@CurrentUser('sub') sub: number): Promise<boolean> {
-        await this.authService.logout(sub);
-        return;
+    async logout(@CurrentUser('sub') sub: number): Promise<void> {
+        return await this.authService.logout(sub);
     }
 
     @Post('refresh-token')
     @UseGuards(JwtRefreshGuard)
     async refreshToken(@CurrentUser() user): Promise<MsgToken> {
         const { sub: id, email, refreshToken } = user;
-        return this.authService.refreshToken(id, email, refreshToken);
+        return await this.authService.refreshToken(id, email, refreshToken);
     }
 }

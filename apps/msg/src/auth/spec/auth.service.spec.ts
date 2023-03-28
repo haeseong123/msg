@@ -11,7 +11,7 @@ import { TokenExpiredException } from "../exceptions/token-expired.exception";
 import { UserIncorrectEmailException } from "../exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "../exceptions/user-incorrect-password.exception";
 import { UnauthorizedAccessException } from "../exceptions/unauthorized-access.exception";
-import { UserEmailConflictException } from "../exceptions/user-email-conflict.exception";
+import { UserEmailConflictException } from "../exceptions/user-email-already-exists.exception";
 import { MsgToken } from "../jwt/msg-token";
 import { UpdateResult } from "typeorm";
 

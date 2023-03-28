@@ -13,7 +13,7 @@ export class UserChatRoomService {
 
     async saveAll(dtos: UserChatRoomDto[]): Promise<UserChatRoom[]> {
         const entities: UserChatRoom[] = dtos.map(dto => dto.toEntity());
-        return await this.userChatRoomRepository.save(entities);
+        return await this.userChatRoomRepository.saveAll(entities);
     }
 
     async remove(entity: UserChatRoom): Promise<UserChatRoom> {

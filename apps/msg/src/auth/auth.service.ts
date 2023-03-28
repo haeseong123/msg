@@ -10,9 +10,8 @@ import { TokenExpiredException } from "./exceptions/token-expired.exception";
 import { UserIncorrectEmailException } from "./exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "./exceptions/user-incorrect-password.exception";
 import { UnauthorizedAccessException } from "./exceptions/unauthorized-access.exception";
-import { UserEmailConflictException } from "./exceptions/user-email-conflict.exception";
 import { User } from "@app/msg-core/entities/user/user.entity";
-import { UpdateResult } from "typeorm";
+import { UserEmailAlreadyExistsException } from "./exceptions/user-email-already-exists.exception";
 
 @Injectable()
 export class AuthService {
@@ -25,7 +24,7 @@ export class AuthService {
         const user = await this.userService.findUserByEmail(dto.email);
 
         if (user) {
-            throw new UserEmailConflictException();
+            throw new UserEmailAlreadyExistsException();
         }
 
         return await this.userService.save(await dto.toEntity());
@@ -47,7 +46,7 @@ export class AuthService {
         return msgToken;
     }
 
-    async logout(id: number): Promise<UpdateResult> {
+    async logout(id: number): Promise<void> {
         const user = await this.userService.findUserById(id);
 
         if (!user) {

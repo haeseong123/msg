@@ -1,10 +1,9 @@
 import { UserChatRoom } from "@app/msg-core/entities/user-chat-room/user-chat-room.entity";
-import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
 
-@Injectable()
-export class UserChatRoomRepository extends Repository<UserChatRoom> {
-    constructor(private dataSource: DataSource) {
-        super(UserChatRoom, dataSource.createEntityManager());
-    }
+export abstract class UserChatRoomRepository {
+    abstract save(entity: UserChatRoom): Promise<UserChatRoom>
+
+    abstract saveAll(entities: UserChatRoom[]): Promise<UserChatRoom[]>
+
+    abstract remove(entity: UserChatRoom): Promise<UserChatRoom>
 }

@@ -8,7 +8,7 @@ import { ChatRoomRepository } from './chat-room.repository';
 import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
 import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
 import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
-import { UserDuplicateInvitationException } from './exceptions/user-duplicate-invitation.exceptin';
+import { UserDuplicateInvitationException } from './exceptions/user-duplicate-invitation.exception';
 
 @Injectable()
 export class ChatRoomService {
@@ -19,7 +19,7 @@ export class ChatRoomService {
     ) { }
 
     async findAll(userId: number): Promise<ChatRoom[]> {
-        return await this.chatRoomRepository.findChatRoomsByUserId(userId);
+        return await this.chatRoomRepository.findByUserId(userId);
     }
 
     async save(userId: number, dto: ChatRoomSaveDto): Promise<ChatRoom> {
@@ -55,7 +55,7 @@ export class ChatRoomService {
     }
 
     async delete(chatRoomId: number, userId: number) {
-        const chatRoom = await this.chatRoomRepository.findChatRoomWithUserChatRoomsById(chatRoomId);
+        const chatRoom = await this.chatRoomRepository.findWithUserChatRoomsById(chatRoomId);
         const userChatRoom = chatRoom?.userChatRooms.find(ucr => ucr.userId === userId);
 
         if (!userChatRoom) {
