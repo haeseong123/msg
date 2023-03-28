@@ -1,5 +1,5 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { ErrorMessage } from "../../exceptions/error-message";
+import { ErrorMessage } from "../../common/exception/error-message";
 
 export class TokenExpiredException extends UnauthorizedException {
     constructor() {

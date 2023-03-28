@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { User } from '@app/msg-core/entities/user/user.entity';
-import { hashString } from '../../util/hash.utils';
+import { hashString } from '../../common/util/hash.utils';
 
 export class UserSignupDto {
   @IsEmail()
