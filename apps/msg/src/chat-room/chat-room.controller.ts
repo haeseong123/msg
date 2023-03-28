@@ -49,7 +49,6 @@ export class ChatRoomController {
             throw new UnauthorizedAccessException();
         }
 
-        await this.chatRoomService.delete(id, userId);
-        return;
+        return await this.chatRoomService.delete(id, userId);
     }
 }

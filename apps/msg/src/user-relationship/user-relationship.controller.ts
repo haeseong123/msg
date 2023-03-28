@@ -61,8 +61,6 @@ export class UserRelationshipController {
             throw new UserRelationshipIdParamMismatchException();
         }
 
-        await this.userRelationshipService.update(dto);
-
-        return;
+        return await this.userRelationshipService.update(dto);
     }
 }

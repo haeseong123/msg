@@ -1,10 +1,14 @@
+import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-relationship.entity";
-import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
 
-@Injectable()
-export class UserRelationshipRepository extends Repository<UserRelationship> {
-    constructor(private dataSource: DataSource) {
-        super(UserRelationship, dataSource.createEntityManager())
-    }
+export abstract class UserRelationshipRepository {
+    abstract findByFromId(fromId: number): Promise<UserRelationship[]>;
+
+    abstract findByToIdAndStatus(toId: number, status: UserRelationshipStatus): Promise<UserRelationship[]>;
+
+    abstract findOneByFromIdAndToId(fromId: number, toId: number): Promise<UserRelationship | null>;
+
+    abstract save(entity: UserRelationship): Promise<UserRelationship>;
+
+    abstract updateStatus(id: number, status: UserRelationshipStatus): Promise<void>;
 }

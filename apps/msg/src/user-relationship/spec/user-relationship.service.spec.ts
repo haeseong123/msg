@@ -1,7 +1,7 @@
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UpdateResult } from "typeorm";
-import { UserRelationshipConflictException } from "../exceptions/user-relationship-confilict-exception";
+import { UserRelationshipConflictException } from "../exceptions/user-relationship-already-exists.exception";
 import { UserRelationshipDto } from "../dto/user-relationship.dto";
 import { UserRelationshipRepository } from "../user-relationship.repository"
 import { UserRelationshipService } from "../user-relationship.service"
