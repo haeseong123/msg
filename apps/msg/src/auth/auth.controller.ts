@@ -16,7 +16,7 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     async signup(@Body() signupDto: UserSignupDto): Promise<UserDto> {
         const user = await this.authService.signup(signupDto);
-        return UserDto.of(
+        return new UserDto(
             user.id,
             user.email,
             user.address,

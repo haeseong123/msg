@@ -5,7 +5,6 @@ import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { ChatRoomService } from "./chat-room.service";
 import { ChatRoomMessageDto } from "./dto/chat-room-message.dto";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
-import { ChatRoomSavedResultDto } from "./dto/chat-room-saved-result.dto";
 import { ChatRoomUserDto } from "./dto/chat-room-user.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
 
@@ -31,9 +30,9 @@ export class ChatRoomController {
     async save(
         @CurrentUser('sub') sub: number,
         @Body() dto: ChatRoomSaveDto,
-    ): Promise<ChatRoomSavedResultDto> {
+    ): Promise<ChatRoomSaveDto> {
         const chatRoom = await this.chatRoomService.save(sub, dto);
-        return new ChatRoomSavedResultDto(
+        return new ChatRoomSaveDto(
             chatRoom.id,
             chatRoom.name,
             chatRoom.userChatRooms.map(ucr => ucr.userId)

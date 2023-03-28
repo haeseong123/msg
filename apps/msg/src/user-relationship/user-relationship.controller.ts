@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorator/current-user.decorator";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
-import { MandatoryArgumentNullException } from "../exceptions/mandatory-argument-null.exception";
+import { MandatoryArgumentNullException } from "../common/exception/mandatory-argument-null.exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipIdParamMismatchException } from "./exceptions/user-relationship-id-param-mismatch.exception";
 import { UserRelationshipIdTokenIdMismatchException } from "./exceptions/user-relationship-id-token-id-mismatch.exception";
@@ -17,7 +17,7 @@ export class UserRelationshipController {
         @CurrentUser('sub') sub: number
     ): Promise<UserRelationshipDto[]> {
         const relationships = await this.userRelationshipService.findAll(sub);
-        return relationships.map(r => UserRelationshipDto.of(
+        return relationships.map(r => new UserRelationshipDto(
             r.id,
             r.fromUserId,
             r.toUserId,
@@ -35,7 +35,7 @@ export class UserRelationshipController {
         }
 
         const relationship = await this.userRelationshipService.save(dto);
-        return UserRelationshipDto.of(
+        return new UserRelationshipDto(
             relationship.id,
             relationship.fromUserId,
             relationship.toUserId,

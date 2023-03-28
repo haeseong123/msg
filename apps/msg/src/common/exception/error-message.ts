@@ -20,4 +20,5 @@ export enum ErrorMessage {
     // CHAT-ROOM
     UNAUTHORIZED_INVITATION = '친구가 아닌 유저를 초대할 수 없습니다.',
     USER_NOT_IN_CHAT_ROOM = '해당 채팅방에 참여중이지 않습니다.',
+    USER_DUPLICATE_INVITATION_EXCEPTION = '한 채팅방에 유저를 중복으로 초대할 수 없습니다.',
 }

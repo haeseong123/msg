@@ -17,21 +17,15 @@ export class UserRelationshipDto {
     @IsEnum(UserRelationshipStatus)
     status: UserRelationshipStatus;
 
-    constructor() { }
-
-    static of(
+    constructor(
         id: number,
         fromUserId: number,
         toUserId: number,
-        status: UserRelationshipStatus
-    ): UserRelationshipDto {
-        const dto = new UserRelationshipDto();
-        dto.id = id;
-        dto.fromUserId = fromUserId;
-        dto.toUserId = toUserId;
-        dto.status = status;
-
-        return dto;
+        status: UserRelationshipStatus) {
+        this.id = id;
+        this.fromUserId = fromUserId;
+        this.toUserId = toUserId;
+        this.status = status;
     }
 
     toEntity(): UserRelationship {

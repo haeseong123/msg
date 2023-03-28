@@ -3,13 +3,13 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ChatRoomModule } from './chat-room/chat-room.module';
-import { databaseConfig } from './config/database.config';
-import { ArgumentInvalidException } from './exceptions/argument-invalid.exception';
-import { GlobalExceptionFIlter } from './global-exception.filter';
-import { ResponseInterceptor } from './interceptor/response.interceptor';
+import { GlobalExceptionFIlter } from './common/filter/global-exception.filter';
 import { UserChatRoomModule } from './user-chat-room/user-chat-room.module';
 import { UserRelationshipModule } from './user-relationship/user-relationship.module';
 import { UserModule } from './user/user.module';
+import { ResponseInterceptor } from './common/interceptor/response.interceptor';
+import { databaseConfig } from './common/config/database.config';
+import { ArgumentInvalidException } from './common/exception/argument-invalid.exception';
 
 @Module({
   imports: [
