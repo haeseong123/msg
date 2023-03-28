@@ -6,11 +6,11 @@ import { UserRepository } from './user.repository';
 export class UserService {
     constructor(private userRepository: UserRepository) { }
 
-    async findUserByEmail(email: string): Promise<User | undefined> {
+    async findUserByEmail(email: string): Promise<User | null> {
         return await this.userRepository.findOneByEmail(email);
     }
 
-    async findUserById(id: number): Promise<User | undefined> {
+    async findUserById(id: number): Promise<User | null> {
         return await this.userRepository.findOneById(id);
     }
 
@@ -26,7 +26,7 @@ export class UserService {
         return await this.userRepository.findByIds(ids);
     }
 
-    async findUserWithRelationshipById(userId: number): Promise<User | undefined> {
-        return await this.userRepository.findUserWithRelationshipById(userId);
+    async findUserWithRelationshipById(userId: number): Promise<User | null> {
+        return await this.userRepository.findWithRelationshipById(userId);
     }
 }

@@ -23,7 +23,7 @@ export class UserRepositoryImpl implements UserRepository {
         return this.repository.findBy({ id: In(ids) });
     }
 
-    findUserWithRelationshipById(id: number): Promise<User | null> {
+    findWithRelationshipById(id: number): Promise<User | null> {
         return this.repository.createQueryBuilder('u')
             .leftJoinAndSelect('u.relationshipFromMe', 'relationFromMe')
             .leftJoinAndSelect('relationFromMe.toUser', 'follow')

@@ -28,6 +28,8 @@
 - [NestJS - Passport](https://hs-archive.tistory.com/99)
 - [NestJS - @Module(), @Injectable(), @InjectRepository()](https://hs-archive.tistory.com/100)
 - [Entity -> Dto 변환은 어디서?](https://hs-archive.tistory.com/102)
+- [클린 아키텍처 번역](https://hs-archive.tistory.com/103)
+- [service에서의 repository 의존 역전하기 - 클린 아키텍처 적용하기](https://hs-archive.tistory.com/104)
 
 ## Description
 
