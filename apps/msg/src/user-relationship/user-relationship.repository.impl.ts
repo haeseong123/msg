@@ -11,6 +11,10 @@ export class UserRelationshipRepositoryImpl implements UserRelationshipRepositor
         @InjectRepository(UserRelationship)
         private readonly repository: Repository<UserRelationship>
     ) { }
+    
+    findById(id: number): Promise<UserRelationship | null> {
+        return this.repository.findOneBy({ id });
+    }
 
     findByFromId(fromId: number): Promise<UserRelationship[]> {
         return this.repository.findBy({ fromUserId: fromId });
@@ -36,7 +40,13 @@ export class UserRelationshipRepositoryImpl implements UserRelationshipRepositor
 
     async updateStatus(id: number, status: UserRelationshipStatus): Promise<void> {
         await this.repository.update(id, { status })
-        
+
+        return;
+    }
+
+    async delete(id: number): Promise<void> {
+        await this.repository.delete(id);
+
         return;
     }
 }
