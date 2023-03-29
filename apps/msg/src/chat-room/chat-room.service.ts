@@ -9,6 +9,7 @@ import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
 import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
 import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
 import { UserDuplicateInvitationException } from './exceptions/user-duplicate-invitation.exception';
+import { User } from '@app/msg-core/entities/user/user.entity';
 
 @Injectable()
 export class ChatRoomService {
@@ -23,34 +24,19 @@ export class ChatRoomService {
     }
 
     async save(userId: number, dto: ChatRoomSaveDto): Promise<ChatRoom> {
-        // 함수 따로 빼내기
-        
         const invitedUserIds = dto.invitedUserIds;
-        const invitedUserIdsSet = new Set(invitedUserIds);
-
-        if (invitedUserIdsSet.size < invitedUserIds.length) {
-            throw new UserDuplicateInvitationException();
-        }
+        this.validateInvitedUserIds(invitedUserIds);
 
         const founder = await this.userService.findUserWithRelationshipById(userId);
-        const invitedByFounder = founder.relationshipFromMe.filter(
-            r => r.status === UserRelationshipStatus.FOLLOW && invitedUserIdsSet.has(r.toUserId)
-        );
+        this.validateInvitationsByFounder(founder, invitedUserIds);
 
-        if (invitedByFounder.length < invitedUserIds.length) {
-            throw new UnauthorizedInvitationException();
-        }
-
-        // Transaction Start
         const chatRoom = await this.chatRoomRepository.save(dto.toEntity());
-        const userChatRoomDtos: UserChatRoomDto[] = [
-            new UserChatRoomDto(founder.id, chatRoom.id),
-            ...invitedUserIds.map(userId => new UserChatRoomDto(userId, chatRoom.id))
-        ];
-        const userChatRooms = await this.userChatRoomService.saveAll(userChatRoomDtos);
-        // Transaction Commit
-
+        const participantsIds = [founder.id, ...invitedUserIds];
+        const userChatRooms = await this.userChatRoomService.saveAll(participantsIds.map(
+            userId => new UserChatRoomDto(userId, chatRoom.id)
+        ));
         chatRoom.userChatRooms = userChatRooms;
+
         return chatRoom;
     }
 
@@ -69,5 +55,24 @@ export class ChatRoomService {
         }
 
         return
+    }
+
+    private validateInvitedUserIds(invitedUserIds: number[]): void {
+        const invitedUserIdsSet = new Set(invitedUserIds);
+
+        if (invitedUserIdsSet.size < invitedUserIds.length) {
+            throw new UserDuplicateInvitationException();
+        }
+    }
+
+    private validateInvitationsByFounder(founder: User, invitedUserIds: number[]): void {
+        const invitedUserIdsSet = new Set(invitedUserIds);
+        const invitedByFounder = founder.relationshipFromMe.filter(
+            r => r.status === UserRelationshipStatus.FOLLOW && invitedUserIdsSet.has(r.toUserId)
+        );
+
+        if (invitedByFounder.length < invitedUserIds.length) {
+            throw new UnauthorizedInvitationException();
+        }
     }
 }

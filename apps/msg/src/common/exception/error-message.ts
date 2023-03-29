@@ -7,13 +7,14 @@ export enum ErrorMessage {
     LOGIN_INPUT_INVALID_EMAIL = '일치하는 이메일이 없습니다.',
     LOGIN_INPUT_INVALID_PASSWORD = '비밀번호가 일치하지 않습니다.',
     USER_EMAIL_ALREADY_EXISTS = '이미 존재하는 이메일입니다.',
+    USER_NOT_FOUNDED = '해당 유저가 존재하지 않습니다.',
 
     // JWT
     UNAUTHORIZED = '허가되지 않는 접근입니다.',
     TOKEN_EXPIRED = '토큰이 만료되었습니다.',
 
     // USER-RELATIONSHIP
-    USER_RELATIONSHIP_ID_TOKEN_ID_MISMATCH = '관계 id와 token id가 일치하지 않습니다.',
+    USER_RELATIONSHIP_FROM_ID_USER_ID_MISMATCH = '자신의 관계만 삭제/수정할 수 있습니다.',
     USER_RELATIONSHIP_ID_PARAM_MISMATCH = '관계 id와 parameter가 일치하지 않습니다.',
     USER_RELATIONSHIP_ALREADY_EXISTS = '이미 존재하는 관계입니다.',
 
