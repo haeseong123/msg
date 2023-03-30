@@ -41,20 +41,19 @@ describe('AuthController', () => {
     describe('회원_가입', () => {
         it('성공', async () => {
             // Given
-            const signupDto: UserSignupDto = {
-                email: "email",
-                password: "password",
-                address: "address",
-                nickname: "nickname",
-            }
-            const user: User = User.of(
+            const signupDto = new UserSignupDto()
+            signupDto.email = "email";
+            signupDto.password = "password";
+            signupDto.address = "address";
+            signupDto.nickname = "nickname";
+            const user: User = new User(
                 signupDto.email,
                 signupDto.password,
                 signupDto.address,
                 signupDto.nickname
             );
             user.id = 1;
-            const userDto: UserDto = UserDto.of(
+            const userDto: UserDto = new UserDto(
                 user.id,
                 user.email,
                 user.address,

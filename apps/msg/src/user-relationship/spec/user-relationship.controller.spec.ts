@@ -1,10 +1,10 @@
 import { UserRelationshipStatus } from "@app/msg-core/entities/user-relationship/user-relationship-status";
 import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-relationship.entity";
 import { Test, TestingModule } from "@nestjs/testing";
-import { MandatoryArgumentNullException } from "../../exceptions/mandatory-argument-null.exception";
+import { MandatoryArgumentNullException } from "../../common/exception/mandatory-argument-null.exception";
 import { UserRelationshipDto } from "../dto/user-relationship.dto";
+import { UserRelationshipFromIdUserIdMismatchException } from "../exceptions/user-relationship-from-id-user-id-mismatch.exception";
 import { UserRelationshipIdParamMismatchException } from "../exceptions/user-relationship-id-param-mismatch.exception";
-import { UserRelationshipIdTokenIdMismatchException } from "../exceptions/user-relationship-id-token-id-mismatch.exception";
 import { UserRelationshipController } from "../user-relationship.controller";
 import { UserRelationshipService } from "../user-relationship.service";
 
@@ -17,6 +17,7 @@ describe('UserRelationshipController', () => {
             findAll: jest.fn(),
             save: jest.fn(),
             update: jest.fn(),
+            delete: jest.fn(),
         }
         const module: TestingModule = await Test.createTestingModule({
             controllers: [UserRelationshipController],
@@ -39,38 +40,44 @@ describe('UserRelationshipController', () => {
     describe('유저_관계_전부_가져오기', () => {
         it('성공', async () => {
             // Given
-            const sub: number = 0;
+            const userId: number = 0;
 
             const findControllerSpy = jest.spyOn(userRelationshipController, 'findAll');
             const findServiceSpy = jest.spyOn(userRelationshipService, 'findAll').mockResolvedValue([]);
 
             // When
-            const result = await userRelationshipController.findAll(sub);
+            const result = await userRelationshipController.findAll(userId);
 
             // Then
-            expect(findControllerSpy).toHaveBeenCalledWith(sub);
-            expect(findServiceSpy).toHaveBeenCalledWith(sub);
+            expect(findControllerSpy).toHaveBeenCalledWith(userId);
+            expect(findServiceSpy).toHaveBeenCalledWith(userId);
             expect(result).toStrictEqual([]);
         });
     });
 
     describe('유저_관계_생성', () => {
+        const relationshipId = 10;
+        const fromUserId = 1;
+        const toUserId = 2;
+        const status = UserRelationshipStatus.FOLLOW
+
         it('성공', async () => {
             // Given
-            const sub: number = 1;
-            const dto: UserRelationshipDto = {
-                fromUserId: sub,
-                toUserId: 1,
-                status: UserRelationshipStatus.FOLLOW
-            };
-            const relationship: UserRelationship = new UserRelationship(
+            // const userId: number = 1;
+            const dto = new UserRelationshipDto(
+                undefined,
+                fromUserId,
+                toUserId,
+                status
+            );
+            const relationship = new UserRelationship(
                 dto.fromUserId,
                 dto.toUserId,
                 dto.status
             );
-            relationship.id = 10;
-            const userRelationshipDto: UserRelationshipDto = UserRelationshipDto.of(
-                relationship.id,
+            relationship.id = relationshipId;
+            const userRelationshipDto = new UserRelationshipDto(
+                relationshipId,
                 relationship.fromUserId,
                 relationship.toUserId,
                 relationship.status
@@ -80,117 +87,137 @@ describe('UserRelationshipController', () => {
             const saveServiceSpy = jest.spyOn(userRelationshipService, 'save').mockResolvedValue(relationship);
 
             // When
-            const result = await userRelationshipController.save(sub, dto);
+            const result = await userRelationshipController.save(fromUserId, dto);
 
             // Then
-            expect(saveControllerSpy).toHaveBeenCalledWith(sub, dto);
+            expect(saveControllerSpy).toHaveBeenCalledWith(fromUserId, dto);
             expect(saveServiceSpy).toHaveBeenCalledWith(dto);
             expect(result).toStrictEqual(userRelationshipDto);
         });
 
-        it('실패_sub와_fromUserId가_다름', async () => {
+        it('실패_userId와_fromUserId가_다름', async () => {
             // Given
-            const sub = 0;
-            const dto: UserRelationshipDto = {
-                fromUserId: 1, // fromUserId와 sub가 같아야 됨
-                toUserId: 2,
-                status: UserRelationshipStatus.FOLLOW
-            };
+            const someOtherFromUserId = 111;
+            const dto = new UserRelationshipDto(
+                undefined, // fromUserId와 userId가 같아야 됨
+                someOtherFromUserId,
+                toUserId,
+                status
+            );
 
             const saveControllerSpy = jest.spyOn(userRelationshipController, 'save');
 
             // When
-            const resultPromise = userRelationshipController.save(sub, dto);
+            const resultPromise = userRelationshipController.save(fromUserId, dto);
 
             // Then
-            await expect(resultPromise).rejects.toThrow(UserRelationshipIdTokenIdMismatchException);
-            expect(saveControllerSpy).toHaveBeenCalledWith(sub, dto);
+            await expect(resultPromise).rejects.toThrow(UserRelationshipFromIdUserIdMismatchException);
+            expect(saveControllerSpy).toHaveBeenCalledWith(fromUserId, dto);
         });
     });
 
     describe('유저_관계_업데이트', () => {
+        const fromUserId: number = 1;
+        const toUserId: number = 2;
+        const status = UserRelationshipStatus.BLOCK;
+        const relationshipId = 10;
+
         it('성공', async () => {
             // Given
-            const sub: number = 0;
-            const paramId = 1;
-            const dto: UserRelationshipDto = {
-                id: paramId,
-                fromUserId: sub,
-                toUserId: 2,
-                status: UserRelationshipStatus.BLOCK
-            };
+            const dto = new UserRelationshipDto(
+                relationshipId,
+                fromUserId,
+                toUserId,
+                status
+            );
 
             const updateControllerSpy = jest.spyOn(userRelationshipController, 'update');
             const updateServiceSpy = jest.spyOn(userRelationshipService, 'update');
 
             // When
-            const result = await userRelationshipController.update(sub, paramId, dto);
+            const result = await userRelationshipController.update(fromUserId, relationshipId, dto);
 
             // Then
-            expect(updateControllerSpy).toHaveBeenCalledWith(sub, paramId, dto);
+            expect(updateControllerSpy).toHaveBeenCalledWith(fromUserId, relationshipId, dto);
             expect(updateServiceSpy).toHaveBeenCalledWith(dto);
-            expect(result).toBe(undefined);
+            expect(result).toBeUndefined();
         });
 
         it('실패_dto.id가_비어있음', async () => {
             // Given
-            const sub: number = 0;
-            const paramId = 1;
-            const userRelationshipDto: UserRelationshipDto = {
-                id: null,
-                fromUserId: sub,
-                toUserId: 3,
-                status: UserRelationshipStatus.BLOCK
-            };
+            const dto = new UserRelationshipDto(
+                undefined,
+                fromUserId,
+                toUserId,
+                status
+            );
+
             const updateControllerSpy = jest.spyOn(userRelationshipController, 'update');
 
             // When
-            const result = userRelationshipController.update(sub, paramId, userRelationshipDto);
+            const result = userRelationshipController.update(fromUserId, relationshipId, dto);
 
             // Then
             await expect(result).rejects.toThrow(MandatoryArgumentNullException);
-            expect(updateControllerSpy).toHaveBeenCalledWith(sub, paramId, userRelationshipDto);
+            expect(updateControllerSpy).toHaveBeenCalledWith(fromUserId, relationshipId, dto);
         });
 
-        it('실패_sub와_fromUserId가_다름', async () => {
+        it('실패_userId와_fromUserId가_다름', async () => {
             // Given
-            const sub: number = 0;
-            const paramId = 1;
-            const userRelationshipDto: UserRelationshipDto = {
-                id: paramId,
-                fromUserId: 23456, // fromUserId와 usb가 같아야 됨
-                toUserId: 3,
-                status: UserRelationshipStatus.BLOCK
-            };
+            const otherUserId = 123456;
+            const dto = new UserRelationshipDto(
+                relationshipId,
+                otherUserId, // fromUserId와 usb가 같아야 됨
+                toUserId,
+                UserRelationshipStatus.BLOCK
+            );
             const updateControllerSpy = jest.spyOn(userRelationshipController, 'update');
 
             // When
-            const result = userRelationshipController.update(sub, paramId, userRelationshipDto);
+            const result = userRelationshipController.update(fromUserId, relationshipId, dto);
 
             // Then
-            await expect(result).rejects.toThrow(UserRelationshipIdTokenIdMismatchException);
-            expect(updateControllerSpy).toHaveBeenCalledWith(sub, paramId, userRelationshipDto);
+            await expect(result).rejects.toThrow(UserRelationshipFromIdUserIdMismatchException);
+            expect(updateControllerSpy).toHaveBeenCalledWith(fromUserId, relationshipId, dto);
         });
 
-        it('실패_paramId와_dto.id가_다름', async () => {
+        it('실패_relationShipId와_dto.id가_다름', async () => {
             // Given
-            const sub: number = 0;
-            const paramId = 1;
-            const userRelationshipDto: UserRelationshipDto = {
-                id: 100, // 파라미터로 보내는 id와 이 id가 일치해야 함.
-                fromUserId: sub,
-                toUserId: 2,
-                status: UserRelationshipStatus.BLOCK
-            }
+            const someOtherDtoId = 999
+            const dto = new UserRelationshipDto(
+                someOtherDtoId,// 파라미터로 보내는 relationShipId와 이 dto.id가 일치해야 함.
+                fromUserId,
+                toUserId,
+                status
+            );
             const updateControllerSpy = jest.spyOn(userRelationshipController, 'update');
 
             // When
-            const result = userRelationshipController.update(sub, paramId, userRelationshipDto);
+            const result = userRelationshipController.update(fromUserId, relationshipId, dto);
 
             // Then
             await expect(result).rejects.toThrow(UserRelationshipIdParamMismatchException);
-            expect(updateControllerSpy).toHaveBeenCalledWith(sub, paramId, userRelationshipDto);
+            expect(updateControllerSpy).toHaveBeenCalledWith(fromUserId, relationshipId, dto);
         });
 
+    });
+
+    describe('유저_관계_삭제하기', () => {
+        it('성공', async () => {
+            // Given
+            const userId = 1;
+            const relationshipId = 10;
+
+            const deleteControllerSpy = jest.spyOn(userRelationshipController, 'delete');
+            const deleteServiceSpy = jest.spyOn(userRelationshipService, 'delete');
+
+            // When
+            const result = await userRelationshipController.delete(userId, relationshipId);
+
+            // Then
+            expect(deleteControllerSpy).toHaveBeenCalledWith(userId, relationshipId);
+            expect(deleteServiceSpy).toHaveBeenCalledWith(relationshipId, userId);
+            expect(result).toBeUndefined();
+        });
     });
 });
