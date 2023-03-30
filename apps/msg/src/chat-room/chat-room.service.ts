@@ -55,7 +55,7 @@ export class ChatRoomService {
             await this.userChatRoomService.remove(userChatRoom);
         }
 
-        return
+        return;
     }
 
     private validateInvitedUserIds(invitedUserIds: number[]): void {

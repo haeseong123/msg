@@ -11,9 +11,9 @@ import { TokenExpiredException } from "../exceptions/token-expired.exception";
 import { UserIncorrectEmailException } from "../exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "../exceptions/user-incorrect-password.exception";
 import { UnauthorizedAccessException } from "../exceptions/unauthorized-access.exception";
-import { UserEmailConflictException } from "../exceptions/user-email-already-exists.exception";
 import { MsgToken } from "../jwt/msg-token";
 import { UpdateResult } from "typeorm";
+import { UserEmailAlreadyExistsException } from "../exceptions/user-email-already-exists.exception";
 
 describe('AuthService', () => {
     let authService: AuthService;
@@ -54,23 +54,26 @@ describe('AuthService', () => {
     });
 
     describe('회원_가입', () => {
-        it('성공', async () => {
-            // Given
-            const dto: UserSignupDto = {
-                email: "test@asd.com",
-                password: "123qwe",
-                address: "address",
-                nickname: "nickname",
-            };
-            const entity: User = User.of(
+        let dto: UserSignupDto;
+        let entity: User;
+
+        beforeEach(() => {
+            dto = new UserSignupDto();
+            dto.email = "test@asd.com";
+            dto.password = "123qwe";
+            dto.address = "address";
+            dto.nickname = "nickname";
+            entity = new User(
                 dto.email,
                 dto.password,
                 dto.address,
                 dto.nickname
-            );
+            )
+        })
+        it('성공', async () => {
             const signupSpy = jest.spyOn(authService, 'signup');
             const findSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
-            const toUserSpy = jest.spyOn(UserSignupDto, 'toUser').mockResolvedValue(entity);
+            const toUserSpy = jest.spyOn(dto, 'toEntity').mockResolvedValue(entity);
             const saveSpy = jest.spyOn(userService, 'save').mockResolvedValue(entity);
 
             // When
@@ -79,49 +82,41 @@ describe('AuthService', () => {
             // Then
             expect(signupSpy).toHaveBeenCalledWith(dto);
             expect(findSpy).toHaveBeenCalledWith(dto.email);
-            expect(toUserSpy).toHaveBeenCalledWith(dto);
+            expect(toUserSpy).toHaveBeenCalled();
             expect(saveSpy).toHaveBeenCalledWith(entity);
             expect(result).toBe(entity);
         });
 
         it('실패_이메일이_겹침', async () => {
             // Given
-            const dto: UserSignupDto = {
-                email: "test@asd.com",
-                password: "123qwe",
-                address: "address",
-                nickname: "nickname",
-            };
-            const user: User = User.of(
-                dto.email,
-                dto.password,
-                dto.address,
-                dto.nickname
-            );
             const signupSpy = jest.spyOn(authService, 'signup');
-            const findSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(user);
+            const findSpy = jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(entity);
 
             // When
             const resultPromise = authService.signup(dto);
 
             // Then
-            await expect(resultPromise).rejects.toThrow(UserEmailConflictException);
+            await expect(resultPromise).rejects.toThrow(UserEmailAlreadyExistsException);
             expect(signupSpy).toHaveBeenCalledWith(dto);
             expect(findSpy).toHaveBeenCalledWith(dto.email);
         });
     })
 
     describe('로그인', () => {
-        const user: User = User.of(
-            'a@a.com',
-            'password',
-            'add',
-            'nick'
-        );
-        const dto: UserSigninDto = {
-            email: user.email,
-            password: user.password
-        };
+        let dto: UserSigninDto;
+        let user: User;
+
+        beforeEach(() => {
+            dto = new UserSigninDto();
+            dto.email = 'a@a.com';
+            dto.password = 'password';
+            user = new User(
+                dto.email,
+                dto.password,
+                'add',
+                'nick'
+            )
+        });
 
         it('성공', async () => {
             // Given
@@ -193,18 +188,24 @@ describe('AuthService', () => {
     })
 
     describe('로그_아웃', () => {
+        let userId: number;
+        let user: User;
+
+        beforeEach(() => {
+            userId = 10;
+            user = new User(
+                'ema@a.com',
+                'pass',
+                'add',
+                'nick'
+            );
+        });
+
         it('성공', async () => {
             // Given
-            const userId = 10;
-            const user: User = User.of('ema@a.com', 'pass', 'add', 'nick');
-            const updateResult: UpdateResult = {
-                raw: 'asd',
-                affected: 1,
-                generatedMaps: [],
-            }
             const logoutSpy = jest.spyOn(authService, 'logout');
             const findByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(user);
-            const updateSpy = jest.spyOn(userService, 'update').mockResolvedValue(updateResult);
+            const updateSpy = jest.spyOn(userService, 'update').mockResolvedValue();
 
             // When
             const result = await authService.logout(userId);
@@ -213,12 +214,11 @@ describe('AuthService', () => {
             expect(logoutSpy).toHaveBeenCalledWith(userId);
             expect(findByIdSpy).toHaveBeenCalledWith(userId);
             expect(updateSpy).toHaveBeenCalledWith(userId, { refreshToken: null });
-            expect(result).toBe(updateResult);
+            expect(result).toBeUndefined();
         })
 
         it('실패_userId와_일치하는_유저_없음', async () => {
             // Given
-            const userId = 10;
             const logoutSpy = jest.spyOn(authService, 'logout');
             const findByIdSpy = jest.spyOn(userService, 'findUserById').mockResolvedValue(null);
 
@@ -233,13 +233,17 @@ describe('AuthService', () => {
     })
 
     describe('토큰_재발급', () => {
-        const user: User = User.of(
-            'a@a.com',
-            'password',
-            'add',
-            'nick'
-        );
-        user.refreshToken = 'some_refresh_token';
+        let user: User;
+
+        beforeEach(() => {
+            user = new User(
+                'a@a.com',
+                'password',
+                'add',
+                'nick'
+            );
+            user.refreshToken = 'some_refresh_token';
+        });
 
         it('성공', async () => {
             // Given

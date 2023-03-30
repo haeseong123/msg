@@ -10,11 +10,12 @@ describe('UserService', () => {
 
     beforeEach(async () => {
         const userRepositoryMock = {
-            findOneBy: jest.fn(),
+            findOneByEmail: jest.fn(),
+            findOneById: jest.fn(),
+            findByIds: jest.fn(),
+            findWithRelationshipById: jest.fn(),
             save: jest.fn(),
             update: jest.fn(),
-            findBy: jest.fn(),
-            findUserWithRelationshipById: jest.fn(),
         };
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -38,7 +39,7 @@ describe('UserService', () => {
         it('성공', async () => {
             // Given
             const userEmail = 'a@na.com';
-            const user: User = User.of(
+            const user: User = new User(
                 userEmail,
                 '123',
                 'test_address',
@@ -46,14 +47,14 @@ describe('UserService', () => {
             );
 
             const findUserByEmailSpy = jest.spyOn(userService, 'findUserByEmail');
-            const findOneBySpy = jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);
+            const findOneBySpy = jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(user);
 
             // When
             const result = await userService.findUserByEmail(userEmail);
 
             // Then
             expect(findUserByEmailSpy).toHaveBeenCalledWith(userEmail);
-            expect(findOneBySpy).toHaveBeenCalledWith({ email: userEmail });
+            expect(findOneBySpy).toHaveBeenCalledWith(userEmail);
             expect(result).toEqual(user);
         })
     });
@@ -62,7 +63,7 @@ describe('UserService', () => {
         it('성공', async () => {
             // Given
             const userId = 1;
-            const user: User = User.of(
+            const user: User = new User(
                 'a@n.com',
                 '123',
                 'add',
@@ -70,14 +71,14 @@ describe('UserService', () => {
             );
 
             const findUserByIdSpy = jest.spyOn(userService, 'findUserById');
-            const findOneBySpy = jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);
+            const findOneBySpy = jest.spyOn(userRepository, 'findOneById').mockResolvedValue(user);
 
             // When
             const result = await userService.findUserById(userId);
 
             // Then
             expect(findUserByIdSpy).toHaveBeenCalledWith(userId);
-            expect(findOneBySpy).toHaveBeenCalledWith({ id: userId });
+            expect(findOneBySpy).toHaveBeenCalledWith(userId);
             expect(result).toEqual(user);
         })
     });
@@ -85,13 +86,13 @@ describe('UserService', () => {
     describe('유저_저장', () => {
         it('성공', async () => {
             // Given
-            const user = User.of(
+            const user = new User(
                 'a@c.com',
                 'password',
                 'add',
                 'nick'
             );
-            const savedUser: User = User.of(
+            const savedUser: User = new User(
                 user.email,
                 user.password,
                 user.address,
@@ -119,14 +120,9 @@ describe('UserService', () => {
             const partialUser: Partial<User> = {
                 address: 'new_address'
             };
-            const updateResult: UpdateResult = {
-                raw: 'abc',
-                affected: 1,
-                generatedMaps: []
-            };
 
             const updateSpy = jest.spyOn(userService, 'update');
-            const updateRepositorySpy = jest.spyOn(userRepository, 'update').mockResolvedValue(updateResult);
+            const updateRepositorySpy = jest.spyOn(userRepository, 'update');
 
             // When
             const result = await userService.update(userId, partialUser);
@@ -134,7 +130,7 @@ describe('UserService', () => {
             // Then
             expect(updateSpy).toHaveBeenCalledWith(userId, partialUser);
             expect(updateRepositorySpy).toHaveBeenCalledWith(userId, partialUser);
-            expect(result).toBe(updateResult);
+            expect(result).toBeUndefined();
         });
     });
 
@@ -143,13 +139,13 @@ describe('UserService', () => {
             // Given
             const userIds = [1, 2];
             const users: User[] = [
-                User.of(
+                new User(
                     "ab@na.com",
                     '111',
                     'add1',
                     'nick1'
                 ),
-                User.of(
+                new User(
                     "abcde@na.com",
                     '222',
                     'add2',
@@ -158,14 +154,14 @@ describe('UserService', () => {
             ]
 
             const findUserByIdsSpy = jest.spyOn(userService, 'findUserByIds');
-            const findBySpy = jest.spyOn(userRepository, 'findBy').mockResolvedValue(users);
+            const findBySpy = jest.spyOn(userRepository, 'findByIds').mockResolvedValue(users);
 
             // When
             const result = await userService.findUserByIds(userIds);
 
             // Then
             expect(findUserByIdsSpy).toHaveBeenCalledWith(userIds);
-            expect(findBySpy).toHaveBeenCalledWith({ id: In(userIds) });
+            expect(findBySpy).toHaveBeenCalledWith(userIds);
             expect(result).toStrictEqual(users);
         });
     });
@@ -174,14 +170,14 @@ describe('UserService', () => {
         it('성공', async () => {
             // Given
             const userId: number = 1;
-            const foundedUser: User = User.of(
+            const foundedUser: User = new User(
                 'email@d.com',
                 '123',
                 'add',
                 'nick'
             );
             const userServicefindUserWithRelationshipByIdSpy = jest.spyOn(userService, 'findUserWithRelationshipById');
-            const userRepositoryfindUserWithRelationshipByIdSpy = jest.spyOn(userRepository, 'findUserWithRelationshipById').mockResolvedValue(foundedUser);
+            const userRepositoryfindUserWithRelationshipByIdSpy = jest.spyOn(userRepository, 'findWithRelationshipById').mockResolvedValue(foundedUser);
 
             // When
             const result = await userService.findUserWithRelationshipById(userId);

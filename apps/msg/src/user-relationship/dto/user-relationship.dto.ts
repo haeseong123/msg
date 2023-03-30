@@ -21,7 +21,8 @@ export class UserRelationshipDto {
         id: number,
         fromUserId: number,
         toUserId: number,
-        status: UserRelationshipStatus) {
+        status: UserRelationshipStatus
+    ) {
         this.id = id;
         this.fromUserId = fromUserId;
         this.toUserId = toUserId;

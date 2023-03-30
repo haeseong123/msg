@@ -16,8 +16,8 @@ describe('UserChatRoomService', () => {
                     provide: UserChatRoomRepository,
                     useValue: {
                         save: jest.fn(),
-                        remove: jest.fn(),
                         saveAll: jest.fn(),
+                        remove: jest.fn(),
                     }
                 }
             ],
@@ -36,7 +36,7 @@ describe('UserChatRoomService', () => {
             const entity: UserChatRoom = new UserChatRoom(dto.userId, dto.chatRoomId);
 
             const userChatRoomServiceSpy = jest.spyOn(userChatRoomService, 'save');
-            const toUserChatRoomSpy = jest.spyOn(UserChatRoomDto, 'toUserChatRoom').mockReturnValue(entity);
+            const toUserChatRoomSpy = jest.spyOn(dto, 'toEntity').mockReturnValue(entity);
             const userChatRoomRepositorySaveSpy = jest.spyOn(userChatRoomRepository, 'save').mockResolvedValue(entity);
 
             // When
@@ -44,7 +44,7 @@ describe('UserChatRoomService', () => {
 
             // Then
             expect(userChatRoomServiceSpy).toHaveBeenCalledWith(dto);
-            expect(toUserChatRoomSpy).toHaveBeenCalledWith(dto);
+            expect(toUserChatRoomSpy).toHaveBeenCalled();
             expect(userChatRoomRepositorySaveSpy).toHaveBeenCalledWith(entity);
             expect(result).toStrictEqual(entity);
         });
@@ -58,25 +58,26 @@ describe('UserChatRoomService', () => {
             const chatRoomId = 3;
             // 유저 - 채팅방 
             const dtos: UserChatRoomDto[] = [
-                { userId: userId, chatRoomId: chatRoomId },
-                { userId: otherUserId, chatRoomId: chatRoomId },
+                new UserChatRoomDto(userId, chatRoomId),
+                new UserChatRoomDto(otherUserId, chatRoomId),
             ]
             const entity1: UserChatRoom = new UserChatRoom(dtos[0].userId, dtos[0].chatRoomId);
             const entity2: UserChatRoom = new UserChatRoom(dtos[1].userId, dtos[1].chatRoomId);
             const userChatRooms: UserChatRoom[] = [entity1, entity2];
 
             const userChatRoomServicesaveAllSpy = jest.spyOn(userChatRoomService, 'saveAll');
-            const toUserChatRoomSpy1 = jest.spyOn(UserChatRoomDto, 'toUserChatRoom').mockReturnValueOnce(entity1);
-            const toUserChatRoomSpy2 = jest.spyOn(UserChatRoomDto, 'toUserChatRoom').mockReturnValueOnce(entity2);
-            (userChatRoomRepository.save as jest.Mock).mockResolvedValueOnce(userChatRooms);
+            const toUserChatRoomSpy1 = jest.spyOn(dtos[0], 'toEntity').mockReturnValueOnce(entity1);
+            const toUserChatRoomSpy2 = jest.spyOn(dtos[1], 'toEntity').mockReturnValueOnce(entity2);
+            const userChatRoomRepositorySaveAllSpy = jest.spyOn(userChatRoomRepository, 'saveAll').mockResolvedValue(userChatRooms);
 
             // When
             const result = await userChatRoomService.saveAll(dtos);
 
             // Then
             expect(userChatRoomServicesaveAllSpy).toHaveBeenCalledWith(dtos);
-            expect(toUserChatRoomSpy1).toHaveBeenCalledWith(dtos[0]);
-            expect(toUserChatRoomSpy2).toHaveBeenCalledWith(dtos[1]);
+            expect(toUserChatRoomSpy1).toHaveBeenCalled();
+            expect(toUserChatRoomSpy2).toHaveBeenCalled();
+            expect(userChatRoomRepositorySaveAllSpy).toHaveBeenCalledWith([entity1, entity2]);
             expect(result).toStrictEqual(userChatRooms);
         });
     });
