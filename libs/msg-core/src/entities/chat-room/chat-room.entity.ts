@@ -8,7 +8,9 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
     @Column('varchar')
     name: string;
 
-    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.chatRoom)
+    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.chatRoom, {
+        cascade: ['insert'],
+    })
     userChatRooms: UserChatRoom[];
 
     @OneToMany(() => Message, message => message.chatRoom)

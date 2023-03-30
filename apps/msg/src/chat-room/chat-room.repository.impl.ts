@@ -31,7 +31,7 @@ export class ChatRoomRepositoryImpl implements ChatRoomRepository {
 
     findWithUserChatRoomsById(id: number): Promise<ChatRoom | null> {
         return this.repository.createQueryBuilder('cr')
-            .innerJoin('cr.userChatRooms', 'ucr')
+            .innerJoinAndSelect('cr.userChatRooms', 'ucr')
             .where('cr.id = :id', { id })
             .getOne();
     }
