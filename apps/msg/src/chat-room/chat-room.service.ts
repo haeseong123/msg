@@ -1,7 +1,6 @@
 import { UserRelationshipStatus } from '@app/msg-core/entities/user-relationship/user-relationship-status';
 import { Injectable } from '@nestjs/common';
 import { UnauthorizedInvitationException } from './exceptions/unauthorized-invitation.exception';
-import { UserChatRoomDto } from '../user-chat-room/dto/user-chat-room.dto';
 import { UserChatRoomService } from '../user-chat-room/user-chat-room.service';
 import { UserService } from '../user/user.service';
 import { ChatRoomRepository } from './chat-room.repository';
@@ -10,6 +9,7 @@ import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.e
 import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
 import { UserDuplicateInvitationException } from './exceptions/user-duplicate-invitation.exception';
 import { User } from '@app/msg-core/entities/user/user.entity';
+import { UserChatRoom } from '@app/msg-core/entities/user-chat-room/user-chat-room.entity';
 
 @Injectable()
 export class ChatRoomService {
@@ -30,17 +30,18 @@ export class ChatRoomService {
         const founder = await this.userService.findUserWithRelationshipById(userId);
         this.validateInvitationsByFounder(founder, invitedUserIds);
 
-        const chatRoom = await this.chatRoomRepository.save(dto.toEntity());
         const participantsIds = [founder.id, ...invitedUserIds];
-        const userChatRooms = await this.userChatRoomService.saveAll(participantsIds.map(
-            userId => new UserChatRoomDto(userId, chatRoom.id)
-        ));
+        const userChatRooms = participantsIds.map(userId =>
+            new UserChatRoom(userId, undefined)
+        );
+
+        const chatRoom = dto.toEntity();
         chatRoom.userChatRooms = userChatRooms;
 
-        return chatRoom;
+        return await this.chatRoomRepository.save(chatRoom);
     }
 
-    async delete(chatRoomId: number, userId: number) {
+    async delete(chatRoomId: number, userId: number): Promise<void> {
         const chatRoom = await this.chatRoomRepository.findWithUserChatRoomsById(chatRoomId);
         const userChatRoom = chatRoom?.userChatRooms.find(ucr => ucr.userId === userId);
 
