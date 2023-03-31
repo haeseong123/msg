@@ -41,8 +41,8 @@ export class ChatRoomService {
         return await this.chatRoomRepository.save(chatRoom);
     }
 
-    async delete(chatRoomId: number, userId: number): Promise<void> {
-        const chatRoom = await this.chatRoomRepository.findWithUserChatRoomsById(chatRoomId);
+    async leaveChatRoom(id: number, userId: number): Promise<void> {
+        const chatRoom = await this.chatRoomRepository.findWithUserChatRoomsById(id);
         const userChatRoom = chatRoom?.userChatRooms.find(ucr => ucr.userId === userId);
 
         if (!userChatRoom) {
@@ -56,6 +56,10 @@ export class ChatRoomService {
         }
 
         return;
+    }
+
+    async isUserInChatRoom(id: number, userId: number): Promise<boolean> {
+        return await this.chatRoomRepository.isUserInChatRoom(id, userId);
     }
 
     private validateInvitedUserIds(invitedUserIds: number[]): void {

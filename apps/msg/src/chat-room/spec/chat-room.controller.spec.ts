@@ -18,7 +18,7 @@ describe('ChatRoomController', () => {
         const serviceMock = {
             findAll: jest.fn(),
             save: jest.fn(),
-            delete: jest.fn(),
+            leaveChatRoom: jest.fn(),
         };
         const module: TestingModule = await Test.createTestingModule({
             controllers: [ChatRoomController],
@@ -138,11 +138,11 @@ describe('ChatRoomController', () => {
             const id: number = 1;
             const userId: number = sub;
 
-            const controllerSpy = jest.spyOn(controller, 'delete');
-            const serviceSpy = jest.spyOn(service, 'delete').mockResolvedValue(null);
+            const controllerSpy = jest.spyOn(controller, 'leave');
+            const serviceSpy = jest.spyOn(service, 'leaveChatRoom').mockResolvedValue(null);
 
             // When
-            const result = await controller.delete(userId, id);
+            const result = await controller.leave(userId, id);
 
             // Then
             expect(controllerSpy).toHaveBeenCalledWith(userId, id);

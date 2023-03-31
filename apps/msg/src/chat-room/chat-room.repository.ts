@@ -8,4 +8,6 @@ export abstract class ChatRoomRepository {
     abstract save(entity: ChatRoom): Promise<ChatRoom>;
 
     abstract remove(entity: ChatRoom): Promise<ChatRoom>;
+
+    abstract isUserInChatRoom(id: number, userId: number): Promise<boolean>;
 }

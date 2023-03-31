@@ -4,7 +4,7 @@ import { ArrayMinSize, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-
 export class ChatRoomSaveDto {
     @IsNumber()
     @IsOptional()
-    id?: number
+    id?: number;
 
     @IsString()
     @IsNotEmpty()

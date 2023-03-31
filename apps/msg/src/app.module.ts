@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { databaseConfig } from './common/config/database.config';
 import { ArgumentInvalidException } from './common/exception/argument-invalid.exception';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ArgumentInvalidException } from './common/exception/argument-invalid.ex
     ChatRoomModule,
     UserRelationshipModule,
     UserChatRoomModule,
+    MessageModule,
   ],
   providers: [
     /** Incoming request
