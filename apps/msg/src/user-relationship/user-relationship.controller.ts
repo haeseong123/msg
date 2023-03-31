@@ -1,14 +1,14 @@
 import { UserRelationship } from "@app/msg-core/entities/user-relationship/user-relationship.entity";
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
-import { CheckUserGuard } from "../user/guard/check-user.guard";
+import { UserGuard } from "../user/guard/user.guard";
 import { MandatoryArgumentNullException } from "../common/exception/mandatory-argument-null.exception";
 import { UserRelationshipDto } from "./dto/user-relationship.dto";
 import { UserRelationshipIdParamMismatchException } from "./exceptions/user-relationship-id-param-mismatch.exception";
 import { UserRelationshipFromIdUserIdMismatchException } from "./exceptions/user-relationship-from-id-user-id-mismatch.exception";
 import { UserRelationshipService } from "./user-relationship.service";
 
-@UseGuards(JwtGuard, CheckUserGuard)
+@UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/user-relationships')
 export class UserRelationshipController {
     constructor(private readonly userRelationshipService: UserRelationshipService) { }

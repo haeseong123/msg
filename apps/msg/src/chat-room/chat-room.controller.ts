@@ -8,9 +8,10 @@ import { ChatRoomMessageDto } from "./dto/chat-room-message.dto";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
 import { ChatRoomUserDto } from "./dto/chat-room-user.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
-import { CheckUserGuard } from "../user/guard/check-user.guard";
+import { UserGuard } from "../user/guard/user.guard";
+import { ChatRoomGuard } from "./guard/chat-room.guard";
 
-@UseGuards(JwtGuard, CheckUserGuard)
+@UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/chat-rooms')
 export class ChatRoomController {
     constructor(private chatRoomService: ChatRoomService) { }
@@ -32,12 +33,13 @@ export class ChatRoomController {
         return this.toChatRoomSaveDto(chatRoom);
     }
 
-    @Delete(':id')
-    async delete(
+    @UseGuards(ChatRoomGuard)
+    @Delete(':chatRoomId')
+    async leave(
         @Param('userId', ParseIntPipe) userId: number,
-        @Param('id', ParseIntPipe) id: number,
+        @Param('chatRoomId', ParseIntPipe) chatRoomId: number,
     ): Promise<void> {
-        return await this.chatRoomService.delete(id, userId);
+        return await this.chatRoomService.leaveChatRoom(chatRoomId, userId);
     }
 
     private toChatRoomDto(chatRoom: ChatRoom): ChatRoomDto {

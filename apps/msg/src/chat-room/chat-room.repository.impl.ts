@@ -43,4 +43,12 @@ export class ChatRoomRepositoryImpl implements ChatRoomRepository {
     remove(entity: ChatRoom): Promise<ChatRoom> {
         return this.repository.remove(entity);
     }
+
+    isUserInChatRoom(id: number, userId: number): Promise<boolean> {
+        return this.repository.createQueryBuilder('cr')
+            .innerJoinAndSelect('cr.userChatRooms', 'ucr')
+            .where('cr.id = :id', { id })
+            .andWhere('ucr.userId = :userId', { userId })
+            .getExists();
+    }
 }

@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { UnauthorizedAccessException } from "../../auth/exceptions/unauthorized-access.exception";
 
 @Injectable()
-export class CheckUserGuard implements CanActivate {
+export class UserGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest();
         const sub = request.user?.sub; // 토큰의 sub 값

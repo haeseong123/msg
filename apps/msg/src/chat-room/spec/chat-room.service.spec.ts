@@ -175,13 +175,13 @@ describe('ChatRoomService', () => {
             chatRoom.id = chatRoomId;
             chatRoom.userChatRooms = userChatRooms;
 
-            const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'delete');
+            const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'leaveChatRoom');
             const findChatRoomWithUserChatRoomsByIdSpy = jest.spyOn(chatRoomRepository, 'findWithUserChatRoomsById').mockResolvedValue(chatRoom);
             const chatRoomRepositoryRemoveSpy = jest.spyOn(chatRoomRepository, 'remove');
             const userChatRoomServiceRemoveSpy = jest.spyOn(userChatRoomService, 'remove');
 
             // When
-            const result = await chatRoomService.delete(chatRoomId, userId);
+            const result = await chatRoomService.leaveChatRoom(chatRoomId, userId);
 
             // Then
             expect(chatRoomServiceDeleteSpy).toHaveBeenCalledWith(chatRoomId, userId);
@@ -202,13 +202,13 @@ describe('ChatRoomService', () => {
             chatRoom.id = chatRoomId;
             chatRoom.userChatRooms = userChatRooms;
 
-            const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'delete');
+            const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'leaveChatRoom');
             const findChatRoomWithUserChatRoomsByIdSpy = jest.spyOn(chatRoomRepository, 'findWithUserChatRoomsById').mockResolvedValue(chatRoom);
             const chatRoomRepositoryRemoveSpy = jest.spyOn(chatRoomRepository, 'remove');
             const userChatRoomServiceRemoveSpy = jest.spyOn(userChatRoomService, 'remove');
 
             // When
-            const result = await chatRoomService.delete(chatRoomId, userId);
+            const result = await chatRoomService.leaveChatRoom(chatRoomId, userId);
 
             // Then
             expect(chatRoomServiceDeleteSpy).toHaveBeenCalledWith(chatRoomId, userId);
@@ -230,11 +230,11 @@ describe('ChatRoomService', () => {
             chatRoom.id = chatRoomId;
             chatRoom.userChatRooms = userChatRooms;
 
-            const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'delete');
+            const chatRoomServiceDeleteSpy = jest.spyOn(chatRoomService, 'leaveChatRoom');
             const findChatRoomWithUserChatRoomsByIdSpy = jest.spyOn(chatRoomRepository, 'findWithUserChatRoomsById').mockResolvedValue(chatRoom);
 
             // When
-            const result = chatRoomService.delete(chatRoomId, userId);
+            const result = chatRoomService.leaveChatRoom(chatRoomId, userId);
 
             // Then
             await expect(result).rejects.toThrow(UserNotInChatRoomException);
