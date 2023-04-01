@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/msg/test/jest-e2e.json",
-    "start:msg:dev": "nest start msg --debug --watch"
+    "start:msg:dev": "nest start msg --debug --watch",
+    "infra:local": "docker-compose -f docker-compose.local.yml up --build"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
