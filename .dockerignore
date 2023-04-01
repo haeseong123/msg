@@ -1,0 +1,23 @@
+# git, vs config
+.husky
+.vscode
+**/.vscode
+
+# docs
+CHANGELOG.md
+README.md
+
+# deploy
+deploy
+
+# lint
+commitlint.config.ts
+
+# compiled output
+dist
+
+# dependencies
+node_modules/
+
+# tests
+coverage
