@@ -1,5 +1,4 @@
 import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
-import { UserChatRoom } from "@app/msg-core/entities/user-chat-room/user-chat-room.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -14,18 +13,10 @@ export class ChatRoomRepositoryImpl implements ChatRoomRepository {
 
     findByUserId(userId: number): Promise<ChatRoom[]> {
         return this.repository.createQueryBuilder('cr')
-            .innerJoinAndSelect('cr.userChatRooms', 'ucr')
+            .leftJoinAndSelect('cr.userChatRooms', 'ucr')
             .leftJoinAndSelect('ucr.user', 'u')
             .leftJoinAndSelect('cr.messages', 'm')
-            .where((qb) => {
-                const subQuery = qb
-                    .subQuery()
-                    .select('userChatRoom.chatRoomId')
-                    .from(UserChatRoom, 'userChatRoom')
-                    .where('userChatRoom.userId = :userId', { userId })
-                    .getQuery();
-                return 'cr.id IN ' + subQuery;
-            })
+            .where('ucr.userId = :userId', { userId })
             .getMany();
     }
 
