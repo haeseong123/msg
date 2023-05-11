@@ -1,21 +1,70 @@
-name: main CI
+# workflow의 이름입니다.
+name: 'test-every-push'
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+# events입니다.
+# 해당 workflow를 동작하게하는 트리거입니다.
+on: push
 
 jobs:
   test:
+    # 리눅스 환경에서 해당 job을 실행합니다.
     runs-on: ubuntu-latest
+    # Job은 여러 step으로 이루어져 있습니다.
+    # Actions은 uses 키워드를 사용하여 실행할 수 있고
+    # 스크립트는 run 키워드를 사용하여 실행할 수 있습니다.
     steps:
+    # CI 환경에서 해당 코드를 fetch하고 브랜치를 checkout하는 동작을 실행합니다.
+    # 이는 누군가 만들어놓은 Action을 사용하는 것입니다.
+    # Action을 사용하기 위해서는 'uses' 키워드를 사용해야 합니다.
     - uses: actions/checkout@v3
+    
+    # 해당 작업의 이름을 Node.js 14.x라고 명시합니다.
+    # setup-node도 checkout처럼 누군가 만들어 놓은 Action입니다. 
     - name: Use Node.js 14.x
+      # 이러한 기능을 제공하는 Action을 가져다 씁니다.
       uses: actions/setup-node@v3
+      # with라는 키워드로 해당 Action에 값을 전달합니다.
+      # 여기서 노드 버전을 특정할 수 있습니다.
       with:
         node-version: 14.x
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        
+    # push할 때마다 npm을 install하는 것은 매우 낭비입니다.
+    # 해당 프로젝트의 node_module이 변했는지 안 변했는지 확인하고
+    # 변화가 있을 때만 npm install합니다.
+    - name: Cache node modules
+      # 해당 기능을 제공하는 Actions를 갖다 씁니다.
+      uses: actions/cache@v3
+      # 이 step을 식별하는 아이디를 부여합니다.
+      # 믿에서 사용할 것입니다.
+      id: cache
+      with:
+        # node_module 폴더를 검사하여
+        path: node_module
+        # 아래 키값으로 cache가 돼있는지 확인합니다.
+        key: npm-packages-${{ hashFiles('**/package-lock.json') }}
+    
+    # 만약 모듈에 변한 것이 있다면 npm install을 진행하는 step입니다.
+    - name: Install Dependencies
+      # 위 step에서 node_module에 대한 cache 검사를 진행했습니다.
+      # 만약 모듈에 변한 게 있다면 npm install을 실행하고 아니면 해당 step을 건너뜁니다.
+      # if 키워드는 해당 스텝을 실행할지 말지를 결정할 수 있는 키워드입니다.
+      # `steps.cache.outpus.cache-hit`의 cache는 은 위 step의 id입니다.
+      # 따라서 위 step에서 cache-hit이라는 output을 받아서 진행할지 말지를 결정하는 것입니다.
+      # 해당 값이 true가 아닐 때만 npm install을 진행합니다.
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm install
+    
+    # 프로젝트를 빌드하는 스크립트를 작성합니다.
+    # 이름은 Project Build입니다.
+    - name: Project Build
+      # npm run build --if-present를 사용하여 빌드합니다.
+      # 여기서 --if-present란 build라는 스크립트가 존재할 때만 
+      # 실행하겠다는 것을 의미합니다.
+      run: npm run build --if-present
+    
+    # 프로젝트를 테스트하는 스크립트를 작성합니다.
+    # 이름은 Project Test입니다.
+    - name: Project Test
+      # npm test를 하여 사전에 작성한 테스트를 실행합니다.
+      run: npm test
