@@ -1,24 +1,42 @@
 version: '3.8'
 
+# 서비스는 동일한 컨테이너 이미지(및 구성)를
+# 한 번 이상 실행하여 플랫폼에서 구현되는 추상적인 개념입니다.
 services:
   db:
+    # DB가 실행되는 컨테이너의 이름을 지정합니다.
     container_name: msg_db_container
+    # mysql 이미지입니다.
     image: mysql:8.0
-    restart: always
+    # .env 파일을 가져옵니다.
     env_file:
       - .env
+    # 가져온 .env 파일에 적혀져 있는 값으로 환경 설정을 합니다.
     environment:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
+    # <호스트 포트 번호>:<컨테이너 포트 번호>로 바인딩 합니다.
+    # <호스트 포트>로 들어온 요청은 <컨테이너 포트>로 전달됩니다.
     ports:
       - '3306:3306'
+    # "컨테이너"는 격리된 환경에서 돌아가기 때문에 기본적으로 다른 컨테이너와의 통신이 불가능합니다.
+    # 하지만 여러 개의 컨테이너를 하나의 Docker 네트워크(network)에 연결시키면 서로 통신이 가능해집니다.
+    # db는 msg와 통신해야 하므로 같은 네트워크로 구성합니다.
     networks:
       - msg_network
+    # 도커 이미지로 컨테이너를 생성하면 이미지는 읽기 전용이 됩니다.
+    # 컨테이너에서 생성된 정보는 이미지 위에 container layer라는 곳에 기록이 되는데,
+    # 컨테이너가 삭제되면 해당 정보도 전부 삭제됩니다.
+    # 볼륨은 Docker 컨테이너에서 생성되고 사용되는 데이터를 "유지"하기 위해 사용하는 매커니즘입니다.
+    # 볼륨은 컨테이너 외부에 존재하여 컨테이너가 삭제되더라도 그 정보가 사라지지 않습니다.
     volumes:
       - db_data:/var/lib/mysql
 
   msg:
     container_name: msg_container
+    # 이미지를 다른데서 가져오는 것이 아닌
+    # ./apps/msg/dockerfile 에 적힌 대로 image를 만든 후
+    # 해당 이미지를 사용합니다.
     build:
       context: .
       dockerfile: ./apps/msg/dockerfile
@@ -28,16 +46,18 @@ services:
       - '3000:3000'
     networks:
       - msg_network
+    # 위에 있는 db라는 서비스가 실행된 후 msg를 실행합니다.
     depends_on:
       - db
     volumes:
-      - msg_data:/app/
+      - msg_data:/app
+    # 커맨드 입니다.
     command: npm run start:msg:dev
 
 volumes:
   db_data:
   msg_data:
 
-
+    # 네트워크는 서비스가 서로 통신할 수 있게 해주는 계층입니다.
 networks:
   msg_network:
