@@ -1,3 +1,15 @@
+## 프로젝트 관련 포스팅
+
+- [NestJS - Guards](https://hs-archive.tistory.com/98)
+- [NestJS - Passport](https://hs-archive.tistory.com/99)
+- [NestJS - @Module(), @Injectable(), @InjectRepository()](https://hs-archive.tistory.com/100)
+- [Entity -> Dto 변환은 어디서?](https://hs-archive.tistory.com/102)
+- [클린 아키텍처 번역](https://hs-archive.tistory.com/103)
+- [service에서의 repository 의존 역전하기 - 클린 아키텍처 적용하기](https://hs-archive.tistory.com/104)
+- [CI/CD](https://hs-archive.tistory.com/106)
+- [깃허브 액션](https://hs-archive.tistory.com/107)
+- [Docker Compose](https://hs-archive.tistory.com/108)
+
 ## 프로젝트 주제
 
 - 메시지 전송 서비스 (Message Service)
@@ -234,25 +246,3 @@ $ yarn run infra:local
 # 단위 테스트
 $ yarn run test
 ```
-
-
-## 회고
-
-- 테스트 코드를 처음부터 전부 작성했는데 과연 테스트 코드를 처음부터 전부 작성하는 것이 좋은지에 대한 생각이 들었습니다. 모든 코드에 대해서 테스트 코드를 작성하려면 많은 시간과 노력이 필요합니다. 따라서 어느 정도 코드가 안정화된 이후에 필요한 부분에 대해서 테스트 코드를 작성하고 이를 조금씩 넓혀가는 방식이 더 좋을 것 같다는 생각이 듭니다.
-
-- 'users/:userId/chat-rooms/:chatRoomId/messages'와 같은 URL에서 userId에 해당하는 사용자가 chatRoomId에 해당하는 채팅방에 속한 사용자인지 확인하는 작업은 항상 진행되어야 합니다. 이러한 작업을 Guard를 통해 처리할지, Service에서 함수의 첫 줄에서 처리해야 할지, 다른 구조가 있는지 고민하는 시간이 오래 걸렸습니다. Guard에서 처리하면 Service 코드가 간결해지지만, message에 대한 모든 요청이 message 컨트롤러를 통해서만 오는 것이 아니라 다른 Service에서 해당 messageService를 호출할 수도 있기 때문에, 호출하는 쪽에서 유효성 검사를 해야 합니다. 이 때, 호출하는 쪽에서 발생하는 문제를 호출하는 쪽에서 책임지는 것이 옳은가에 대한 고민이 필요합니다. 반대로, messageService에서 해당 작업을 처리하면, 다른 Service에서 messageService를 통해 메시지에 대한 CURD를 진행해도 문제가 없지만, messageService의 모든 함수의 첫 번째 줄에 validate() 함수가 중복으로 호출되어 코드의 모양이 좋지 않습니다. 저는 Guard를 사용하는 방식을 택했지만 이것이 좋은 구조라고 생각이 들지 않았습니다. 아키텍처, 책임 범위 그리고 객체 지향 프로그래밍(OOP)에 대한 공부가 필요하다고 느꼈습니다. 
-
-- 파일의 이름을 'chat-room.controller.ts'와 같은 형식으로 작성하였는데 영 별로였습니다. 'ChatRoomController.ts'와 같은 파스칼케이스로 짓는 것이 더 좋아보였습니다.
-
-
-## 프로젝트 관련 포스팅
-
-- [NestJS - Guards](https://hs-archive.tistory.com/98)
-- [NestJS - Passport](https://hs-archive.tistory.com/99)
-- [NestJS - @Module(), @Injectable(), @InjectRepository()](https://hs-archive.tistory.com/100)
-- [Entity -> Dto 변환은 어디서?](https://hs-archive.tistory.com/102)
-- [클린 아키텍처 번역](https://hs-archive.tistory.com/103)
-- [service에서의 repository 의존 역전하기 - 클린 아키텍처 적용하기](https://hs-archive.tistory.com/104)
-- [CI/CD](https://hs-archive.tistory.com/106)
-- [깃허브 액션](https://hs-archive.tistory.com/107)
-- [Docker Compose](https://hs-archive.tistory.com/108)
