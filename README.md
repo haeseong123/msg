@@ -237,6 +237,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, MsgResponse<T>
 
 ```bash
 # 인프라 생성 및 실행
+# docker-compose가 설치되어 있어야 합니다.
 $ yarn run infra:local
 ```
 
