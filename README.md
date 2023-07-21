@@ -9,6 +9,7 @@
 - [CI/CD](https://hs-archive.tistory.com/106)
 - [깃허브 액션](https://hs-archive.tistory.com/107)
 - [Docker Compose](https://hs-archive.tistory.com/108)
+- [실시간 통신 - WebSocket이란](https://hs-archive.tistory.com/125)
 
 ## 프로젝트 주제
 
