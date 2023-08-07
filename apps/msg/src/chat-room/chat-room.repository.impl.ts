@@ -20,6 +20,16 @@ export class ChatRoomRepositoryImpl implements ChatRoomRepository {
             .getMany();
     }
 
+    findByIdAndUserId(id: number, userId: number): Promise<ChatRoom | null> {
+        return this.repository.createQueryBuilder('cr')
+            .leftJoinAndSelect('cr.userChatRooms', 'ucr')
+            .leftJoinAndSelect('ucr.user', 'u')
+            .leftJoinAndSelect('cr.messages', 'm')
+            .where('cr.id = :id', { id })
+            .andWhere('ucr.userId = :userId', { userId })
+            .getOne();
+    }
+
     findWithUserChatRoomsById(id: number): Promise<ChatRoom | null> {
         return this.repository.createQueryBuilder('cr')
             .innerJoinAndSelect('cr.userChatRooms', 'ucr')

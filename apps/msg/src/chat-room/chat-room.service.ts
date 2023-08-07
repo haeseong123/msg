@@ -23,6 +23,10 @@ export class ChatRoomService {
         return await this.chatRoomRepository.findByUserId(userId);
     }
 
+    async findOne(id: number, userId: number): Promise<ChatRoom | null> {
+        return await this.chatRoomRepository.findByIdAndUserId(id, userId);
+    }
+
     async save(userId: number, dto: ChatRoomSaveDto): Promise<ChatRoom> {
         const invitedUserIds = dto.invitedUserIds;
         this.validateInvitedUserIds(invitedUserIds);

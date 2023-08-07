@@ -1,8 +1,8 @@
 import { Message } from "@app/msg-core/entities/message/message.entity";
 import { Injectable } from "@nestjs/common";
-import { MessageUpdateDto } from "./dto/message.update.dto";
 import { MessageDto } from "./dto/message.dto";
 import { MessageRepository } from "./message.repository";
+import { MandatoryArgumentNullException } from "../common/exception/mandatory-argument-null.exception";
 
 @Injectable()
 export class MessageService {
@@ -16,8 +16,12 @@ export class MessageService {
         return this.messageRepository.save(messageDto.toEntity());
     }
 
-    async updateContent(id: number, dto: MessageUpdateDto): Promise<void> {
-        return this.messageRepository.updateContent(id, dto.message);
+    async update(messageDto: MessageDto): Promise<void> {
+        if (!messageDto.id) {
+            throw new MandatoryArgumentNullException()
+        }
+
+        return this.messageRepository.update(messageDto.id, { content: messageDto.content });
     }
 
     async delete(id: number): Promise<void> {

@@ -2,6 +2,7 @@ import { Message } from "@app/msg-core/entities/message/message.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { MessageRepository } from "./message.repository";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 export class MessageRepositoryImpl extends MessageRepository {
     constructor(
@@ -19,8 +20,8 @@ export class MessageRepositoryImpl extends MessageRepository {
         return this.repository.save(entity);
     }
 
-    async updateContent(id: number, content: string): Promise<void> {
-        await this.repository.update(id, { content });
+    async update(id: number, partialEntity: QueryDeepPartialEntity<Message>): Promise<void> {
+        await this.repository.update(id, partialEntity);
 
         return;
     }

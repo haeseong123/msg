@@ -11,6 +11,7 @@ import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { databaseConfig } from './common/config/database.config';
 import { ArgumentInvalidException } from './common/exception/argument-invalid.exception';
 import { MessageModule } from './message/message.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MessageModule } from './message/message.module';
     UserRelationshipModule,
     UserChatRoomModule,
     MessageModule,
+    ChatModule,
   ],
   providers: [
     /** Incoming request

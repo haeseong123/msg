@@ -1,13 +1,12 @@
-import { Message } from "@app/msg-core/entities/message/message.entity";
 import { Controller, Delete, Get, Post, Put, Param, ParseIntPipe, UseGuards, Body } from "@nestjs/common";
 import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { ChatRoomGuard } from "../chat-room/guard/chat-room.guard";
 import { UserGuard } from "../user/guard/user.guard";
-import { MessageUpdateDto } from "./dto/message.update.dto";
 import { MessageDto } from "./dto/message.dto";
 import { MessageGuard } from "./guard/message.guard";
 import { MessageService } from "./message.service";
 import { ArgumentInvalidException } from "../common/exception/argument-invalid.exception";
+import { MessageConverter } from "./message-converter";
 
 @UseGuards(JwtGuard, UserGuard, ChatRoomGuard)
 @Controller('users/:userId/chat-rooms/:chatRoomId/messages')
@@ -20,7 +19,7 @@ export class MessageController {
         @Param('chatRoomId', ParseIntPipe) chatRoomId: number,
     ): Promise<MessageDto[]> {
         const messages = await this.messageService.findAllByChatRoomIdAndSenderId(chatRoomId, userId);
-        return messages.map(m => this.toMessageDto(m));
+        return messages.map(m => MessageConverter.toMessageDto(m));
     }
 
     @Post()
@@ -34,16 +33,20 @@ export class MessageController {
         }
 
         const message = await this.messageService.save(dto);
-        return this.toMessageDto(message);
+        return MessageConverter.toMessageDto(message);
     }
 
     @UseGuards(MessageGuard)
     @Put(':messageId')
     async update(
         @Param('messageId', ParseIntPipe) messageId: number,
-        @Body() dto: MessageUpdateDto,
+        @Body() messageDto: MessageDto,
     ): Promise<void> {
-        return this.messageService.updateContent(messageId, dto);
+        if (messageId !== messageDto.id) {
+            throw new ArgumentInvalidException();
+        }
+
+        return this.messageService.update(messageDto);
     }
 
     @UseGuards(MessageGuard)
@@ -52,14 +55,5 @@ export class MessageController {
         @Param('messageId', ParseIntPipe) messageId: number,
     ): Promise<void> {
         return this.messageService.delete(messageId);
-    }
-
-    private toMessageDto(message: Message): MessageDto {
-        return new MessageDto(
-            message.id,
-            message.senderId,
-            message.chatRoomId,
-            message.content
-        );
     }
 }
