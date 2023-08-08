@@ -16,8 +16,8 @@
 
 ## 프로젝트 주제
 
-- 메시지 전송 서비스 (Message Service)
-- 메시지 전송과 관련된 기능을 제공하는 REST API 서비스
+- 메시지 전송 서비스
+- 메시지 전송과 관련된 실시간 양방향 통신(Socket.IO 사용) 및 REST API 서비스 제공
 
 ## 제작 기간, 참여 인원
 
@@ -81,6 +81,50 @@ export class MessageRepositoryImpl extends MessageRepository {
 
 
 ## 핵심 기능
+
+## 실시간 양방향 통신
+
+### 연결 ('chat')
+
+1. 클라이언트는 입장할 채팅방과 토큰을 담아 서버로 전송합니다.
+2. 서버는 클라이언트가 보낸 값을 확인합니다. 유효하지 않은 값이면 예외를 발생시킵니다.
+3. 문제가 없다면 클라이언트를 채팅방에 접속시킵니다.
+4. 채팅방의 다른 모든 유저에게 해당 클라이언트가 접속했음을 알립니다.
+5. 접속한 클라이언트에게 채팅방의 모든 메시지를 전송합니다.
+
+### 메시지 전송 (event: postMessage)
+
+1. 클라이언트는 `postMessage` 이벤트를 통해 서버로 메시지를 전송합니다.
+2. 서버는 메시지를 DB에 저장하고 `newMessage` 이벤트를 통해 채팅방에 해당 메시지를 전송합니다.
+
+### 메시지 수정 (event: updateMessage)
+
+1. 클라이언트는 `updateMessage` 이벤트를 통해 서버로 수정 메시지를 전송합니다.
+2. 서버는 수정 사항을 DB에 기록하고 수정 내용을 `updateMessage`를 통해 해당 채팅방에 알립니다.
+
+### 메시지 삭제 (event: deleteMessage)
+
+1. 클라이언트는 `deleteMessage` 이벤트를 통해 서버로 삭제할 메시지의 정보를 보냅니다.
+2. 서버는 해당 메시지를 DB에서 삭제하고 그 내용을 `deleteMessage`를 통해 해당 채팅방에 알립니다.
+
+### 연결 끊기 (event: disconnect)
+
+1. 클라이언트가 socket 연결을 끊습니다.
+2. 이때 해당 socket의 `disconnect`이벤트가 발생합니다.
+3. `disconnect` 이벤트가 발생 시 socket이 속했던 채팅방에 해당 클라이언트가 나갔다고 알립니다.
+
+### 실제 동작 모습
+
+- 입장 및 퇴장
+
+![newbie](https://github.com/haeseong123/msg/assets/50406129/d78cb57f-1bb7-4ee8-8112-23c5b1067690)
+
+
+- 메시지 전송/수정/삭제
+
+![crud](https://github.com/haeseong123/msg/assets/50406129/b70c8709-749c-4ca5-ad9d-a7abc6cc1efd)
+
+## RestAPI
 
 ### 사용자 인증 ('auth')
 1. 유저가 email과 password를 서버에 전송합니다.
@@ -237,17 +281,17 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, MsgResponse<T>
 ```
 
 
-## 앱 실행
+## 서버 실행
 
 ```bash
 # 인프라 생성 및 실행
 # docker-compose가 설치되어 있어야 합니다.
-$ yarn run infra:local
+$ npm run infra:local
 ```
 
 ## 테스트
 
 ```bash
 # 단위 테스트
-$ yarn run test
+$ npm run test
 ```
