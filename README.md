@@ -33,7 +33,7 @@
 
 ## 핵심 원칙
 
-프로젝트는 Clean Code의 원칙 및 ***SOLID*** 원칙을 적용하여 개발되었습니다. 특히, Single Responsibility Principle과 Dependency Inversion Principle을 지키도록 노력했습니다.
+프로젝트는 Clean Architecture 및 ***SOLID*** 원칙을 적용하여 개발되었습니다. 특히, Single Responsibility Principle과 Dependency Inversion Principle을 지키도록 노력했습니다.
 
 예를 들어, 'MessageService' 클래스는 'MessageRepository'에 의존합니다. 이 때 'MessageService'는 비즈니스 로직만 처리하고 데이터 베이스 쿼리는 'MessageRepository' 클래스에 위임합니다. 이를 통해, 비즈니스 로직과 쿼리 로직은 분리되어 유연성과 확장성이 향상되었습니다. 
 
