@@ -20,10 +20,10 @@ export class UserDto {
     private readonly _relation: UserRelationDto[];
 
     constructor(
-        id: number | null,
+        id: number,
         email: string,
         nickname: string,
-        refreshToken: string,
+        refreshToken: string | null,
         relation: UserRelationDto[],
     ) {
         this._id = id;

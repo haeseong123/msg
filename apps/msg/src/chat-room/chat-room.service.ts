@@ -37,15 +37,6 @@ export class ChatRoomService {
     }
 
     async save(dto: ChatRoomSaveDto): Promise<ChatRoom> {
-        const host = await this.userService.findById(dto.hostUserId);
-
-        /**
-         * 호스트 id에 해당되는 유저가 DB에 존재해야 합니다.
-         */
-        if (!host) {
-            throw new UserNotFoundedException();
-        }
-
         /**
          * `초대 목록`은 중복이 없어야 합니다.
          */
@@ -70,6 +61,11 @@ export class ChatRoomService {
         if (inviteeUserIdSet.size > chatRoomMaxSize) {
             throw new MaxInvitedIdsException();
         }
+
+        /**
+         * 호스트 id에 해당되는 유저가 DB에 존재해야 합니다.
+         */
+        const host = await this.userService.findByIdOrThrow(dto.hostUserId);
 
         /**
          * 초대 목록에 있는 유저는 모두 호스트 유저가 FOLLOW 한 유저야 합니다.

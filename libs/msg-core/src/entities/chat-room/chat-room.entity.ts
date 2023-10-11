@@ -1,7 +1,6 @@
 import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 import { ChatRoomParticipant } from "./chat-room-participant/chat-room-participant.entity";
-import { removeAt } from "@app/msg-core/util/remove-at";
 
 @Entity()
 export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
@@ -46,7 +45,7 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
             return
         }
 
-        this.participants = removeAt(this.participants, index);
+        this.participants.splice(index, 1);
     }
 
     private findParticipantIndex(participants: ChatRoomParticipant[], participant: ChatRoomParticipant): number {

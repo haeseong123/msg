@@ -2,6 +2,7 @@ import { EmailInfo } from "@app/msg-core/entities/user/email-info";
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { TestingModule, Test } from "@nestjs/testing";
 import { UserEmailInfoDto } from "apps/msg/src/user/dto/user-email-info.dto";
+import { UserNotFoundedException } from "apps/msg/src/user/user-relation/exceptions/user-not-found.exception";
 import { UserRepository } from "apps/msg/src/user/user.repository";
 import { UserService } from "apps/msg/src/user/user.service";
 
@@ -46,7 +47,7 @@ describe('UserService', () => {
         });
     });
 
-    describe('id로 유저 가져오기', () => {
+    describe('id로 유저 가져오기 실패하면 throw', () => {
         it('성공', async () => {
             // Given
             const id = 1;
@@ -54,10 +55,22 @@ describe('UserService', () => {
             jest.spyOn(userRepository, 'findById').mockResolvedValue(user);
 
             // When
-            const result = await userService.findById(id);
+            const result = await userService.findByIdOrThrow(id);
 
             // Then
             expect(result).toEqual(user);
+        });
+
+        it('실패: id에 해당되는 user가 존재하지 않음', async () => {
+            // Given
+            const id = 1;
+            jest.spyOn(userRepository, 'findById').mockResolvedValue(null);
+
+            // When
+            const resultPromise = userService.findByIdOrThrow(id);
+
+            // Then
+            await expect(resultPromise).rejects.toThrow(UserNotFoundedException);
         });
     });
 

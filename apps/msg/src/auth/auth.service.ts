@@ -78,16 +78,9 @@ export class AuthService {
      */
     async logout(id: number): Promise<boolean> {
         /**
-         * id로 user를 가져옵니다.
+         * id에 해당되는 user가 있는지 확인합니다.
          */
-        const user = await this.userService.findById(id);
-
-        /**
-         * user가 있는지 확인합니다.
-         */
-        if (!user) {
-            throw new UnauthorizedAccessException();
-        }
+        const user = await this.userService.findByIdOrThrow(id);
 
         /**
          * refreshToken을 폐기합니다.
@@ -103,16 +96,9 @@ export class AuthService {
      */
     async refreshToken(dto: UsingRefreshTokenDto): Promise<MsgTokenDto> {
         /**
-         * id로 user를 가져옵니다.
+         * id에 해당되는 user가 있는지 확인합니다.
          */
-        const user = await this.userService.findById(dto.id);
-
-        /**
-         * user가 존재하는지 확인합니다.
-         */
-        if (!user) {
-            throw new UnauthorizedAccessException();
-        }
+        const user = await this.userService.findByIdOrThrow(dto.id);
 
         /**
          * user.refreshToken과 dto.refreshToken이 일치하는지 확인합니다.

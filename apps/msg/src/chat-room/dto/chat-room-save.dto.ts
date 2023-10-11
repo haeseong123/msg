@@ -6,7 +6,7 @@ import { ArrayMinSize, IsNotEmpty, IsNumber, IsString } from "class-validator";
 export class ChatRoomSaveDto {
     @Expose({ name: 'hostUserId' })
     @IsNumber()
-    private readonly _hostUserId: number | null;
+    private readonly _hostUserId: number;
 
     @Expose({ name: 'title' })
     @IsString()
@@ -19,7 +19,7 @@ export class ChatRoomSaveDto {
     private readonly _invitedUserIds: number[];
 
     constructor(
-        hostUserId: number | null,
+        hostUserId: number,
         title: string,
         invitedUserIds: number[],
     ) {

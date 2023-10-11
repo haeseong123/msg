@@ -1,6 +1,7 @@
 import { Expose } from "class-transformer";
 import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
 import { ChatRoomParticipantDto } from "./chat-room-participant.dto";
+import { MandatoryArgumentNullException } from "../../common/exception/mandatory-argument-null.exception";
 
 export class ChatRoomDto {
     @Expose({ name: 'id' })
@@ -23,7 +24,15 @@ export class ChatRoomDto {
     }
 
     static of(chatRoom: ChatRoom): ChatRoomDto {
-        const participantDtos = chatRoom.participants.map(p => new ChatRoomParticipantDto(p.chatRoomId, p.userId));
+        const participantDtos: ChatRoomParticipantDto[] = [];
+
+        for (const p of chatRoom.participants) {
+            if (!p.chatRoomId) {
+                throw new MandatoryArgumentNullException();
+            }
+
+            participantDtos.push(new ChatRoomParticipantDto(p.chatRoomId, p.userId));
+        }
 
         return new ChatRoomDto(
             chatRoom.id,

@@ -24,7 +24,7 @@ describe('AuthService', () => {
     beforeEach(async () => {
         const userServiceMock = {
             findByEmail: jest.fn(),
-            findById: jest.fn(),
+            findByIdOrThrow: jest.fn(),
             findByIds: jest.fn(),
             save: jest.fn(),
         };
@@ -148,24 +148,13 @@ describe('AuthService', () => {
 
         it('성공', async () => {
             // Given
-            jest.spyOn(userService, 'findById').mockResolvedValue(user);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
 
             // When
             const result = await authService.logout(userId);
 
             // Then
             expect(result).toBe(true);
-        })
-
-        it('실패: userId에 해당되는 유저가 존재하지 않음', async () => {
-            // Given
-            jest.spyOn(userService, 'findById').mockResolvedValue(null);
-
-            // When
-            const resultPromise = authService.logout(userId);
-
-            // Then
-            await expect(resultPromise).rejects.toThrow(UnauthorizedAccessException);
         })
     })
 
@@ -184,7 +173,7 @@ describe('AuthService', () => {
         it('성공', async () => {
             // Given
             const token = new MsgTokenDto('new_token', 'new_ref_token');
-            jest.spyOn(userService, 'findById').mockResolvedValue(user);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
             jest.spyOn(tokenService, 'generateToken').mockReturnValue(token);
 
             // When
@@ -194,21 +183,10 @@ describe('AuthService', () => {
             expect(result).toStrictEqual(token);
         });
 
-        it('실패: userId에 해당되는 유저가 존재하지 않음', async () => {
-            // Given
-            jest.spyOn(userService, 'findById').mockResolvedValue(null);
-
-            // When
-            const resultPromise = authService.refreshToken(usingRefreshTokenDto);
-
-            // Then
-            await expect(resultPromise).rejects.toThrow(UnauthorizedAccessException);
-        });
-
         it('실패: dto.refreshToken과 entity.refreshToken이 다름', async () => {
             // Given
             const dummyUsingRefreshTokenDto = new UsingRefreshTokenDto(1, 'dummy_refresh_token');
-            jest.spyOn(userService, 'findById').mockResolvedValue(user);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
 
             // When
             const resultPromise = authService.refreshToken(dummyUsingRefreshTokenDto);

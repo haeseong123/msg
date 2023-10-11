@@ -12,18 +12,13 @@ export class UserRelationService {
     ) { }
 
     async findAllByUserId(userId: number): Promise<UserRelation[]> {
-        const user = await this.userService.findById(userId);
+        const user = await this.userService.findByIdOrThrow(userId);
 
         return user.relations;
     }
 
     // WithTransaction
     async save(dto: UserRelationDto): Promise<UserRelation> {
-        const [fromUser, toUser] = await Promise.all([
-            this.userService.findById(dto.fromUserId),
-            this.userService.findById(dto.toUserId),
-        ]);
-
         /**
          * 자기 자신을 FOLLOW 혹은 BLOCK 할 수 없습니다.
          */
@@ -34,9 +29,10 @@ export class UserRelationService {
         /**
          * dto.frumUserId, dto.toUserId에 해당되는 user가 있는지 확인합니다.
          */
-        if (!fromUser || !toUser) {
-            throw new UserNotFoundedException();
-        }
+        const [fromUser, toUser] = await Promise.all([
+            this.userService.findByIdOrThrow(dto.fromUserId),
+            this.userService.findByIdOrThrow(dto.toUserId),
+        ]);
 
         /**
          * 관계가 이미 존재한다면, 관계를 갱신합니다.
@@ -45,7 +41,7 @@ export class UserRelationService {
          */
         const relation = dto.toEntity();
         const isAlreadyExsisteRelation = fromUser.relations.some(r => r.toUserId === dto.toUserId);
-        
+
         if (isAlreadyExsisteRelation) {
             fromUser.updateRelationStatus(relation);
         } else {
@@ -63,6 +59,8 @@ export class UserRelationService {
     async update(dto: UserRelationDto): Promise<UserRelation> {
         return await this.save(dto);
     }
+
+    private
 }
 
 /**

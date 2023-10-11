@@ -14,7 +14,6 @@ import { MaxInvitedIdsException } from "apps/msg/src/chat-room/exceptions/max-in
 import { UnauthorizedInvitationException } from "apps/msg/src/chat-room/exceptions/unauthorized-invitation.exception";
 import { UserNotInChatRoomException } from "apps/msg/src/chat-room/exceptions/user-not-in-chat-room.exception";
 import { MessageService } from "apps/msg/src/message/message.service";
-import { UserNotFoundedException } from "apps/msg/src/user/user-relation/exceptions/user-not-found.exception";
 import { UserService } from "apps/msg/src/user/user.service";
 import { ChatRoomNotFoundException } from "apps/msg/src/chat-room/exceptions/chat-room-not-found.exception";
 import { InvitedDutplicateException } from "apps/msg/src/chat-room/exceptions/invited-dutplicate.exception";
@@ -33,7 +32,7 @@ describe('ChatRoomService', () => {
             remove: jest.fn(),
         };
         const userServiceMock = {
-            findById: jest.fn(),
+            findByIdOrThrow: jest.fn(),
         };
         const messageServiceMock = {
             removeAllByChatRoomId: jest.fn(),
@@ -119,7 +118,7 @@ describe('ChatRoomService', () => {
             );
             const chatRoom = ChatRoom.of(title, invitedUserIds.map(userId => ChatRoomParticipant.of(1, userId)));
 
-            jest.spyOn(userService, 'findById').mockResolvedValue(host);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(host);
             jest.spyOn(chatRoomRepository, 'save').mockResolvedValue(chatRoom);
 
             // When
@@ -129,23 +128,11 @@ describe('ChatRoomService', () => {
             expect(result).toStrictEqual(chatRoom);
         });
 
-        it('실패: hostId에 해당되는 유저가 존재하지 않음', async () => {
-            // Given
-            const chatRoomSaveDto = new ChatRoomSaveDto(1, 'title', []);
-            jest.spyOn(userService, 'findById').mockResolvedValue(null);
-
-            // When
-            const resultPromise = chatRoomService.save(chatRoomSaveDto);
-
-            // Then
-            await expect(resultPromise).rejects.toThrow(UserNotFoundedException);
-        });
-
         it('실패: 초대 목록에 중복이 존재', async () => {
             // Given
             const chatRoomSaveDto = new ChatRoomSaveDto(1, 'title', [1, 1]);
             const host = User.of(EmailInfo.of('', ''), '', '', '', []);
-            jest.spyOn(userService, 'findById').mockResolvedValue(host);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(host);
 
             // When
             const resultPromise = chatRoomService.save(chatRoomSaveDto);
@@ -159,7 +146,7 @@ describe('ChatRoomService', () => {
             const hostId = 1;
             const chatRoomSaveDto = new ChatRoomSaveDto(hostId, 'title', [hostId]);
             const host = User.of(EmailInfo.of('', ''), '', '', '', []);
-            jest.spyOn(userService, 'findById').mockResolvedValue(host);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(host);
 
             // When
             const resultPromise = chatRoomService.save(chatRoomSaveDto);
@@ -172,7 +159,7 @@ describe('ChatRoomService', () => {
             // Given
             const chatRoomSaveDto = new ChatRoomSaveDto(777, 'title', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
             const host = User.of(EmailInfo.of('', ''), '', '', '', []);
-            jest.spyOn(userService, 'findById').mockResolvedValue(host);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(host);
 
             // When
             const resultPromise = chatRoomService.save(chatRoomSaveDto);
@@ -185,7 +172,7 @@ describe('ChatRoomService', () => {
             // Given
             const chatRoomSaveDto = new ChatRoomSaveDto(1, 'title', [2]);
             const host = User.of(EmailInfo.of('', ''), '', '', '', []);
-            jest.spyOn(userService, 'findById').mockResolvedValue(host);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(host);
 
             // When
             const resultPromise = chatRoomService.save(chatRoomSaveDto);

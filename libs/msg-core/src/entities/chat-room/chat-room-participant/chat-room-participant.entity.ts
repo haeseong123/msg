@@ -7,7 +7,7 @@ import { ChatRoom } from "../chat-room.entity";
 @Index(['chatRoomId', 'userId'], { unique: true })
 export class ChatRoomParticipant extends AssignedIdAndTimestampBaseEntity {
     @Column({ name: 'chat_room_id' })
-    chatRoomId: number;
+    chatRoomId: number | null;
 
     @Column({ name: 'user_id' })
     userId: number;

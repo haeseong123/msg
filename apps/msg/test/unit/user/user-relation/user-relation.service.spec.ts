@@ -15,7 +15,7 @@ describe('UserRelationService', () => {
 
     beforeEach(async () => {
         const userServiceMock = {
-            findById: jest.fn(),
+            findByIdOrThrow: jest.fn(),
             save: jest.fn(),
         };
 
@@ -39,7 +39,7 @@ describe('UserRelationService', () => {
             const userId = 1;
             const relation = [];
             const user = User.of(EmailInfo.of('local', 'domain'), '', '', '', relation);
-            jest.spyOn(userService, 'findById').mockResolvedValue(user);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
 
             // When
             const result = await userRelationService.findAllByUserId(userId);
@@ -75,8 +75,8 @@ describe('UserRelationService', () => {
         it('성공: 관계 갱신', async () => {
             // Given
             const hasRelationAlreadyFromUser = User.of(EmailInfo.of('', ''), '', '', '', [relation]);
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(hasRelationAlreadyFromUser);
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(toUser);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(hasRelationAlreadyFromUser);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(toUser);
             const relationUpdateSpy = jest.spyOn(hasRelationAlreadyFromUser, 'updateRelationStatus');
 
             // When
@@ -89,8 +89,8 @@ describe('UserRelationService', () => {
 
         it('성공: 관계 생성', async () => {
             // Given
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(fromUser);
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(toUser);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(fromUser);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(toUser);
             const relationCreateSpy = jest.spyOn(fromUser, 'createRelation');
 
             // When
@@ -104,26 +104,14 @@ describe('UserRelationService', () => {
         it('실패: 자기 자신을 관계에 추가할 순 없습니다.', async () => {
             // Given
             const fromUserEqualToUserDto = new UserRelationDto(1, 2, 2, UserRelationStatusEnum.BLOCK);
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(fromUser);
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(toUser);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(fromUser);
+            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(toUser);
 
             // When
             const resultPromise = userRelationService.save(fromUserEqualToUserDto);
 
             // Then
             await expect(resultPromise).rejects.toThrow(ArgumentInvalidException);
-        });
-
-        it('실패: dto.frumUserId 혹은 dto.toUserId에 해당되는 user가 존재하지 않습니다.', async () => {
-            // Given
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(null);
-            jest.spyOn(userService, 'findById').mockResolvedValueOnce(null);
-
-            // When
-            const resultPromise = userRelationService.save(userRelationDto);
-
-            // Then
-            await expect(resultPromise).rejects.toThrow(UserNotFoundedException);
         });
     });
 });

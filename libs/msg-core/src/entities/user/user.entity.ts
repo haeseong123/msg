@@ -2,7 +2,6 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 import { UserRelation } from "./user-relation/user-relation.entity";
 import { EmailInfo } from "./email-info";
-import { removeAt } from "@app/msg-core/util/remove-at";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
@@ -82,7 +81,7 @@ export class User extends AssignedIdAndTimestampBaseEntity {
             return
         }
 
-        this.relations = removeAt(this.relations, index);
+        this.relations.splice(index, 1);
     }
 
     private findRelationIndex(relations: UserRelation[], relation: UserRelation): number {
