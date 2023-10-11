@@ -5,6 +5,7 @@ import { FindAllMessageInfoDto } from "./dto/find-all-message-info.dto";
 import { ChatRoomService } from "../chat-room/chat-room.service";
 import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
 import { MessageSaveDto } from "./dto/message-save.dto";
+import { NotParticipantInChatRoomException } from "./exception/not-participant-in-chat-room.exception";
 
 @Injectable()
 export class MessageService {
@@ -17,9 +18,9 @@ export class MessageService {
         private readonly chatRoomService: ChatRoomService,
     ) { }
 
-    async findAllByChatRoomIdAndSenderId(dto: FindAllMessageInfoDto): Promise<Message[]> {
+    async findAllByChatRoomIdAndUserId(dto: FindAllMessageInfoDto): Promise<Message[]> {
         /**
-         * dto.chatRoomId에 해당되는 chatroom이 존재하는지 확인합니다.
+         * dto.chatRoomId에 해당되는 chatroom을 가져옵니다.
          */
         const chatRoom = await this.chatRoomService.findByIdOrThrow(dto.chatRoomId);
 
@@ -38,7 +39,7 @@ export class MessageService {
 
     async save(dto: MessageSaveDto): Promise<Message> {
         /**
-         * dto.sentChatRoomId에 해당되는 chatRoom이 존재하는지 확인합니다.
+         * dto.chatRoomId에 해당되는 chatroom을 가져옵니다.
          */
         const chatRoom = await this.chatRoomService.findByIdOrThrow(dto.sentChatRoomId);
 
@@ -66,7 +67,7 @@ export class MessageService {
         const isUserInChatRoom = chatRoom.participants.some(p => p.userId === userId);
 
         if (!isUserInChatRoom) {
-            throw new Error("채팅방에 참여중인 유저가 아닙니다.");
+            throw new NotParticipantInChatRoomException();
         }
     }
 }

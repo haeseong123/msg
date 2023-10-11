@@ -16,12 +16,12 @@ export class MessageSaveDto {
     private readonly _content: string;
 
     constructor(
-        senderId: number,
-        chatRoomId: number,
+        sentUserId: number,
+        sentChatRoomId: number,
         content: string,
     ) {
-        this._sentUserId = senderId;
-        this._sentChatRoomId = chatRoomId;
+        this._sentUserId = sentUserId;
+        this._sentChatRoomId = sentChatRoomId;
         this._content = content;
     }
 

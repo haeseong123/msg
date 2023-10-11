@@ -12,12 +12,12 @@ import { MessageSaveDto } from "./dto/message-save.dto";
 export class MessageController {
     constructor(private readonly messageService: MessageService) { }
     @Get()
-    async findAllByChatRoomId(
+    async findAllByChatRoomIdAndUserId(
         @Param('userId', ParseIntPipe) userId: number,
         @Param('chatRoomId', ParseIntPipe) chatRoomId: number,
     ): Promise<MessageDto[]> {
         const dto = new FindAllMessageInfoDto(userId, chatRoomId);
-        const messages = await this.messageService.findAllByChatRoomIdAndSenderId(dto);
+        const messages = await this.messageService.findAllByChatRoomIdAndUserId(dto);
 
         return messages.map(m => MessageDto.of(m));
     }

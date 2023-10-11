@@ -11,11 +11,12 @@ describe('ChatRoomController', () => {
 
     beforeEach(async () => {
         const serviceMock = {
-            findById: jest.fn,
-            findAllByUserId: jest.fn,
-            save: jest.fn,
-            leaveChatRoom: jest.fn,
+            findById: jest.fn(),
+            findAllByUserId: jest.fn(),
+            save: jest.fn(),
+            leaveChatRoom: jest.fn(),
         };
+
         const module: TestingModule = await Test.createTestingModule({
             controllers: [ChatRoomController],
             providers: [
