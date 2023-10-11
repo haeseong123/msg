@@ -7,10 +7,12 @@ import { ChatRoomRepositoryImpl } from "./chat-room.repository.impl";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
 import { MessageModule } from "../message/message.module";
+import { TransactionModule } from "../common/transaction/transaction.module";
 
 @Module({
     imports: [
         UserModule,
+        TransactionModule,
         forwardRef(() => MessageModule),
         TypeOrmModule.forFeature([ChatRoom]),
     ],

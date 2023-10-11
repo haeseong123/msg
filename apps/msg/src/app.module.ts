@@ -11,6 +11,7 @@ import { ArgumentInvalidException } from './common/exception/argument-invalid.ex
 import { MessageModule } from './message/message.module';
 // import { ChatModule } from './websocket/chat/chat.module';
 import { UserRelationModule } from './user/user-relation/user-relation.module';
+import { TransactionModule } from './common/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserRelationModule } from './user/user-relation/user-relation.module';
     ChatRoomModule,
     UserRelationModule,
     MessageModule,
+    TransactionModule,
     // ChatModule,
   ],
   providers: [

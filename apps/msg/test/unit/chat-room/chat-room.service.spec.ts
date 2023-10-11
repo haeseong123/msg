@@ -17,12 +17,14 @@ import { MessageService } from "apps/msg/src/message/message.service";
 import { UserService } from "apps/msg/src/user/user.service";
 import { ChatRoomNotFoundException } from "apps/msg/src/chat-room/exceptions/chat-room-not-found.exception";
 import { InvitedDutplicateException } from "apps/msg/src/chat-room/exceptions/invited-dutplicate.exception";
+import { TransactionService } from "apps/msg/src/common/transaction/transaction-service";
 
 describe('ChatRoomService', () => {
     let chatRoomService: ChatRoomService;
     let chatRoomRepository: ChatRoomRepository;
     let userService: UserService;
     let messageService: MessageService;
+    let transactionService: TransactionService;
 
     beforeEach(async () => {
         const chatRoomRepositoryMock = {
@@ -37,6 +39,9 @@ describe('ChatRoomService', () => {
         const messageServiceMock = {
             removeAllByChatRoomId: jest.fn(),
         };
+        const transactionServiceMock = {
+            logicWithTransaction: jest.fn(),
+        }
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -53,6 +58,10 @@ describe('ChatRoomService', () => {
                     provide: MessageService,
                     useValue: messageServiceMock,
                 },
+                {
+                    provide: TransactionService,
+                    useValue: transactionServiceMock,
+                }
             ]
         }).compile();
 
@@ -60,6 +69,7 @@ describe('ChatRoomService', () => {
         chatRoomRepository = module.get<ChatRoomRepository>(ChatRoomRepository);
         userService = module.get<UserService>(UserService);
         messageService = module.get<MessageService>(MessageService);
+        transactionService = module.get<TransactionService>(TransactionService);
     });
 
     describe('chatRoomId로 채팅방 가져오기', () => {
@@ -74,6 +84,33 @@ describe('ChatRoomService', () => {
 
             // Then
             expect(result).toStrictEqual(chatRoom);
+        });
+    });
+
+    describe('chatRoomId로 채팅방 가져오기, 없으면 throw', () => {
+        it('성공', async () => {
+            // Given
+            const chatRoomId = 1;
+            const chatRoom = ChatRoom.of('title', []);
+            jest.spyOn(chatRoomRepository, 'findById').mockResolvedValue(chatRoom);
+
+            // When
+            const result = await chatRoomService.findByIdOrThrow(chatRoomId);
+
+            // Then
+            expect(result).toStrictEqual(chatRoom);
+        });
+
+        it('실패: id에 해당되는 채팅방 없음', async () => {
+            // Given
+            const chatRoomId = 1;
+            jest.spyOn(chatRoomRepository, 'findById').mockResolvedValue(null);
+
+            // When
+            const resultPromise = chatRoomService.findByIdOrThrow(chatRoomId);
+
+            // Then
+            await expect(resultPromise).rejects.toThrow(ChatRoomNotFoundException);
         });
     });
 
@@ -228,6 +265,7 @@ describe('ChatRoomService', () => {
             const removeAllByChatRoomIdSpy = jest.spyOn(messageService, 'removeAllByChatRoomId');
             const removeSpy = jest.spyOn(chatRoomRepository, 'remove');
             jest.spyOn(chatRoomRepository, 'findById').mockResolvedValue(chatRoom);
+            jest.spyOn(transactionService, 'logicWithTransaction').mockImplementation((logic) => logic());
 
             // When
             const result = await chatRoomService.leaveChatRoom(chatRoomLeaveDto);

@@ -24,9 +24,9 @@ describe('AuthService', () => {
     beforeEach(async () => {
         const userServiceMock = {
             findByEmail: jest.fn(),
-            findByIdOrThrow: jest.fn(),
-            findByIds: jest.fn(),
             save: jest.fn(),
+            findByEmailOrThrow: jest.fn(),
+            findByIdOrThrow: jest.fn(),
         };
         const tokenServiceMock = {
             generateToken: jest.fn()
@@ -102,7 +102,7 @@ describe('AuthService', () => {
         it('성공', async () => {
             // Given
             const token = new MsgTokenDto('token', 'ref_token');
-            jest.spyOn(userService, 'findByEmail').mockResolvedValue(user);
+            jest.spyOn(userService, 'findByEmailOrThrow').mockResolvedValue(user);
             jest.spyOn(bcrypt, 'compare').mockImplementation(() => true);
             jest.spyOn(tokenService, 'generateToken').mockReturnValue(token);
 
@@ -113,20 +113,9 @@ describe('AuthService', () => {
             expect(result).toStrictEqual(token);
         });
 
-        it('실패: 이메일 불일치', async () => {
-            // Given
-            jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
-
-            // When
-            const resultPromise = authService.signin(userSigninDto);
-
-            // Then
-            await expect(resultPromise).rejects.toThrow(UserIncorrectEmailException);
-        });
-
         it('실패: 비밀번호 불일치', async () => {
             // Given
-            jest.spyOn(userService, 'findByEmail').mockResolvedValue(user);
+            jest.spyOn(userService, 'findByEmailOrThrow').mockResolvedValue(user);
             jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
 
             // When

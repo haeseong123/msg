@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { UserEmailInfoDto } from './dto/user-email-info.dto';
 import { UserNotFoundedException } from './user-relation/exceptions/user-not-found.exception';
+import { UserIncorrectEmailException } from '../auth/exceptions/user-incorrect-email.exception';
 
 @Injectable()
 export class UserService {
@@ -10,6 +11,16 @@ export class UserService {
 
     async findByEmail(dto: UserEmailInfoDto): Promise<User | null> {
         return await this.userRepository.findByEmail(dto.emailLocal, dto.emailDomain);
+    }
+
+    async findByEmailOrThrow(dto: UserEmailInfoDto): Promise<User> {
+        const user = await this.findByEmail(dto);
+
+        if (!user) {
+            throw new UserIncorrectEmailException();
+        }
+
+        return user;
     }
 
     async findByIdOrThrow(id: number): Promise<User> {

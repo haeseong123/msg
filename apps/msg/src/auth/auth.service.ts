@@ -3,9 +3,7 @@ import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { JwtPayload } from "./jwt/jwt-payload";
 import { compare } from "bcrypt";
 import { TokenExpiredException } from "./exceptions/token-expired.exception";
-import { UserIncorrectEmailException } from "./exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "./exceptions/user-incorrect-password.exception";
-import { UnauthorizedAccessException } from "./exceptions/unauthorized-access.exception";
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { UserEmailAlreadyExistsException } from "./exceptions/user-email-already-exists.exception";
 import { TokenService } from "./jwt/token.service";
@@ -53,14 +51,7 @@ export class AuthService {
         /**
          * client가 보낸 dto에 있는 email로 user를 가져옵니다. 
          */
-        const user = await this.userService.findByEmail(dto.emailInfoDto);
-
-        /**
-         * user가 존재하는지 확인합니다.
-         */
-        if (!user) {
-            throw new UserIncorrectEmailException();
-        }
+        const user = await this.userService.findByEmailOrThrow(dto.emailInfoDto);
 
         /**
          * user.password와 dto.password가 일치하는지 확인합니다.

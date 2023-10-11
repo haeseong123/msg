@@ -21,7 +21,7 @@ export class MessageService {
         /**
          * dto.chatRoomId에 해당되는 chatroom이 존재하는지 확인합니다.
          */
-        const chatRoom = await this.findChatRoomByIdOrThrow(dto.chatRoomId);
+        const chatRoom = await this.chatRoomService.findByIdOrThrow(dto.chatRoomId);
 
         /**
          * dto.userId가 chatRoom에 참여중인지 확인합니다.
@@ -40,7 +40,7 @@ export class MessageService {
         /**
          * dto.sentChatRoomId에 해당되는 chatRoom이 존재하는지 확인합니다.
          */
-        const chatRoom = await this.findChatRoomByIdOrThrow(dto.sentChatRoomId);
+        const chatRoom = await this.chatRoomService.findByIdOrThrow(dto.sentChatRoomId);
 
         /**
          * dto.sentUserId가 chatRoom에 참여중인지 확인합니다.
@@ -58,18 +58,8 @@ export class MessageService {
     async removeAllByChatRoomId(chatRoomId: number): Promise<Message[]> {
         const messages = await this.messageRepository.findAllByChatRoomId(chatRoomId);
         const removedMessages = await this.messageRepository.removeAll(messages);
-        
+
         return removedMessages;
-    }
-
-    private async findChatRoomByIdOrThrow(chatRoomId: number): Promise<ChatRoom> {
-        const chatRoom = await this.chatRoomService.findById(chatRoomId);
-
-        if (!chatRoom) {
-            throw new Error("chatRoomId에 해당되는 채팅방이 존재하지 않습니다.");
-        }
-
-        return chatRoom;
     }
 
     private async checkUserInChatRoom(chatRoom: ChatRoom, userId: number) {

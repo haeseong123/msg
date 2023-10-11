@@ -13,6 +13,7 @@ import { MaxInvitedIdsException } from './exceptions/max-invited-ids.exception';
 import { InvitedDutplicateException } from './exceptions/invited-dutplicate.exception';
 import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
 import { ChatRoomNotFoundException } from './exceptions/chat-room-not-found.exception';
+import { TransactionService } from '../common/transaction/transaction-service';
 
 @Injectable()
 export class ChatRoomService {
@@ -26,10 +27,21 @@ export class ChatRoomService {
          */
         @Inject(forwardRef(() => MessageService))
         private messageService: MessageService,
+        private transactionService: TransactionService,
     ) { }
 
     async findById(id: number): Promise<ChatRoom | null> {
         return await this.chatRoomRepository.findById(id);
+    }
+
+    async findByIdOrThrow(id: number): Promise<ChatRoom> {
+        const chatRoom = await this.findById(id);
+
+        if (!chatRoom) {
+            throw new ChatRoomNotFoundException();
+        }
+
+        return chatRoom;
     }
 
     async findAllByUserId(userId: number): Promise<ChatRoom[]> {
@@ -113,8 +125,10 @@ export class ChatRoomService {
          */
         if (chatRoom.participants.length <= 1) {
             /** 채팅방에 있는 모든 메시지 삭제 + 채팅방 삭제 */
-            await this.messageService.removeAllByChatRoomId(chatRoom.id);
-            await this.chatRoomRepository.remove(chatRoom);
+            await this.transactionService.logicWithTransaction(async () => {
+                await this.messageService.removeAllByChatRoomId(chatRoom.id);
+                await this.chatRoomRepository.remove(chatRoom);
+            });
         } else {
             /** 채팅방 나가기 */
             chatRoom.leaveChatRoom(participant);
