@@ -1,4 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpStatus } from '@nestjs/common';
+import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,7 +15,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, MsgResponse<T>
     intercept(context: ExecutionContext, next: CallHandler): Observable<MsgResponse<T>> {
         return next.handle().pipe(
             map((result: T) => {
-                const statusCode = context.switchToHttp().getResponse().statusCode || 200;
+                const statusCode = context.switchToHttp().getResponse<Request>().statusCode || 200;
                 const message = getSuccessResponseMessageForStatusCode(statusCode)
                 const timestamp = new Date().toISOString();
                 const successResponse: MsgResponse<T> = {

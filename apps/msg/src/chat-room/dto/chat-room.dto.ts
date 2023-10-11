@@ -1,16 +1,34 @@
-import { ChatRoomMessageDto } from "./chat-room-message.dto";
-import { ChatRoomUserDto } from "./chat-room-user.dto";
+import { Expose } from "class-transformer";
+import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
+import { ChatRoomParticipantDto } from "./chat-room-participant.dto";
 
 export class ChatRoomDto {
-    id: number;
-    name: string;
-    participants: ChatRoomUserDto[];
-    messages: ChatRoomMessageDto[];
+    @Expose({ name: 'id' })
+    private readonly _id: number;
 
-    constructor(id: number, name: string, participants: ChatRoomUserDto[], messages: ChatRoomMessageDto[]) {
-        this.id = id;
-        this.name = name;
-        this.participants = participants;
-        this.messages = messages;
+    @Expose({ name: 'title' })
+    private readonly _title: string;
+
+    @Expose({ name: 'participants' })
+    private readonly _participants: ChatRoomParticipantDto[];
+
+    constructor(
+        id: number,
+        title: string,
+        participants: ChatRoomParticipantDto[],
+    ) {
+        this._id = id;
+        this._title = title;
+        this._participants = participants;
+    }
+
+    static of(chatRoom: ChatRoom): ChatRoomDto {
+        const participantDtos = chatRoom.participants.map(p => new ChatRoomParticipantDto(p.chatRoomId, p.userId));
+
+        return new ChatRoomDto(
+            chatRoom.id,
+            chatRoom.title,
+            participantDtos,
+        );
     }
 }

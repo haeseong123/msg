@@ -1,4 +1,3 @@
-import { IsNotEmpty } from "class-validator";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 import { ChatRoom } from "../chat-room/chat-room.entity";
@@ -6,28 +5,37 @@ import { User } from "../user/user.entity";
 
 @Entity()
 export class Message extends AssignedIdAndTimestampBaseEntity {
-    @Column()
-    @IsNotEmpty()
-    senderId: number;
+    @JoinColumn({ name: 'sent_user_id' })
+    sentUserId: number;
 
-    @Column()
-    @IsNotEmpty()
-    chatRoomId: number;
+    @JoinColumn({ name: 'sent_chat_room_id' })
+    sentChatRoomId: number;
 
-    @Column()
+    @Column({ name: 'content' })
     content: string;
 
-    @Column()
-    sentAt: Date;
+    @ManyToOne(() => User)
+    @JoinColumn({ name: 'sent_user_id' })
+    private readonly _sentUser: User;
 
-    @Column({ nullable: true })
-    deletedAt: Date;
+    @ManyToOne(() => ChatRoom)
+    @JoinColumn({ name: 'sent_chat_room_id' })
+    private readonly _chatRoom: ChatRoom;
 
-    @ManyToOne(() => User, user => user.sentMessages, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'senderId' })
-    sender!: User;
+    static of(
+        sentUserId: number,
+        sentChatRoomId: number,
+        content: string,
+    ): Message {
+        const message = new Message();
+        message.sentUserId = sentUserId;
+        message.sentChatRoomId = sentChatRoomId;
+        message.content = content;
 
-    @ManyToOne(() => ChatRoom, chatRoom => chatRoom.messages, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'chatRoomId' })
-    chatRoom!: ChatRoom;
+        return message;
+    }
+
+    changeContent(content: string) {
+        this.content = content;
+    }
 }

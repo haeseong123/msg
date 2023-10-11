@@ -1,46 +1,52 @@
-import { MsgToken } from "apps/msg/src/auth/jwt/msg-token";
+import { MsgTokenDto } from "apps/msg/src/auth/jwt/dto/msg-token.dto";
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { JwtGuard } from "./jwt/guard/jwt.guard";
 import { JwtRefreshGuard } from "./jwt/guard/jwt-refresh.guard";
-import { UserSignupDto } from "../user/dto/user-signup.dto";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { CurrentUser } from "./decorator/current-user.decorator";
 import { UserDto } from "../user/dto/user.dto";
+import { UsingRefreshTokenDto } from "./dto/using-refresh-token.dto";
+import { UserSingUpDto } from "../user/dto/user-signup.dto";
+import { UsingRefreshToken } from "./decorator/using-refresh-token.decorator";
 
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Post('signup')
-    @HttpCode(HttpStatus.CREATED)
-    async signup(@Body() signupDto: UserSignupDto): Promise<UserDto> {
-        const user = await this.authService.signup(signupDto);
-        return new UserDto(
-            user.id,
-            user.email,
-            user.address,
-            user.nickname
-        );
+    async signup(
+        @Body() dto: UserSingUpDto
+    ): Promise<UserDto> {
+        const user = await this.authService.signup(dto);
+
+        return UserDto.of(user);
     }
 
     @Post('signin')
     @HttpCode(HttpStatus.OK)
-    async signin(@Body() signinDto: UserSigninDto): Promise<MsgToken> {
+    async signin(
+        @Body() signinDto: UserSigninDto
+    ): Promise<MsgTokenDto> {
         return await this.authService.signin(signinDto);
     }
 
     @Post('logout')
     @UseGuards(JwtGuard)
     @HttpCode(HttpStatus.OK)
-    async logout(@CurrentUser('sub') sub: number): Promise<void> {
+    async logout(
+        @CurrentUser('sub') sub: number
+    ): Promise<boolean> {
         return await this.authService.logout(sub);
     }
 
     @Post('refresh-token')
     @UseGuards(JwtRefreshGuard)
-    async refreshToken(@CurrentUser() user): Promise<MsgToken> {
-        const { sub: id, email, refreshToken } = user;
-        return await this.authService.refreshToken(id, email, refreshToken);
+    async refreshToken(
+        @UsingRefreshToken() dto: UsingRefreshTokenDto,
+    ): Promise<MsgTokenDto> {
+        const msgTokenDto = await this.authService.refreshToken(dto);
+
+        return msgTokenDto;
     }
 }

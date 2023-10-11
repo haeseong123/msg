@@ -13,10 +13,10 @@ export enum ErrorMessage {
     UNAUTHORIZED = '허가되지 않는 접근입니다.',
     TOKEN_EXPIRED = '토큰이 만료되었습니다.',
 
-    // USER-RELATIONSHIP
-    USER_RELATIONSHIP_FROM_ID_USER_ID_MISMATCH = '자신의 관계만 삭제/수정할 수 있습니다.',
-    USER_RELATIONSHIP_ID_PARAM_MISMATCH = '관계 id와 parameter가 일치하지 않습니다.',
-    USER_RELATIONSHIP_ALREADY_EXISTS = '이미 존재하는 관계입니다.',
+    // USER-RELATION
+    USER_RELATION_FROM_ID_USER_ID_MISMATCH = '자신의 관계만 삭제/수정할 수 있습니다.',
+    USER_RELATION_ID_PARAM_MISMATCH = 'DTO에 담긴 관계 id와 URL에 담긴 관계 id가 일치하지 않습니다.',
+    USER_RELATION_ALREADY_EXISTS = '이미 존재하는 관계입니다.',
 
     // CHAT-ROOM
     UNAUTHORIZED_INVITATION = '친구가 아닌 유저를 초대할 수 없습니다.',

@@ -1,41 +1,37 @@
 import { Message } from "@app/msg-core/entities/message/message.entity";
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Expose } from "class-transformer";
 
 export class MessageDto {
-    @IsNumber()
-    @IsOptional()
-    id?: number;
+    @Expose({ name: 'id' })
+    private readonly _id: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    senderId: number;
+    @Expose({ name: 'sentUserId' })
+    private readonly _sentUserId: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    chatRoomId: number;
+    @Expose({ name: 'sentChatRoomId' })
+    private readonly _sentChatRoomId: number;
 
-    @IsString()
-    @IsNotEmpty()
-    content: string;
+    @Expose({ name: 'content' })
+    private readonly _content: string;
 
     constructor(
         id: number,
-        senderId: number,
-        chatRoomId: number,
+        sentUserId: number,
+        sentChatRoomId: number,
         content: string,
     ) {
-        this.id = id;
-        this.senderId = senderId;
-        this.chatRoomId = chatRoomId;
-        this.content = content;
+        this._id = id;
+        this._sentUserId = sentUserId;
+        this._sentChatRoomId = sentChatRoomId;
+        this._content = content;
     }
 
-    toEntity(): Message {
-        const message = new Message();
-        message.senderId = this.senderId;
-        message.chatRoomId = this.chatRoomId;
-        message.content = this.content;
-        message.sentAt = new Date();
-        return message;
+    static of(message: Message): MessageDto {
+        return new MessageDto(
+            message.id,
+            message.sentUserId,
+            message.sentChatRoomId,
+            message.content,
+        );
     }
 }

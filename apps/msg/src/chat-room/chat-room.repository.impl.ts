@@ -11,45 +11,62 @@ export class ChatRoomRepositoryImpl implements ChatRoomRepository {
         private readonly repository: Repository<ChatRoom>
     ) { }
 
-    findByUserId(userId: number): Promise<ChatRoom[]> {
-        return this.repository.createQueryBuilder('cr')
-            .leftJoinAndSelect('cr.userChatRooms', 'ucr')
-            .leftJoinAndSelect('ucr.user', 'u')
-            .leftJoinAndSelect('cr.messages', 'm')
-            .where('ucr.userId = :userId', { userId })
+    async findById(id: number): Promise<ChatRoom | null> {
+        const chatRoom = await this.repository.findOneBy({ id });
+
+        return chatRoom;
+    }
+
+    async findByUserId(userId: number): Promise<ChatRoom[]> {
+        const chatRooms = await this.repository.createQueryBuilder('cr')
+            .leftJoinAndSelect('cr.participants', 'p')
+            .where('p.userId = :userId', { userId })
             .getMany();
+
+        return chatRooms;
     }
 
-    findByIdAndUserId(id: number, userId: number): Promise<ChatRoom | null> {
-        return this.repository.createQueryBuilder('cr')
-            .leftJoinAndSelect('cr.userChatRooms', 'ucr')
-            .leftJoinAndSelect('ucr.user', 'u')
-            .leftJoinAndSelect('cr.messages', 'm')
-            .where('cr.id = :id', { id })
-            .andWhere('ucr.userId = :userId', { userId })
-            .getOne();
+    async save(entity: ChatRoom): Promise<ChatRoom> {
+        return await this.repository.save(entity);
     }
 
-    findWithUserChatRoomsById(id: number): Promise<ChatRoom | null> {
-        return this.repository.createQueryBuilder('cr')
-            .innerJoinAndSelect('cr.userChatRooms', 'ucr')
-            .where('cr.id = :id', { id })
-            .getOne();
+    async remove(entity: ChatRoom): Promise<ChatRoom> {
+        const removedEntity = await this.repository.remove(entity);
+
+        return removedEntity;
     }
 
-    save(entity: ChatRoom): Promise<ChatRoom> {
-        return this.repository.save(entity);
-    }
+    // findByUserId(userId: number): Promise<ChatRoom[]> {
+    //     return this.repository.createQueryBuilder('cr')
+    //         .leftJoinAndSelect('cr.userChatRooms', 'ucr')
+    //         .leftJoinAndSelect('ucr.user', 'u')
+    //         .leftJoinAndSelect('cr.messages', 'm')
+    //         .where('ucr.userId = :userId', { userId })
+    //         .getMany();
+    // }
 
-    remove(entity: ChatRoom): Promise<ChatRoom> {
-        return this.repository.remove(entity);
-    }
+    // findByIdAndUserId(id: number, userId: number): Promise<ChatRoom | null> {
+    //     return this.repository.createQueryBuilder('cr')
+    //         .leftJoinAndSelect('cr.userChatRooms', 'ucr')
+    //         .leftJoinAndSelect('ucr.user', 'u')
+    //         .leftJoinAndSelect('cr.messages', 'm')
+    //         .where('cr.id = :id', { id })
+    //         .andWhere('ucr.userId = :userId', { userId })
+    //         .getOne();
+    // }
 
-    isUserInChatRoom(id: number, userId: number): Promise<boolean> {
-        return this.repository.createQueryBuilder('cr')
-            .innerJoinAndSelect('cr.userChatRooms', 'ucr')
-            .where('cr.id = :id', { id })
-            .andWhere('ucr.userId = :userId', { userId })
-            .getExists();
-    }
+    // findWithUserChatRoomsById(id: number): Promise<ChatRoom | null> {
+    //     return this.repository.createQueryBuilder('cr')
+    //         .innerJoinAndSelect('cr.userChatRooms', 'ucr')
+    //         .where('cr.id = :id', { id })
+    //         .getOne();
+    // }
+
+    // isUserInChatRoom(id: number, userId: number): Promise<boolean> {
+    //     return this.repository.createQueryBuilder('cr')
+    //         .innerJoinAndSelect('cr.userChatRooms', 'ucr')
+    //         .where('cr.id = :id', { id })
+    //         .andWhere('ucr.userId = :userId', { userId })
+    //         .getExists();
+    // }
 }

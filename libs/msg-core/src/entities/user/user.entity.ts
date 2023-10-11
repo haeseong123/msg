@@ -1,52 +1,103 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
 import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
-import { Message } from "../message/message.entity";
-import { Notification } from "../notification/notification.entity";
-import { UserChatRoom } from "../user-chat-room/user-chat-room.entity";
-import { UserRelationship } from "../user-relationship/user-relationship.entity";
+import { UserRelation } from "./user-relation/user-relation.entity";
+import { EmailInfo } from "./email-info";
+import { removeAt } from "@app/msg-core/util/remove-at";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
-    @IsEmail()
-    @Column('varchar', { unique: true })
-    email: string;
+    @Column(() => EmailInfo, { prefix: false })
+    emailInfo: EmailInfo;
 
-    @IsNotEmpty()
-    @Column('varchar')
+    @Column({ name: 'password', type: 'varchar' })
     password: string;
 
-    @IsNotEmpty()
-    @Column('varchar')
-    address: string;
-
-    @IsNotEmpty()
-    @Column('varchar', { length: 50 })
+    @Column({ name: 'nickname', type: 'varchar', length: 15 })
     nickname: string;
 
-    @Column('varchar', { nullable: true })
-    refreshToken: string;
+    @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
+    refreshToken: string | null;
 
-    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.user)
-    userChatRooms!: UserChatRoom[];
+    @OneToMany(() => UserRelation, (userRelation) => userRelation.fromUserId, {
+        eager: true,
+        cascade: ['insert', 'update', 'remove'],
+    })
+    relations: UserRelation[]
 
-    @OneToMany(() => Message, message => message.sender)
-    sentMessages!: Message[];
+    static of(
+        emailInfo: EmailInfo,
+        password: string,
+        nickname: string,
+        refreshToken: string | null,
+        relations: UserRelation[],
+    ): User {
+        const user = new User();
+        user.emailInfo = emailInfo;
+        user.password = password;
+        user.nickname = nickname;
+        user.refreshToken = refreshToken;
+        user.relations = relations;
 
-    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.fromUser)
-    relationshipFromMe!: UserRelationship[];
+        return user;
+    }
 
-    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.toUser)
-    relationshipToMe!: UserRelationship[];
+    createRefreshToken(refreshToken: string) {
+        this.refreshToken = refreshToken;
+    }
 
-    @OneToMany(() => Notification, notification => notification.user)
-    notifications!: Notification[];
+    removeRefreshToken() {
+        this.refreshToken = null;
+    }
 
-    constructor(email: string, password: string, address: string, nickname: string) {
-        super();
-        this.email = email;
-        this.password = password;
-        this.address = address;
-        this.nickname = nickname;
+    createRelation(relation: UserRelation) {
+        /**
+         * relations에 해당 relation이 존재하면 아무 일도 하지 않습니다.
+         */
+        const existingRelation = this.findRelation(this.relations, relation);
+        if (existingRelation) {
+            return;
+        }
+
+        this.relations.push(relation);
+    }
+
+    updateRelationStatus(relation: UserRelation) {
+        /**
+         * relations에 해당 relation이 존재하지 않으면 아무 일도 하지 않습니다.
+         */
+        const existingRelation = this.findRelation(this.relations, relation);
+        if (!existingRelation) {
+            return;
+        }
+
+        existingRelation.updaetStatus(relation.status);
+    }
+
+    removeRelation(relation: UserRelation) {
+        /**
+         * relations에 해당 relation이 존재하지 않으면 아무 일도 하지 않습니다.
+         */
+        const index = this.findRelationIndex(this.relations, relation);
+        if (index < 0) {
+            return
+        }
+
+        this.relations = removeAt(this.relations, index);
+    }
+
+    private findRelationIndex(relations: UserRelation[], relation: UserRelation): number {
+        const index = relations.findIndex(r => r.id === relation.id);
+
+        return index;
+    }
+
+    private findRelation(relations: UserRelation[], relation: UserRelation): UserRelation | undefined {
+        const index = this.findRelationIndex(relations, relation);
+
+        if (index < 0) {
+            return undefined
+        }
+
+        return relations[index];
     }
 }

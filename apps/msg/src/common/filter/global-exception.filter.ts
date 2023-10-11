@@ -6,8 +6,8 @@ import { MsgResponse } from '../interceptor/response.interceptor';
 export class GlobalExceptionFIlter implements ExceptionFilter {
     private readonly logger = new Logger('GlobalExceptionFIlter');
     catch(exception: unknown, host: ArgumentsHost): void {
-        const ctx = host.switchToHttp();
-        const response = ctx.getResponse<Response>();
+        const context = host.switchToHttp();
+        const response = context.getResponse<Response>();
         const statusCode = exception instanceof HttpException
             ? exception.getStatus()
             : HttpStatus.INTERNAL_SERVER_ERROR

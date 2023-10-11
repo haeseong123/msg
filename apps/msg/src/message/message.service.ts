@@ -1,34 +1,82 @@
 import { Message } from "@app/msg-core/entities/message/message.entity";
-import { Injectable } from "@nestjs/common";
-import { MessageDto } from "./dto/message.dto";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { MessageRepository } from "./message.repository";
-import { MandatoryArgumentNullException } from "../common/exception/mandatory-argument-null.exception";
+import { FindAllMessageInfoDto } from "./dto/find-all-message-info.dto";
+import { ChatRoomService } from "../chat-room/chat-room.service";
+import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
+import { MessageSaveDto } from "./dto/message-save.dto";
 
 @Injectable()
 export class MessageService {
-    constructor(private readonly messageRepository: MessageRepository) { }
+    constructor(
+        private readonly messageRepository: MessageRepository,
+        /**
+         * @deprecated 의존성 순환 문제 해결 필요
+         */
+        @Inject(forwardRef(() => ChatRoomService))
+        private readonly chatRoomService: ChatRoomService,
+    ) { }
 
-    async findAllByChatRoomIdAndSenderId(chatRoomId: number, senderId: number): Promise<Message[]> {
-        return this.messageRepository.findAllByChatRoomIdAndSenderId(chatRoomId, senderId);
+    async findAllByChatRoomIdAndSenderId(dto: FindAllMessageInfoDto): Promise<Message[]> {
+        /**
+         * dto.chatRoomId에 해당되는 chatroom이 존재하는지 확인합니다.
+         */
+        const chatRoom = await this.findChatRoomByIdOrThrow(dto.chatRoomId);
+
+        /**
+         * dto.userId가 chatRoom에 참여중인지 확인합니다.
+         */
+        this.checkUserInChatRoom(chatRoom, dto.userId);
+
+        /**
+         * message를 조회합니다.
+         */
+        const messages = await this.messageRepository.findAllByChatRoomId(dto.chatRoomId);
+
+        return messages;
     }
 
-    async save(messageDto: MessageDto): Promise<Message> {
-        return this.messageRepository.save(messageDto.toEntity());
+    async save(dto: MessageSaveDto): Promise<Message> {
+        /**
+         * dto.sentChatRoomId에 해당되는 chatRoom이 존재하는지 확인합니다.
+         */
+        const chatRoom = await this.findChatRoomByIdOrThrow(dto.sentChatRoomId);
+
+        /**
+         * dto.sentUserId가 chatRoom에 참여중인지 확인합니다.
+         */
+        this.checkUserInChatRoom(chatRoom, dto.sentUserId);
+
+        /**
+         * message를 저장합니다.
+         */
+        const savedMessage = await this.messageRepository.save(dto.toEntity());
+
+        return savedMessage
     }
 
-    async update(messageDto: MessageDto): Promise<void> {
-        if (!messageDto.id) {
-            throw new MandatoryArgumentNullException()
+    async removeAllByChatRoomId(chatRoomId: number): Promise<Message[]> {
+        const messages = await this.messageRepository.findAllByChatRoomId(chatRoomId);
+        const removedMessages = await this.messageRepository.removeAll(messages);
+        
+        return removedMessages;
+    }
+
+    private async findChatRoomByIdOrThrow(chatRoomId: number): Promise<ChatRoom> {
+        const chatRoom = await this.chatRoomService.findById(chatRoomId);
+
+        if (!chatRoom) {
+            throw new Error("chatRoomId에 해당되는 채팅방이 존재하지 않습니다.");
         }
 
-        return this.messageRepository.update(messageDto.id, { content: messageDto.content });
+        return chatRoom;
     }
 
-    async delete(id: number): Promise<void> {
-        return await this.messageRepository.delete(id);
-    }
+    private async checkUserInChatRoom(chatRoom: ChatRoom, userId: number) {
+        const isUserInChatRoom = chatRoom.participants.some(p => p.userId === userId);
 
-    async isOwnerTheMessage(id: number, senderId: number): Promise<boolean> {
-        return await this.messageRepository.isOwnerTheMessage(id, senderId);
+        if (!isUserInChatRoom) {
+            throw new Error("채팅방에 참여중인 유저가 아닙니다.");
+        }
     }
 }

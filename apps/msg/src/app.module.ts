@@ -4,14 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ChatRoomModule } from './chat-room/chat-room.module';
 import { GlobalExceptionFIlter } from './common/filter/global-exception.filter';
-import { UserChatRoomModule } from './user-chat-room/user-chat-room.module';
-import { UserRelationshipModule } from './user-relationship/user-relationship.module';
 import { UserModule } from './user/user.module';
 import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { databaseConfig } from './common/config/database.config';
 import { ArgumentInvalidException } from './common/exception/argument-invalid.exception';
 import { MessageModule } from './message/message.module';
-import { ChatModule } from './chat/chat.module';
+// import { ChatModule } from './websocket/chat/chat.module';
+import { UserRelationModule } from './user/user-relation/user-relation.module';
 
 @Module({
   imports: [
@@ -19,10 +18,9 @@ import { ChatModule } from './chat/chat.module';
     AuthModule,
     UserModule,
     ChatRoomModule,
-    UserRelationshipModule,
-    UserChatRoomModule,
+    UserRelationModule,
     MessageModule,
-    ChatModule,
+    // ChatModule,
   ],
   providers: [
     /** Incoming request

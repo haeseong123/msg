@@ -6,27 +6,19 @@ import { UserRepository } from './user.repository';
 export class UserService {
     constructor(private userRepository: UserRepository) { }
 
-    async findUserByEmail(email: string): Promise<User | null> {
-        return await this.userRepository.findOneByEmail(email);
+    async findByEmail(emailLocal: string, emailDomain: string): Promise<User | null> {
+        return await this.userRepository.findByEmail(emailLocal, emailDomain);
     }
 
-    async findUserById(id: number): Promise<User | null> {
-        return await this.userRepository.findOneById(id);
+    async findById(id: number): Promise<User | null> {
+        return await this.userRepository.findById(id);
+    }
+
+    async findByIds(ids: number[]): Promise<User[]> {
+        return await this.userRepository.findByIds(ids);
     }
 
     async save(user: User): Promise<User> {
         return await this.userRepository.save(user);
-    }
-
-    async update(id: number, data: Partial<User>): Promise<void> {
-        return await this.userRepository.update(id, data);
-    }
-
-    async findUserByIds(ids: number[]): Promise<User[]> {
-        return await this.userRepository.findByIds(ids);
-    }
-
-    async findUserWithRelationshipById(userId: number): Promise<User | null> {
-        return await this.userRepository.findWithRelationshipById(userId);
     }
 }
