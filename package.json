@@ -90,7 +90,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/msg-core(|/.*)$": "<rootDir>/libs/msg-core/src/$1"
+      "^@app/msg-core(|/.*)$": "<rootDir>/libs/msg-core/src/$1",
+      "^apps/(.*)$":"<rootDir>/apps/$1"
     }
   }
 }

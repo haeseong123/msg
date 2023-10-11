@@ -1,12 +1,14 @@
+import { EmailInfo } from "@app/msg-core/entities/user/email-info";
 import { User } from "@app/msg-core/entities/user/user.entity";
-import { Test, TestingModule } from "@nestjs/testing";
-import { UserSigninDto } from "../../../src/user/dto/user-signin.dto";
-import { UserSignupDto } from "../../../src/user/dto/user-signup.dto";
-import { UserDto } from "../../../src/user/dto/user.dto";
-import { AuthController } from "../../../src/auth/auth.controller"
-import { AuthService } from "../../../src/auth/auth.service";
-import { JwtPayload } from "../../../src/auth/jwt/jwt-payload";
-import { MsgToken } from "../../../src/auth/jwt/dto/msg-token.dto";
+import { TestingModule, Test } from "@nestjs/testing";
+import { AuthController } from "apps/msg/src/auth/auth.controller";
+import { AuthService } from "apps/msg/src/auth/auth.service";
+import { UsingRefreshTokenDto } from "apps/msg/src/auth/dto/using-refresh-token.dto";
+import { MsgTokenDto } from "apps/msg/src/auth/jwt/dto/msg-token.dto";
+import { UserEmailInfoDto } from "apps/msg/src/user/dto/user-email-info.dto";
+import { UserSigninDto } from "apps/msg/src/user/dto/user-signin.dto";
+import { UserSingUpDto } from "apps/msg/src/user/dto/user-signup.dto";
+import { UserDto } from "apps/msg/src/user/dto/user.dto";
 
 describe('AuthController', () => {
     let authController: AuthController;
@@ -34,40 +36,22 @@ describe('AuthController', () => {
         authService = module.get<AuthService>(AuthService);
     });
 
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
-    describe('회원_가입', () => {
+    describe('회원 가입', () => {
         it('성공', async () => {
             // Given
-            const signupDto = new UserSignupDto()
-            signupDto.email = "email";
-            signupDto.password = "password";
-            signupDto.address = "address";
-            signupDto.nickname = "nickname";
-            const user: User = new User(
-                signupDto.email,
-                signupDto.password,
-                signupDto.address,
-                signupDto.nickname
-            );
-            user.id = 1;
-            const userDto: UserDto = new UserDto(
-                user.id,
-                user.email,
-                user.address,
-                user.nickname
-            );
-            const signupControllerSpy = jest.spyOn(authController, 'signup');
-            const signupServiceSpy = jest.spyOn(authService, 'signup').mockResolvedValue(user);
+            const userEmailInfoDto = new UserEmailInfoDto('hs@naver.com');
+            const password = 'password';
+            const nickname = 'nickname';
+
+            const userSingUpDto = new UserSingUpDto(userEmailInfoDto, password, nickname);
+            const user = User.of(EmailInfo.of(userEmailInfoDto.emailLocal, userEmailInfoDto.emailDomain), password, nickname, null, []);
+            const userDto = UserDto.of(user);
+            jest.spyOn(authService, 'signup').mockResolvedValue(user);
 
             // When
-            const result = await authController.signup(signupDto)
+            const result = await authController.signup(userSingUpDto);
 
             // Then
-            expect(signupControllerSpy).toHaveBeenCalledWith(signupDto);
-            expect(signupServiceSpy).toHaveBeenCalledWith(signupDto);
             expect(result).toStrictEqual(userDto);
         });
     });
@@ -75,21 +59,15 @@ describe('AuthController', () => {
     describe('로그인', () => {
         it('성공', async () => {
             // Given
-            const signinDto: UserSigninDto = {
-                email: 'test@test.com',
-                password: 'test123',
-            };
-            const msgToken: MsgToken = { accessToken: 'access token', refreshToken: 'refresh token' };
-            const signinControllerSpy = jest.spyOn(authController, 'signin');
-            const signinServiceSpy = jest.spyOn(authService, 'signin').mockResolvedValue(msgToken)
+            const signinDto = new UserSigninDto(new UserEmailInfoDto('hs@naver.com'), 'password');
+            const token = new MsgTokenDto('token', 'refresh_token');
+            jest.spyOn(authService, 'signin').mockResolvedValue(token);
 
             // When
             const result = await authController.signin(signinDto);
 
             // Then
-            expect(signinControllerSpy).toHaveBeenCalledWith(signinDto);
-            expect(signinServiceSpy).toHaveBeenCalledWith(signinDto);
-            expect(result).toBe(msgToken);
+            expect(result).toBe(token);
         });
     });
 
@@ -97,38 +75,29 @@ describe('AuthController', () => {
         it('성공', async () => {
             // Given
             const sub = 1
-            const logoutControllerSpy = jest.spyOn(authController, 'logout');
-            const logoutServiceSpy = jest.spyOn(authService, 'logout');
+            const expectResult = true
+            jest.spyOn(authService, 'logout').mockResolvedValue(expectResult);
 
             // When
             const result = await authController.logout(sub);
 
             // Then
-            expect(logoutControllerSpy).toHaveBeenCalledWith(sub);
-            expect(logoutServiceSpy).toHaveBeenCalledWith(sub);
-            expect(result).toBe(undefined);
+            expect(result).toBe(expectResult);
         });
     });
 
     describe('토큰_갱신', () => {
         it('성공', async () => {
             // Given
-            const tokenPayload: JwtPayload & { refreshToken: string } = {
-                sub: 1,
-                email: 'test@example.com',
-                refreshToken: 'refresh_token'
-            }
-            const msgToken: MsgToken = { accessToken: 'new_access_token', refreshToken: 'new_refresh_tokeb' }
-            const refreshTokenControllerSpy = jest.spyOn(authController, 'refreshToken');
-            const refreshTokenServiceSpy = jest.spyOn(authService, 'refreshToken').mockResolvedValue(msgToken);
+            const dto = new UsingRefreshTokenDto(1, "refresh_token");
+            const newToken = new MsgTokenDto('new_token', 'new_ref_token');
+            jest.spyOn(authService, 'refreshToken').mockResolvedValue(newToken);
 
             // When
-            const result = await authController.refreshToken(tokenPayload)
+            const result = await authController.refreshToken(dto);
 
             // Then
-            expect(refreshTokenControllerSpy).toHaveBeenCalledWith(tokenPayload);
-            expect(refreshTokenServiceSpy).toHaveBeenCalledWith(tokenPayload.sub, tokenPayload.email, tokenPayload.refreshToken);
-            expect(result).toStrictEqual(msgToken);
+            expect(result).toStrictEqual(newToken);
         })
     })
 })

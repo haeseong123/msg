@@ -3,11 +3,16 @@ import { ChatRoomRepository } from './chat-room.repository';
 import { ChatRoomSaveDto } from './dto/chat-room-save.dto';
 import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
 import { UnauthorizedInvitationException } from './exceptions/unauthorized-invitation.exception';
-import { UserDuplicateInvitationException } from './exceptions/user-duplicate-invitation.exception';
 import { UserRelationStatusEnum } from '@app/msg-core/entities/user/user-relation/user-relation-status.enum';
 import { UserService } from '../user/user.service';
 import { UserNotFoundedException } from '../user/user-relation/exceptions/user-not-found.exception';
 import { MessageService } from '../message/message.service';
+import { ChatRoomLeaveDto } from './dto/chat-room-leave.dto';
+import { HostIdInInvitedUserIdsException } from './exceptions/host-id-in-invited-user-ids.exception';
+import { MaxInvitedIdsException } from './exceptions/max-invited-ids.exception';
+import { InvitedDutplicateException } from './exceptions/invited-dutplicate.exception';
+import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
+import { ChatRoomNotFoundException } from './exceptions/chat-room-not-found.exception';
 
 @Injectable()
 export class ChatRoomService {
@@ -46,14 +51,14 @@ export class ChatRoomService {
          */
         const inviteeUserIdSet: Set<number> = new Set(dto.invitedUserIds);
         if (inviteeUserIdSet.size < dto.invitedUserIds.length) {
-            throw new UserDuplicateInvitationException();
+            throw new InvitedDutplicateException();
         }
 
         /**
          * `초대 목록`에 호스트의 id가 있어선 안 됩니다.
          */
         if (inviteeUserIdSet.has(dto.hostUserId)) {
-            throw new Error('');
+            throw new HostIdInInvitedUserIdsException();
         }
 
         /**
@@ -63,7 +68,7 @@ export class ChatRoomService {
          */
         const chatRoomMaxSize = 10 - 1;
         if (inviteeUserIdSet.size > chatRoomMaxSize) {
-            throw new Error('');
+            throw new MaxInvitedIdsException();
         }
 
         /**
@@ -87,34 +92,35 @@ export class ChatRoomService {
         return await this.chatRoomRepository.save(chatRoom);
     }
 
-    async leaveChatRoom(id: number, userId: number): Promise<ChatRoom> {
-        const chatRoom = await this.chatRoomRepository.findById(id);
-        const participant = chatRoom.participants.find(p => p.userId === userId);
+    async leaveChatRoom(dto: ChatRoomLeaveDto): Promise<ChatRoom> {
+        const chatRoom = await this.chatRoomRepository.findById(dto.chatRoomId);
 
         /**
          * 채팅방이 존재하는지 확인합니다.
          */
         if (!chatRoom) {
-            throw new Error('id에 해당되는 chatRoom이 없습니다.');
+            throw new ChatRoomNotFoundException();
         }
 
         /**
          * 요청을 보낸 유저가 해당 채팅방에 참여중인지 확인합니다.
          */
+        const participant = chatRoom.participants.find(p => p.userId === dto.userId);
         if (!participant) {
-            throw new Error('해당 채팅방의 참여자가 아닙니다.');
+            throw new UserNotInChatRoomException();
         }
 
         /**
-         * 채팅방에 참여자가 한명이라면 채팅방 자체를 삭제합니다.
-         * 이때 채팅방의 메시지도 전부 삭제합니다.
+         * 채팅방에 참여자가 한명이면 채팅방을 삭제하고 채팅방에 있는 모든 메시지도 삭제합니다.
          * 
          * 채팅방에 참여자가 둘 이상이라면 채팅방을 나가기만 합니다.
          */
         if (chatRoom.participants.length <= 1) {
+            /** 채팅방에 있는 모든 메시지 삭제 + 채팅방 삭제 */
             await this.messageService.removeAllByChatRoomId(chatRoom.id);
             await this.chatRoomRepository.remove(chatRoom);
         } else {
+            /** 채팅방 나가기 */
             chatRoom.leaveChatRoom(participant);
             await this.chatRoomRepository.save(chatRoom);
         }

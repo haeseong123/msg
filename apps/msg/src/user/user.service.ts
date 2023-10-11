@@ -1,13 +1,14 @@
 import { User } from '@app/msg-core/entities/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
+import { UserEmailInfoDto } from './dto/user-email-info.dto';
 
 @Injectable()
 export class UserService {
     constructor(private userRepository: UserRepository) { }
 
-    async findByEmail(emailLocal: string, emailDomain: string): Promise<User | null> {
-        return await this.userRepository.findByEmail(emailLocal, emailDomain);
+    async findByEmail(dto: UserEmailInfoDto): Promise<User | null> {
+        return await this.userRepository.findByEmail(dto.emailLocal, dto.emailDomain);
     }
 
     async findById(id: number): Promise<User | null> {

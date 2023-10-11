@@ -23,6 +23,16 @@ export class UserSingUpDto {
     @MaxLength(15)
     private readonly _nickname: string;
 
+    constructor(
+        emailInfoDto: UserEmailInfoDto,
+        password: string,
+        nickname: string,
+    ) {
+        this._emailInfoDto = emailInfoDto;
+        this._password = password;
+        this._nickname = nickname;
+    }
+
     async toEntity(): Promise<User> {
         const email = EmailInfo.of(this.emailInfoDto.emailLocal, this.emailInfoDto.emailDomain);
         const hashedPassword = await hashString(this._password);

@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { UserService } from "../user.service";
 import { UserRelation } from "@app/msg-core/entities/user/user-relation/user-relation.entity";
 import { UserRelationDto } from "./dto/user-relation.dto";
+import { UserNotFoundedException } from "./exceptions/user-not-found.exception";
+import { ArgumentInvalidException } from "../../common/exception/argument-invalid.exception";
 
 @Injectable()
 export class UserRelationService {
@@ -23,17 +25,17 @@ export class UserRelationService {
         ]);
 
         /**
-         * dto.frumUserId에 해당되는 user가 있는지 확인합니다.
+         * 자기 자신을 FOLLOW 혹은 BLOCK 할 수 없습니다.
          */
-        if (!fromUser) {
-            throw new Error("fromId에 맞는 유저가 없습니다.");
+        if (dto.fromUserId === dto.toUserId) {
+            throw new ArgumentInvalidException();
         }
 
         /**
-         * dto.toUserId에 해당되는 user가 있는지 확인합니다.
+         * dto.frumUserId, dto.toUserId에 해당되는 user가 있는지 확인합니다.
          */
-        if (!toUser) {
-            throw new Error("toId에 맞는 유저가 없습니다.");
+        if (!fromUser || !toUser) {
+            throw new UserNotFoundedException();
         }
 
         /**
@@ -42,39 +44,24 @@ export class UserRelationService {
          * 존재하는 관계가 없다면, 관계를 새로 만듭니다.
          */
         const relation = dto.toEntity();
-        const isAlreadyExsistsRelation = fromUser.relations.find(r => r.toUserId === dto.toUserId);
-        if (isAlreadyExsistsRelation) {
-            fromUser.createRelation(relation);
-        } else {
+        const isAlreadyExsisteRelation = fromUser.relations.some(r => r.toUserId === dto.toUserId);
+        
+        if (isAlreadyExsisteRelation) {
             fromUser.updateRelationStatus(relation);
+        } else {
+            fromUser.createRelation(relation);
         }
+
+        /**
+         * 새로운 관계 혹은 갱신된 관계를 DB에 저장합니다.
+         */
+        await this.userService.save(fromUser);
 
         return relation;
     }
 
     async update(dto: UserRelationDto): Promise<UserRelation> {
         return await this.save(dto);
-    }
-
-    // withTransaction
-    async delete(id: number, userId: number): Promise<boolean> {
-        // userId에 해당되는 유저가 있는지 확인
-        const user = await this.userService.findById(userId);
-        if (!user) {
-            throw new Error("userId에 맞는 유저가 없습니다.");
-        }
-
-        // id에 해당되는 관계가 있는지 확인
-        const relation = user.relations.find(r => r.id === id);
-        if (!relation) {
-            throw new Error("id에 맞는 관계가 없습니다.");
-        }
-
-        // 관계 삭제
-        user.removeRelation(relation);
-        await this.userService.save(user);
-
-        return true;
     }
 }
 

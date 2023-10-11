@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { JwtGuard } from "../../auth/jwt/guard/jwt.guard";
 import { UserGuard } from "../guard/user.guard";
 import { UserRelationService } from "./user-relation.service";
@@ -12,7 +12,7 @@ export class UserRelationController {
     constructor(private readonly userRelationService: UserRelationService) { }
 
     @Get()
-    async findAll(
+    async findAllByUserId(
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<UserRelationDto[]> {
         const relations = await this.userRelationService.findAllByUserId(userId);
@@ -38,15 +38,5 @@ export class UserRelationController {
         const updatedRelation = await this.userRelationService.update(dto);
 
         return UserRelationDto.of(updatedRelation);
-    }
-
-    @Delete(':id')
-    async delete(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<boolean> {
-        const result = await this.userRelationService.delete(id, userId)
-
-        return result;
     }
 }

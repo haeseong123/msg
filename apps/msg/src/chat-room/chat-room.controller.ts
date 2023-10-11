@@ -4,6 +4,7 @@ import { ChatRoomService } from "./chat-room.service";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
 import { UserGuard } from "../user/guard/user.guard";
+import { ChatRoomLeaveDto } from "./dto/chat-room-leave.dto";
 
 @UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/chat-rooms')
@@ -33,8 +34,9 @@ export class ChatRoomController {
         @Param('userId', ParseIntPipe) userId: number,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<ChatRoomDto> {
-        const leftCharRoom = await this.chatRoomService.leaveChatRoom(id, userId);
+        const dto = new ChatRoomLeaveDto(userId, id);
+        const leftChatRoom = await this.chatRoomService.leaveChatRoom(dto);
 
-        return ChatRoomDto.of(leftCharRoom);
+        return ChatRoomDto.of(leftChatRoom);
     }
 }

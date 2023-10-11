@@ -28,7 +28,7 @@ export class AuthService {
         /**
          * client가 보낸 dto에 있는 email로 user를 가져옵니다. 
          */
-        const duplicateEmailUser = await this.userService.findByEmail(dto.emailInfoDto.emailLocal, dto.emailInfoDto.emailDomain);
+        const duplicateEmailUser = await this.userService.findByEmail(dto.emailInfoDto);
 
         /**
          * 이메일 중복을 확인합니다.
@@ -53,7 +53,7 @@ export class AuthService {
         /**
          * client가 보낸 dto에 있는 email로 user를 가져옵니다. 
          */
-        const user = await this.userService.findByEmail(dto.emailInfoDto.emailLocal, dto.emailInfoDto.emailDomain);
+        const user = await this.userService.findByEmail(dto.emailInfoDto);
 
         /**
          * user가 존재하는지 확인합니다.
