@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/msg-core/tsconfig.lib.json"
       }
+    },
+    "msg-realtime": {
+      "type": "application",
+      "root": "apps/msg-realtime",
+      "entryFile": "main",
+      "sourceRoot": "apps/msg-realtime/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/msg-realtime/tsconfig.app.json"
+      }
     }
   }
 }

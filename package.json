@@ -10,16 +10,25 @@
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/msg/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/msg/test/jest-e2e.json",
-    "start:msg:dev": "nest start msg --debug --watch",
-    "infra:local": "docker-compose -f docker-compose.local.yml up --build"
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    
+    "build:msg": "nest build msg",
+    "start:msg:dev": "nest start msg --watch",
+    "start:msg:prod": "node dist/apps/msg/main",
+    "test:msg": "npm test apps/msg/test",
+    "test:msg:unit": "npm test apps/msg/test/unit",
+    "infra:local": "docker-compose -f docker-compose.local.yml up --build",
+
+    "build:msg-realtime": "nest build msg-realtime",
+    "start:msg-realtime:dev": "nest start msg-realtime --watch",
+    "start:msg-realtime:prod": "node dist/apps/msg-realtime/main",
+    "test:msg-realtime": "npm test apps/msg-realtime/test",
+    "test:msg-realtime:unit": "npm test apps/msg-realtime/test/unit"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -91,7 +100,7 @@
     ],
     "moduleNameMapper": {
       "^@app/msg-core(|/.*)$": "<rootDir>/libs/msg-core/src/$1",
-      "^apps/(.*)$":"<rootDir>/apps/$1"
+      "^apps/(.*)$": "<rootDir>/apps/$1"
     }
   }
 }
