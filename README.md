@@ -153,14 +153,7 @@ export class MessageRepositoryImpl extends MessageRepository {
 
 ## 도메인 설계
 
-사용자(User), 관계(UserRelationship), 채팅방(ChatRoom), 메시지(Message) 4개의 도메인으로 구성됩니다. 채팅방은 유저 간 메시지를 주고받을 수 있는 방을 나타냅니다.
-
-User-UserRelationship, User-ChatRoom은 다대다(N:M) 관계입니다.
-
-User-Message, ChatRoom-Message는 일대다(1:N) 관계입니다.
-
-
-![ERD](https://user-images.githubusercontent.com/50406129/229339364-a118e5ec-1e25-4c81-9694-4ffe5082e409.PNG)
+![erd](https://github.com/haeseong123/msg/assets/50406129/ccbd06f4-2677-4051-9e85-49d15f16fe78)
 
 
 ## 예외 처리
