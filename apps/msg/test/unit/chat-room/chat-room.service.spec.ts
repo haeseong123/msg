@@ -17,7 +17,7 @@ import { MessageService } from "apps/msg/src/message/message.service";
 import { UserService } from "apps/msg/src/user/user.service";
 import { ChatRoomNotFoundException } from "apps/msg/src/chat-room/exceptions/chat-room-not-found.exception";
 import { InvitedDutplicateException } from "apps/msg/src/chat-room/exceptions/invited-dutplicate.exception";
-import { TransactionService } from "apps/msg/src/common/transaction/transaction-service";
+import { TransactionService } from "apps/msg/src/common/database/transaction/transaction-service";
 
 describe('ChatRoomService', () => {
     let chatRoomService: ChatRoomService;

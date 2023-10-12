@@ -13,7 +13,7 @@ import { MaxInvitedIdsException } from './exceptions/max-invited-ids.exception';
 import { InvitedDutplicateException } from './exceptions/invited-dutplicate.exception';
 import { UserNotInChatRoomException } from './exceptions/user-not-in-chat-room.exception';
 import { ChatRoomNotFoundException } from './exceptions/chat-room-not-found.exception';
-import { TransactionService } from '../common/transaction/transaction-service';
+import { TransactionService } from '../common/database/transaction/transaction-service';
 
 @Injectable()
 export class ChatRoomService {
