@@ -1,4 +1,4 @@
-export interface JwtPayload {
+export interface TokenPayload {
     sub: number
     email: string
 }

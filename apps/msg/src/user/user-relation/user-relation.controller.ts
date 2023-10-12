@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
-import { JwtGuard } from "../../auth/jwt/guard/jwt.guard";
 import { UserGuard } from "../guard/user.guard";
 import { UserRelationService } from "./user-relation.service";
 import { UserRelationDto } from "./dto/user-relation.dto";
 import { UserRelationSaveGuard } from "./guard/user-relation-save.guard";
 import { UserRelationUpdateGuard } from "./guard/user-relation-update.guard";
+import { JwtGuard } from "@app/msg-core/jwt/guard/jwt.guard";
 
 @UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/user-relations')

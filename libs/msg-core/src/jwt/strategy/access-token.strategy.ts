@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { JwtPayload } from "../jwt-payload";
 import { Request } from "express";
 import { MsgUser } from "../msg-user";
-import { UnauthorizedAccessException } from "../../exceptions/unauthorized-access.exception";
+import { TokenPayload } from "../token-payload";
+import { UnauthorizedAccessException } from "../exception/unauthorizated-access.exception";
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -16,7 +16,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
         })
     }
 
-    async validate(req: Request, payload: JwtPayload) {
+    async validate(req: Request, payload: TokenPayload) {
         const token = req.headers['authorization']?.replace('Bearer ', '').trim();
 
         if (!token) {

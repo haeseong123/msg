@@ -1,7 +1,7 @@
 import { Expose } from "class-transformer"
-import { JwtPayload } from "./jwt-payload";
+import { TokenPayload } from "./token-payload";
 
-export class MsgUser implements JwtPayload {
+export class MsgUser implements TokenPayload {
     @Expose({ name: 'sub' })
     private readonly _sub: number;
 

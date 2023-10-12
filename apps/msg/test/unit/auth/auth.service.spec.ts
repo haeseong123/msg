@@ -1,15 +1,13 @@
 import { EmailInfo } from "@app/msg-core/entities/user/email-info";
 import { User } from "@app/msg-core/entities/user/user.entity";
+import { MsgTokenDto } from "@app/msg-core/jwt/dto/msg-token.dto";
+import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
+import { TokenService } from "@app/msg-core/jwt/token.service";
 import { TestingModule, Test } from "@nestjs/testing";
 import { AuthService } from "apps/msg/src/auth/auth.service";
 import { UsingRefreshTokenDto } from "apps/msg/src/auth/dto/using-refresh-token.dto";
-import { TokenExpiredException } from "apps/msg/src/auth/exceptions/token-expired.exception";
-import { UnauthorizedAccessException } from "apps/msg/src/auth/exceptions/unauthorized-access.exception";
 import { UserEmailAlreadyExistsException } from "apps/msg/src/auth/exceptions/user-email-already-exists.exception";
-import { UserIncorrectEmailException } from "apps/msg/src/auth/exceptions/user-incorrect-email.exception";
 import { UserIncorrectPasswordException } from "apps/msg/src/auth/exceptions/user-incorrect-password.exception";
-import { MsgTokenDto } from "apps/msg/src/auth/jwt/dto/msg-token.dto";
-import { TokenService } from "apps/msg/src/auth/jwt/token.service";
 import { UserEmailInfoDto } from "apps/msg/src/user/dto/user-email-info.dto";
 import { UserSigninDto } from "apps/msg/src/user/dto/user-signin.dto";
 import { UserSingUpDto } from "apps/msg/src/user/dto/user-signup.dto";

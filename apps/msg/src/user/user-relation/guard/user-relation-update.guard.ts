@@ -4,8 +4,8 @@ import { UserRelationFromIdUserIdMismatchException } from "../exceptions/user-re
 import { UserRelationIdParamMismatchException } from "../exceptions/user-relation-id-param-mismatch.exception";
 import { plainToInstance } from "class-transformer";
 import { UserRelationDto } from "../dto/user-relation.dto";
-import { MsgUser } from "apps/msg/src/auth/jwt/msg-user";
 import { Request } from "express";
+import { MsgUser } from "@app/msg-core/jwt/msg-user";
 
 @Injectable()
 export class UserRelationUpdateGuard implements CanActivate {

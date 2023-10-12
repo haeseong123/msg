@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
-import { JwtPayload } from "./jwt/jwt-payload";
 import { compare } from "bcrypt";
-import { TokenExpiredException } from "./exceptions/token-expired.exception";
 import { UserIncorrectPasswordException } from "./exceptions/user-incorrect-password.exception";
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { UserEmailAlreadyExistsException } from "./exceptions/user-email-already-exists.exception";
-import { TokenService } from "./jwt/token.service";
 import { UsingRefreshTokenDto } from "./dto/using-refresh-token.dto";
-import { MsgTokenDto } from "./jwt/dto/msg-token.dto";
 import { UserSingUpDto } from "../user/dto/user-signup.dto";
 import { UserService } from "../user/user.service";
+import { TokenService } from "@app/msg-core/jwt/token.service";
+import { MsgTokenDto } from "@app/msg-core/jwt/dto/msg-token.dto";
+import { TokenPayload } from "@app/msg-core/jwt/token-payload";
+import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
 
 @Injectable()
 export class AuthService {
@@ -109,7 +109,7 @@ export class AuthService {
         /**
          * 토큰을 생성합니다.
          */
-        const payload: JwtPayload = {
+        const payload: TokenPayload = {
             sub: user.id,
             email: user.emailInfo.email
         };

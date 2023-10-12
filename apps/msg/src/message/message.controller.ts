@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Param, ParseIntPipe, UseGuards, Body } from "@nestjs/common";
-import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { UserGuard } from "../user/guard/user.guard";
 import { MessageDto } from "./dto/message.dto";
 import { MessageService } from "./message.service";
 import { FindAllMessageInfoDto } from "./dto/find-all-message-info.dto";
 import { MessageSaveGuard } from "./guard/message-save.guard";
 import { MessageSaveDto } from "./dto/message-save.dto";
+import { JwtGuard } from "@app/msg-core/jwt/guard/jwt.guard";
 
 @UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/chat-rooms/:chatRoomId/messages')

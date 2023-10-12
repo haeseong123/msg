@@ -2,7 +2,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { UsingRefreshTokenDto } from '../dto/using-refresh-token.dto';
 import { plainToInstance } from 'class-transformer';
 import { Request } from 'express';
-import { MsgUser } from '../jwt/msg-user';
+import { MsgUser } from '@app/msg-core/jwt/msg-user';
 
 export const UsingRefreshToken = createParamDecorator(
     (data: unknown, context: ExecutionContext) => {

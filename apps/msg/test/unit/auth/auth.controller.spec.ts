@@ -1,10 +1,10 @@
 import { EmailInfo } from "@app/msg-core/entities/user/email-info";
 import { User } from "@app/msg-core/entities/user/user.entity";
+import { MsgTokenDto } from "@app/msg-core/jwt/dto/msg-token.dto";
 import { TestingModule, Test } from "@nestjs/testing";
 import { AuthController } from "apps/msg/src/auth/auth.controller";
 import { AuthService } from "apps/msg/src/auth/auth.service";
 import { UsingRefreshTokenDto } from "apps/msg/src/auth/dto/using-refresh-token.dto";
-import { MsgTokenDto } from "apps/msg/src/auth/jwt/dto/msg-token.dto";
 import { UserEmailInfoDto } from "apps/msg/src/user/dto/user-email-info.dto";
 import { UserSigninDto } from "apps/msg/src/user/dto/user-signin.dto";
 import { UserSingUpDto } from "apps/msg/src/user/dto/user-signup.dto";

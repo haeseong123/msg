@@ -1,9 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { UnauthorizedAccessException } from "../../auth/exceptions/unauthorized-access.exception";
 import { Request } from "express";
 import { plainToInstance } from "class-transformer";
 import { MessageSaveDto } from "../dto/message-save.dto";
 import { Observable } from "rxjs";
+import { UnauthorizedAccessException } from "@app/msg-core/jwt/exception/unauthorizated-access.exception";
 
 @Injectable()
 export class MessageSaveGuard implements CanActivate {

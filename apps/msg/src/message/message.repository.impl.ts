@@ -40,17 +40,4 @@ export class MessageRepositoryImpl extends MessageRepository {
 
         return removedMessages;
     }
-
-    // async update(id: number, partialEntity: QueryDeepPartialEntity<Message>): Promise<void> {
-    //     const updatedMessage = await this.repository.update(id, partialEntity);
-
-    //     return;
-    // }
-
-    // isOwnerTheMessage(id: number, senderId: number): Promise<boolean> {
-    //     return this.repository.createQueryBuilder('m')
-    //         .where('m.id = :id', { id })
-    //         .andWhere('m.senderId = :senderId', { senderId })
-    //         .getExists();
-    // }
 }

@@ -2,9 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { JwtPayload } from "../jwt-payload";
+import { TokenPayload } from "../token-payload";
 import { MsgUser } from "../msg-user";
-import { UnauthorizedAccessException } from "../../exceptions/unauthorized-access.exception";
+import { UnauthorizedAccessException } from "../exception/unauthorizated-access.exception";
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
@@ -16,7 +16,7 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
         })
     }
 
-    async validate(req: Request, payload: JwtPayload) {
+    async validate(req: Request, payload: TokenPayload) {
         const refreshToken = req.headers['authorization']?.replace('Bearer ', '').trim();
 
         if (!refreshToken) {
@@ -24,7 +24,7 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
         }
 
         const user = new MsgUser(payload.sub, payload.email, refreshToken);
-        
+
         return user;
     }
 }

@@ -42,7 +42,7 @@ import { TransactionModule } from './common/transaction/transaction.module';
         exceptionFactory: (_error) => new ArgumentInvalidException()
       })
     },
-    {
+    { 
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor
     },

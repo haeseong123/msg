@@ -1,10 +1,10 @@
 import { Body, Controller, Get, UseGuards, Post, Delete, Param, ParseIntPipe } from "@nestjs/common";
-import { JwtGuard } from "../auth/jwt/guard/jwt.guard";
 import { ChatRoomService } from "./chat-room.service";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
 import { UserGuard } from "../user/guard/user.guard";
 import { ChatRoomLeaveDto } from "./dto/chat-room-leave.dto";
+import { JwtGuard } from "@app/msg-core/jwt/guard/jwt.guard";
 
 @UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/chat-rooms')

@@ -3,8 +3,8 @@ import { Observable } from "rxjs";
 import { UserRelationFromIdUserIdMismatchException } from "../exceptions/user-relation-from-id-user-id-mismatch.exception";
 import { plainToInstance } from "class-transformer";
 import { UserRelationDto } from "../dto/user-relation.dto";
-import { MsgUser } from "apps/msg/src/auth/jwt/msg-user";
 import { Request } from "express";
+import { MsgUser } from "@app/msg-core/jwt/msg-user";
 
 @Injectable()
 export class UserRelationSaveGuard implements CanActivate {
