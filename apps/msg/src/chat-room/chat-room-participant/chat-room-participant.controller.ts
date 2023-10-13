@@ -11,6 +11,9 @@ import { ChatRoomParticipantRemoveDto } from "./dto/chat-room-participant-remove
 export class ChatRoomParticipantController {
     constructor(private chatRoomParticipantService: ChatRoomParticipantService) { }
 
+    /**
+     * 채팅방에 다른 유저를 초대합니다.
+     */
     @Post()
     async save(
         @Body() dto: ChatRoomParticipantSaveDto,
@@ -20,6 +23,9 @@ export class ChatRoomParticipantController {
         return ChatRoomParticipantDto.of(savedParticipant);
     }
     
+    /**
+     * 채팅방을 나갑니다.
+     */
     @Delete(':id')
     async leave(
         @Param('id', ParseIntPipe) id: number,
@@ -27,8 +33,8 @@ export class ChatRoomParticipantController {
         @Param('chatRoomId', ParseIntPipe) chatRoomId: number,
     ): Promise<ChatRoomParticipantDto> {
         const dto = new ChatRoomParticipantRemoveDto(id, userId, chatRoomId);
-        const chatRoomParticipant = await this.chatRoomParticipantService.remove(dto);
+        const leavedParticipant = await this.chatRoomParticipantService.remove(dto);
 
-        return ChatRoomParticipantDto.of(chatRoomParticipant);
+        return ChatRoomParticipantDto.of(leavedParticipant);
     }
 }

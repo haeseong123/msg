@@ -105,6 +105,9 @@ export class ChatRoomParticipantService {
         const participantsSize = chatRoom.getParticipantsSize();
         
         if (participantsSize <= 1) {
+            /** 
+             * 채팅방과 해당 채팅방의 모든 메시지를 삭제합니다. 
+             * */
             const remove = async () => {
                 await Promise.all([
                     this.messageService.removeAllByChatRoomId(chatRoom.id),
@@ -112,12 +115,13 @@ export class ChatRoomParticipantService {
                 ]);
             };
 
-            /** 채팅방과 해당 채팅방의 모든 메시지를 삭제합니다. */
             await this.transactionService.withTransaction(remove);
         } else {
+            /** 
+             * 채팅방에서 나갑니다.
+             * */
             chatRoom.leaveChatRoom(participant);
 
-            /** 채팅방에서 참여자를 내보냅니다. */
             await this.chatRoomService.saveByEntity(chatRoom);
         }
 
