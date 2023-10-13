@@ -66,6 +66,7 @@ describe('ChatRoomController', () => {
             // Given
             const chatRoomSaveDto = new ChatRoomSaveDto(1, '', []);
             const savedChatRoom = chatRoomSaveDto.toEntity();
+            savedChatRoom.participants = [];
             const chatRoomDto = ChatRoomDto.of(savedChatRoom);
 
             jest.spyOn(chatRoomService, 'save').mockResolvedValue(savedChatRoom);

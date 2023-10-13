@@ -26,7 +26,11 @@ export class ChatRoomDto {
         return new ChatRoomDto(
             chatRoom.id,
             chatRoom.title,
-            chatRoom.participants.map(cr => ChatRoomParticipantDto.of(cr)),
+            chatRoom.participants.map(p => ChatRoomParticipantDto.of(p)),
         );
+    }
+
+    get participants(): ChatRoomParticipantDto[] {
+        return this._participants;
     }
 }
