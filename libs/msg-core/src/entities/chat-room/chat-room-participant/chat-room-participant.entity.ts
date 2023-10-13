@@ -6,19 +6,22 @@ import { ChatRoom } from "../chat-room.entity";
 @Entity()
 @Index(['chatRoomId', 'userId'], { unique: true })
 export class ChatRoomParticipant extends AssignedIdAndTimestampBaseEntity {
-    @Column({ name: 'chat_room_id' })
+    @Column({ name: 'chat_room_id', type: 'int', unsigned: true })
     chatRoomId: number | null;
 
-    @Column({ name: 'user_id' })
+    @Column({ name: 'user_id', type: 'int', unsigned: true })
     userId: number;
 
-    @ManyToOne(() => ChatRoom)
+    @ManyToOne(() => ChatRoom, {
+        onDelete: 'CASCADE',
+        orphanedRowAction: 'delete',
+    })
     @JoinColumn({ name: 'chat_room_id' })
-    private readonly _chatRoom: ChatRoom;
+    chatRoom: ChatRoom;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'user_id' })
-    private readonly _user: User;
+    user: User;
 
     static of(
         chatRoomId: number | null,

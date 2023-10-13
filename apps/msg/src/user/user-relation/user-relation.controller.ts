@@ -8,7 +8,7 @@ import { JwtGuard } from "@app/msg-core/jwt/guard/jwt.guard";
 import { UserRelationSaveDto } from "./dto/user-relation-save.dto";
 
 @UseGuards(JwtGuard, UserGuard)
-@Controller('users/:userId/user-relations')
+@Controller('users/:userId/relations')
 export class UserRelationController {
     constructor(private readonly userRelationService: UserRelationService) { }
 

@@ -70,14 +70,10 @@ export class UserRelationService {
         ]);
 
         /**
-         * dto.toUserId로 관계를 가져옵니다.
+         * 관계를 생성합니다. 
          */
-        const relation = fromUser.findRelationByToUserIdOrThrow(dto.toUserId);
-
-        /**
-         * 관계의 status를 갱신합니다.
-         */
-        fromUser.updateRelationStatus(relation);
+        const relation = dto.toEntity();
+        fromUser.updateRelation(relation);
 
         /**
          * 변경사항을 DB에 저장합니다.

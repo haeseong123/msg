@@ -1,4 +1,4 @@
-import { Expose, Exclude, Transform } from "class-transformer";
+import { Expose, Exclude, Transform, Type } from "class-transformer";
 import { IsString, MinLength, MaxLength, ValidateNested } from "class-validator";
 import { UserEmailInfoDto } from "./user-email-info.dto";
 import { EmailInfo } from "@app/msg-core/entities/user/email-info";
@@ -7,6 +7,7 @@ import { User } from "@app/msg-core/entities/user/user.entity";
 
 export class UserSingUpDto {
     @Expose({ name: 'email' })
+    @Type(() => UserEmailInfoDto)
     @Transform(({ obj }) => new UserEmailInfoDto(obj['email']))
     @ValidateNested()
     private readonly _emailInfoDto: UserEmailInfoDto;

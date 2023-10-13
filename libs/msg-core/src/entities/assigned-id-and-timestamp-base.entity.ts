@@ -3,7 +3,7 @@ import { TimestampedBaseEntity } from "./timestamped-base.entity";
 import { IdNotMatchedException } from "./id-not-matched.exception";
 
 export abstract class AssignedIdAndTimestampBaseEntity extends TimestampedBaseEntity {
-    @PrimaryGeneratedColumn({ type: 'bigint' })
+    @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
     id: number;
 
     validateId(id: number) {

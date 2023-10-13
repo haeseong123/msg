@@ -43,6 +43,15 @@ export class UserRelationDto {
         );
     }
 
+    toEntity(): UserRelation {
+        return UserRelation.ofWithId(
+            this._id,
+            this._fromUserId,
+            this._toUserId,
+            this._status,
+        );
+    }
+
     get id(): number {
         return this._id;
     }

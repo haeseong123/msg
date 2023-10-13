@@ -19,7 +19,7 @@ export class ChatRoomParticipantController {
 
         return ChatRoomParticipantDto.of(savedParticipant);
     }
-
+    
     @Delete(':id')
     async leave(
         @Param('id', ParseIntPipe) id: number,

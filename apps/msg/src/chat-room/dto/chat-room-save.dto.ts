@@ -29,7 +29,7 @@ export class ChatRoomSaveDto {
     }
 
     toEntity(): ChatRoom {
-        const chatRoomParticipants = this._invitedUserIds.map(userId => ChatRoomParticipant.of(null, userId));
+        const chatRoomParticipants = [this._hostUserId, ...this._invitedUserIds].map(userId => ChatRoomParticipant.of(null, userId));
 
         return ChatRoom.of(
             this._title,

@@ -6,10 +6,10 @@ import { User } from "../user.entity";
 @Entity()
 @Index(['fromUserId', 'toUserId'], { unique: true })
 export class UserRelation extends AssignedIdAndTimestampBaseEntity {
-    @Column({ name: 'from_user_id' })
+    @Column({ name: 'from_user_id', type: 'int', unsigned: true })
     fromUserId: number;
 
-    @Column({ name: 'to_user_id' })
+    @Column({ name: 'to_user_id', type: 'int', unsigned: true })
     toUserId: number;
 
     @Column({
@@ -19,13 +19,19 @@ export class UserRelation extends AssignedIdAndTimestampBaseEntity {
     })
     status: UserRelationStatusEnum;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, {
+        onDelete: 'CASCADE',
+        orphanedRowAction: 'delete',
+    })
     @JoinColumn({ name: 'from_user_id' })
-    private readonly _fromUser: User;
+    fromUser: User;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, {
+        onDelete: 'CASCADE',
+        orphanedRowAction: 'delete',
+    })
     @JoinColumn({ name: 'to_user_id' })
-    private readonly _toUser: User;
+    toUser: User;
 
     static of(
         fromUserId: number,
@@ -33,6 +39,21 @@ export class UserRelation extends AssignedIdAndTimestampBaseEntity {
         status: UserRelationStatusEnum,
     ): UserRelation {
         const userRelation = new UserRelation();
+        userRelation.fromUserId = fromUserId;
+        userRelation.toUserId = toUserId;
+        userRelation.status = status;
+
+        return userRelation;
+    }
+
+    static ofWithId(
+        id: number,
+        fromUserId: number,
+        toUserId: number,
+        status: UserRelationStatusEnum,
+    ): UserRelation {
+        const userRelation = new UserRelation();
+        userRelation.id = id;
         userRelation.fromUserId = fromUserId
         userRelation.toUserId = toUserId
         userRelation.status = status

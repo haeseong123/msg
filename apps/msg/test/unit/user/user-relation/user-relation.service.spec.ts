@@ -91,8 +91,8 @@ describe('UserRelationService', () => {
 
             jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(fromUser);
             jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValueOnce(toUser);
-            jest.spyOn(fromUser, 'findRelationByToUserIdOrThrow').mockImplementation((_toUserId) => relation);
-            jest.spyOn(fromUser, 'updateRelationStatus').mockImplementation(() => { });
+            jest.spyOn(relationDto, 'toEntity').mockReturnValue(relation);
+            jest.spyOn(fromUser, 'updateRelation').mockImplementation(() => { });
             jest.spyOn(userService, 'saveByEntity').mockImplementation(async (_fromUser) => fromUser);
 
             // When

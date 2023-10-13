@@ -3,6 +3,6 @@ import { BadRequestException } from "@nestjs/common";
 
 export class IdNotMatchedException extends BadRequestException {
     constructor() {
-        super(ErrorMessage.USER_NOT_IN_CHAT_ROOM)
+        super(ErrorMessage.ID_NOT_MACTHED)
     }
 }

@@ -1,25 +1,34 @@
 import { ChatRoomParticipant } from "@app/msg-core/entities/chat-room/chat-room-participant/chat-room-participant.entity";
 import { Expose } from "class-transformer";
+import { IsNumber } from "class-validator";
 
 export class ChatRoomParticipantSaveDto {
     @Expose({ name: 'chatRoomId' })
+    @IsNumber()
     private readonly _chatRoomId: number;
 
-    @Expose({ name: 'userId' })
-    private readonly _userId: number;
+    @Expose({ name: 'inviterUserId' })
+    @IsNumber()
+    private readonly _inviterUserId: number;
+
+    @Expose({ name: 'inviteeUserId' })
+    @IsNumber()
+    private readonly _inviteeUserId: number;
 
     constructor(
         chatRoomId: number,
-        userId: number,
+        inviterUserId: number,
+        inviteeUserId: number,
     ) {
         this._chatRoomId = chatRoomId;
-        this._userId = userId;
+        this._inviterUserId = inviterUserId;
+        this._inviteeUserId = inviteeUserId;
     }
 
     toEntity(): ChatRoomParticipant {
         return ChatRoomParticipant.of(
             this._chatRoomId,
-            this._userId,
+            this._inviteeUserId,
         );
     }
 
@@ -27,7 +36,11 @@ export class ChatRoomParticipantSaveDto {
         return this._chatRoomId;
     }
 
-    get userId(): number {
-        return this._userId;
+    get inviterUserId(): number {
+        return this._inviterUserId;
+    }
+
+    get inviteeUserId(): number {
+        return this._inviteeUserId;
     }
 }

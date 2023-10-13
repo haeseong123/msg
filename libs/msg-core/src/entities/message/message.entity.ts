@@ -5,10 +5,10 @@ import { User } from "../user/user.entity";
 
 @Entity()
 export class Message extends AssignedIdAndTimestampBaseEntity {
-    @JoinColumn({ name: 'sent_user_id' })
+    @Column({ name: 'sent_user_id', type: 'int', unsigned: true })
     sentUserId: number;
 
-    @JoinColumn({ name: 'sent_chat_room_id' })
+    @Column({ name: 'sent_chat_room_id', type: 'int', unsigned: true })
     sentChatRoomId: number;
 
     @Column({ name: 'content' })

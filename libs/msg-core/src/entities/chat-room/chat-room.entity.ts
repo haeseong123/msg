@@ -8,9 +8,9 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
     @Column({ name: 'title', type: 'varchar', length: 20, })
     title: string;
 
-    @OneToMany(() => ChatRoomParticipant, chatRoomParticipant => chatRoomParticipant.chatRoomId, {
-        eager: true,
-        cascade: ['insert', 'update', 'remove'],
+    @OneToMany(() => ChatRoomParticipant, chatRoomParticipant => chatRoomParticipant.chatRoom, {
+        /** 저장/갱신될 때 같이 저장 */
+        cascade: true,
     })
     participants: ChatRoomParticipant[];
 
@@ -30,6 +30,7 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
      */
     participate(participant: ChatRoomParticipant) {
         const existingParticipant = this.findparticipantByUserId(participant.userId);
+        
         if (existingParticipant) {
             return;
         }
@@ -46,8 +47,6 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         if (index < 0) {
             return
         }
-
-        this.participants.splice(index, 1);
     }
 
     /**
@@ -73,13 +72,6 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
     }
 
     /**
-     * 채팅방 참여자 수를 반환합니다.
-     */
-    getParticipantsSize(): number {
-        return this.participants.length;
-    }
-
-    /**
      * userId에 해당되는 참여자를 찾습니다.
      * 
      * 찾지 못하면 예외를 던집니다.
@@ -92,5 +84,12 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         }
 
         return participant;
+    }
+    
+    /**
+     * 채팅방 참여자 수를 반환합니다.
+     */
+    getParticipantsSize(): number {
+        return this.participants.length;
     }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, UseGuards, Post, Delete, Param, ParseIntPipe } from "@nestjs/common";
+import { Body, Controller, Get, UseGuards, Post, Param, ParseIntPipe } from "@nestjs/common";
 import { ChatRoomService } from "./chat-room.service";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";

@@ -12,7 +12,12 @@ export class UserRepositoryImpl implements UserRepository {
     ) { }
 
     async findById(id: number): Promise<User | null> {
-        return await this.repository.findOneBy({ id });
+        const user = this.repository.createQueryBuilder('u')
+            .leftJoinAndSelect('u.relations', 'ur')
+            .where('u.id = :id', { id })
+            .getOne();
+
+        return user;
     }
 
     async findByIds(ids: number[]): Promise<User[]> {

@@ -1,6 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { MsgResponse } from '../interceptor/response.interceptor';
+import { instanceToPlain } from 'class-transformer';
 
 @Catch()
 export class GlobalExceptionFIlter implements ExceptionFilter {
@@ -25,6 +26,6 @@ export class GlobalExceptionFIlter implements ExceptionFilter {
         this.logger.error(`HTTP Error: ${statusCode} - Message: ${message}`);
         this.logger.error(exception);
 
-        response.json(responseBody)
+        response.json(instanceToPlain(responseBody))
     }
 }

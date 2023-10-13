@@ -1,9 +1,10 @@
-import { Exclude, Expose, Transform } from "class-transformer";
+import { Exclude, Expose, Transform, Type } from "class-transformer";
 import { IsString, MinLength, ValidateNested } from "class-validator"
 import { UserEmailInfoDto } from "./user-email-info.dto";
 
 export class UserSigninDto {
     @Expose({ name: 'email' })
+    @Type(() => UserEmailInfoDto)
     @Transform(({ obj }) => new UserEmailInfoDto(obj['email']))
     @ValidateNested()
     private readonly _emailInfoDto: UserEmailInfoDto;

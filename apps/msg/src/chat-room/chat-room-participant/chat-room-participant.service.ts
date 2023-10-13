@@ -4,11 +4,14 @@ import { ChatRoomParticipantSaveDto } from "./dto/chat-room-participant-save.dto
 import { ChatRoomParticipantRemoveDto } from "./dto/chat-room-participant-remove.dto";
 import { TransactionService } from "../../common/database/transaction/transaction-service";
 import { MessageService } from "../../message/message.service";
-import { Inject, forwardRef } from "@nestjs/common";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
+import { UserService } from "../../user/user.service";
 
+@Injectable()
 export class ChatRoomParticipantService {
     constructor(
         private chatRoomService: ChatRoomService,
+        private userService: UserService,
         /**
          * @deprecated 의존성 순환 문제 해결 필요
          * 
@@ -24,30 +27,40 @@ export class ChatRoomParticipantService {
      */
     async save(dto: ChatRoomParticipantSaveDto): Promise<ChatRoomParticipant> {
         /**
+         * dto.inviterUserId로 유저를 가져옵니다.
+         * 
          * dto.chatRoomId로 chatRoom을 가져옵니다.
          */
-        const chatroom = await this.chatRoomService.findByIdOrThrow(dto.chatRoomId);
+        const [inviter, chatRoom] = await Promise.all([
+            this.userService.findByIdOrThrow(dto.inviterUserId),
+            this.chatRoomService.findByIdOrThrow(dto.chatRoomId),
+        ]);
 
         /**
-         * 채팅방에 userId가 존재하는지 확인합니다.
+         * inviter가 invitee를 FOLLOW하고 있는지 확인합니다.
          */
-        chatroom.findParticipantByUserIdOrThrow(dto.userId);
+        inviter.validateTargetIdsAllFollowing([dto.inviteeUserId]);
 
         /**
-         * 채팅방에 새 유저를 초대할만한 공간이 있는지 확인합니다. 
+         * inviter가 채팅방에 존재하는 사람인지 확인합니다.
          */
-        this.chatRoomService.validateChatRoomCapacityForParticipants(chatroom.getParticipantsSize() + 1);
+        chatRoom.findParticipantByUserIdOrThrow(dto.inviterUserId);
 
         /**
-         * 채팅방에 유저를 초대합니다.  
+         * 채팅방에 invitee를 초대할 공간이 남아있는지 확인합니다. 
+         */
+        this.chatRoomService.validateChatRoomCapacityForParticipants(chatRoom.getParticipantsSize() + 1);
+
+        /**
+         * 채팅방에 invitee를 초대합니다.  
          */
         const participantWithoutId = dto.toEntity();
-        chatroom.participate(participantWithoutId);
+        chatRoom.participate(participantWithoutId);
 
         /**
          * DB에 변경사항을 저장합니다.
          */
-        const updatedChatRoom = await this.chatRoomService.saveByEntity(chatroom);
+        const updatedChatRoom = await this.chatRoomService.saveByEntity(chatRoom);
 
         /**
          * updatedChatRoom에서 방금 초대했던 유저를 찾습니다.
@@ -56,7 +69,7 @@ export class ChatRoomParticipantService {
          * 
          * participant.id가 null로 채워져 있기 때문에 이 로직이 필요합니다.
          */
-        const savedParticipant = updatedChatRoom.findParticipantByUserIdOrThrow(dto.userId);
+        const savedParticipant = updatedChatRoom.findParticipantByUserIdOrThrow(dto.inviteeUserId);
 
         return savedParticipant;
     }
@@ -90,7 +103,7 @@ export class ChatRoomParticipantService {
          * 그게 아니라면 채팅방에서 참여자를 내보내기만 합니다.
          */
         const participantsSize = chatRoom.getParticipantsSize();
-
+        
         if (participantsSize <= 1) {
             const remove = async () => {
                 await Promise.all([

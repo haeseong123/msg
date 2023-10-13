@@ -11,9 +11,8 @@ export class UserGuard implements CanActivate {
         const request = context.switchToHttp().getRequest<Request>();
         const user = plainToInstance(MsgUser, request.user);
         const userIdFromParam = parseInt(request.params.userId, 10);
-
         const isValidaUserId = user.sub === userIdFromParam;
-        
+
         if (!isValidaUserId) {
             throw new UnauthorizedAccessException();
         }

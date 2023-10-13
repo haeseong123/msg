@@ -12,6 +12,7 @@ import { MessageModule } from './message/message.module';
 // import { ChatModule } from './websocket/chat/chat.module';
 import { UserRelationModule } from './user/user-relation/user-relation.module';
 import { TransactionModule } from './common/database/transaction/transaction.module';
+import { ChatRoomParticipantModule } from './chat-room/chat-room-participant/chat-room-participant.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TransactionModule } from './common/database/transaction/transaction.mod
     AuthModule,
     UserModule,
     ChatRoomModule,
+    ChatRoomParticipantModule,
     UserRelationModule,
     MessageModule,
     TransactionModule,
@@ -39,10 +41,14 @@ import { TransactionModule } from './common/database/transaction/transaction.mod
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
-        exceptionFactory: (_error) => new ArgumentInvalidException()
+        exceptionFactory: (err) => {
+          console.log(err);
+
+          return new ArgumentInvalidException()
+        }
       })
     },
-    { 
+    {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor
     },

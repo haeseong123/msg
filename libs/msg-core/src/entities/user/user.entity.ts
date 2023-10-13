@@ -19,9 +19,8 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
     refreshToken: string | null;
 
-    @OneToMany(() => UserRelation, (userRelation) => userRelation.fromUserId, {
-        eager: true,
-        cascade: ['insert', 'update', 'remove'],
+    @OneToMany(() => UserRelation, (userRelation) => userRelation.fromUser, {
+        cascade: true,
     })
     relations: UserRelation[]
 
@@ -72,7 +71,7 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     /**
      * 관계의 상태를 수정합니다.
      */
-    updateRelationStatus(relation: UserRelation) {
+    updateRelation(relation: UserRelation) {
         const existingRelation = this.findRelationByToUserId(relation.toUserId);
 
         if (!existingRelation) {
@@ -133,12 +132,14 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     }
 
     /**
-     * targetIdSet에 있는 id를 전부 FOLLOW하고 있는지 확인합니다.
+     * toUserIds에 있는 유저를 전부 FOLLOW하고 있는지 확인합니다.
+     * 
+     * 하나라도 FOLOOW하고 있지 않다면 예외를 던집니다.
      */
-    validateTargetIdsAllFollowing(targetIdSet: Set<number>) {
+    validateTargetIdsAllFollowing(toUserIds: Iterable<number>) {
         const relationToUserIdSet = new Set(this.relations.map(r => r.toUserId))
 
-        for (const toUserId of targetIdSet) {
+        for (const toUserId of toUserIds) {
             if (!relationToUserIdSet.has(toUserId)) {
                 throw new UnauthorizedInvitationException();
             }
