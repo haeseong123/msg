@@ -279,7 +279,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, MsgResponse<T>
 ```bash
 # 인프라 생성 및 실행
 # docker-compose가 설치되어 있어야 합니다.
-$ npm run infra:local
+$ npm run start:msg:dev:infra
 ```
 
 ## 테스트

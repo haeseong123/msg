@@ -9,13 +9,13 @@ export class TransactionServiceImpl implements TransactionService {
         private dataSource: DataSource
     ) { }
 
-    async logicWithTransaction<T>(logic: () => Promise<T>, isolationLevel?: IsolationLevel | undefined): Promise<T> {
+    async withTransaction<T>(func: () => Promise<T>, isolationLevel?: IsolationLevel | undefined): Promise<T> {
         const queryRunner = this.dataSource.createQueryRunner();
 
         await queryRunner.connect();
         await queryRunner.startTransaction(isolationLevel);
         try {
-            const result = await logic();
+            const result = await func();
 
             await queryRunner.commitTransaction();
             return result;

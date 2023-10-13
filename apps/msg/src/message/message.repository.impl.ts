@@ -11,12 +11,6 @@ export class MessageRepositoryImpl extends MessageRepository {
         super();
     }
 
-    async findById(id: number): Promise<Message | null> {
-        const message = await this.repository.findOneBy({ id });
-
-        return message;
-    }
-
     async findAllByChatRoomId(chatRoomId: number): Promise<Message[]> {
         const messages = await this.repository.findBy({ sentChatRoomId: chatRoomId });
 
@@ -27,12 +21,6 @@ export class MessageRepositoryImpl extends MessageRepository {
         const savedMessage = await this.repository.save(entity);
 
         return savedMessage;
-    }
-
-    async remove(entity: Message): Promise<Message> {
-        const removedMessage = await this.repository.remove(entity);
-
-        return removedMessage;
     }
 
     async removeAll(entities: Message[]): Promise<Message[]> {

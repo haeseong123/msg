@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 import { ChatRoomParticipant } from "./chat-room-participant/chat-room-participant.entity";
+import { UserNotInChatRoomException } from "./exception/user-not-in-chat-room.exception";
 
 @Entity()
 export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
@@ -24,11 +25,11 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         return chatRoom;
     }
 
-    joinChatRoom(participant: ChatRoomParticipant) {
-        /**
-         * participants에 해당 participant이 존재하면 아무 일도 하지 않습니다.
-         */
-        const existingParticipant = this.findparticipant(this.participants, participant);
+    /**
+     * 채팅방에 새로운 참여자를 등록합니다.
+     */
+    participate(participant: ChatRoomParticipant) {
+        const existingParticipant = this.findparticipantByUserId(participant.userId);
         if (existingParticipant) {
             return;
         }
@@ -36,11 +37,12 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         this.participants.push(participant);
     }
 
+    /**
+     * 채팅방에서 참여자를 내보냅니다.
+     */
     leaveChatRoom(participant: ChatRoomParticipant) {
-        /**
-         * participants에 해당 participant가 없다면 아무 일도 하지 않습니다. 
-         */
-        const index = this.findParticipantIndex(this.participants, participant);
+        const index = this.findParticipantIndexByUserId(participant.userId);
+
         if (index < 0) {
             return
         }
@@ -48,19 +50,47 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         this.participants.splice(index, 1);
     }
 
-    private findParticipantIndex(participants: ChatRoomParticipant[], participant: ChatRoomParticipant): number {
-        const index = participants.findIndex(p => p.id === participant.id);
+    /**
+     * userId에 해당되는 참여자의 인덱스를 찾습니다.
+     */
+    findParticipantIndexByUserId(userId: number): number {
+        const index = this.participants.findIndex(p => p.userId === userId);
 
         return index;
     }
 
-    private findparticipant(participants: ChatRoomParticipant[], participant: ChatRoomParticipant): ChatRoomParticipant | undefined {
-        const index = this.findParticipantIndex(participants, participant);
+    /**
+     * userId에 해당되는 참여자를 찾습니다.
+     */
+    findparticipantByUserId(userId: number): ChatRoomParticipant | null {
+        const index = this.findParticipantIndexByUserId(userId);
 
         if (index < 0) {
-            return undefined
+            return null
         }
 
-        return participants[index];
+        return this.participants[index];
+    }
+
+    /**
+     * 채팅방 참여자 수를 반환합니다.
+     */
+    getParticipantsSize(): number {
+        return this.participants.length;
+    }
+
+    /**
+     * userId에 해당되는 참여자를 찾습니다.
+     * 
+     * 찾지 못하면 예외를 던집니다.
+     */
+    findParticipantByUserIdOrThrow(userId: number): ChatRoomParticipant {
+        const participant = this.findparticipantByUserId(userId);
+
+        if (!participant) {
+            throw new UserNotInChatRoomException();
+        }
+
+        return participant;
     }
 }

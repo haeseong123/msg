@@ -41,10 +41,6 @@ export class ChatRoomSaveDto {
         return this._hostUserId;
     }
 
-    get title(): string {
-        return this._title;
-    }
-
     get invitedUserIds(): number[] {
         return this._invitedUserIds;
     }

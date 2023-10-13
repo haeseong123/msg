@@ -1,9 +1,7 @@
 import { ChatRoomParticipant } from "@app/msg-core/entities/chat-room/chat-room-participant/chat-room-participant.entity";
 import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
-import { Message } from "@app/msg-core/entities/message/message.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ChatRoomService } from "apps/msg/src/chat-room/chat-room.service";
-import { FindAllMessageInfoDto } from "apps/msg/src/message/dto/find-all-message-info.dto";
 import { MessageSaveDto } from "apps/msg/src/message/dto/message-save.dto";
 import { MessageRepository } from "apps/msg/src/message/message.repository";
 import { MessageService } from "apps/msg/src/message/message.service";
@@ -42,62 +40,44 @@ describe('MessageService', () => {
         chatRoomService = module.get<ChatRoomService>(ChatRoomService);
     });
 
-    describe('dto.chatRoomId에 해당되는 채팅방의 모든 메시지 가져오기', () => {
-        let findAllMessageInfoDto: FindAllMessageInfoDto;
-        let participant: ChatRoomParticipant;
-        let chatRoom: ChatRoom;
-        let messages: Message[];
-
-        beforeEach(() => {
-            const [userId, chatRoomId] = [1, 1];
-
-            findAllMessageInfoDto = new FindAllMessageInfoDto(userId, chatRoomId);
-            participant = ChatRoomParticipant.of(chatRoomId, userId);
-            chatRoom = ChatRoom.of('', [participant]);
-            messages = [];
-        });
-
+    describe('chatRoomId에 해당되는 채팅방에 보낸 모든 메시지를 가져옵니다.', () => {
         it('성공', async () => {
             // Given
-            jest.spyOn(chatRoomService, 'findByIdOrThrow').mockResolvedValue(chatRoom);
+            const messages = [];
+
             jest.spyOn(messageRepository, 'findAllByChatRoomId').mockResolvedValue(messages);
 
             // When
-            const result = await messageService.findAllByChatRoomIdAndUserId(findAllMessageInfoDto);
+            const result = await messageService.findAllByChatRoomId(1);
 
             // Then
             expect(result).toStrictEqual(messages);
         });
     });
 
-    describe('메시지 저장', () => {
-        let messageSaveDto: MessageSaveDto;
-        let participant: ChatRoomParticipant;
-        let chatRoom: ChatRoom;
-
-        beforeEach(() => {
-            const [userId, chatRoomId] = [1, 1];
-
-            messageSaveDto = new MessageSaveDto(userId, chatRoomId, 'content');
-            participant = ChatRoomParticipant.of(chatRoomId, userId);
-            chatRoom = ChatRoom.of('', [participant]);
-        });
-
+    describe('메시지를 저장합니다.', () => {
         it('성공', async () => {
             // Given
-            const savedMessage = messageSaveDto.toEntity();
+            const [userId, chatRoomId] = [1, 1];
+            const messageSaveDto = new MessageSaveDto(userId, chatRoomId, 'content');
+            const participant = ChatRoomParticipant.of(chatRoomId, userId);
+            const chatRoom = ChatRoom.of('', [participant]);
+            const message = messageSaveDto.toEntity();
+
             jest.spyOn(chatRoomService, 'findByIdOrThrow').mockResolvedValue(chatRoom);
-            jest.spyOn(messageRepository, 'save').mockResolvedValue(savedMessage);
+            jest.spyOn(chatRoom, 'findParticipantByUserIdOrThrow').mockImplementation(() => participant);
+            jest.spyOn(messageSaveDto, 'toEntity').mockReturnValue(message);
+            jest.spyOn(messageRepository, 'save').mockResolvedValue(message);
 
             // When
             const result = await messageService.save(messageSaveDto);
 
             // Then
-            expect(result).toStrictEqual(savedMessage);
+            expect(result).toStrictEqual(message);
         });
     });
 
-    describe('채팅방에 있는 모든 메시지 삭제', () => {
+    describe('chatRoomId에 해당되는 채팅방에 보낸 모든 메시지를 삭제합니다.', () => {
         it('성공', async () => {
             // Given
             const messages = [];

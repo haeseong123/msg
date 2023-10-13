@@ -9,11 +9,7 @@ import { TokenModule } from "@app/msg-core/jwt/token.module";
         UserModule,
         TokenModule,
     ],
-    controllers: [
-        AuthController,
-    ],
-    providers: [
-        AuthService,
-    ],
+    controllers: [AuthController],
+    providers: [AuthService],
 })
 export class AuthModule { }

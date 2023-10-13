@@ -1,16 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { UserSigninDto } from "../user/dto/user-signin.dto";
 import { compare } from "bcrypt";
-import { UserIncorrectPasswordException } from "./exceptions/user-incorrect-password.exception";
+import { UserIncorrectPasswordException } from "../user/exception/user-incorrect-password.exception";
 import { User } from "@app/msg-core/entities/user/user.entity";
-import { UserEmailAlreadyExistsException } from "./exceptions/user-email-already-exists.exception";
+import { UserEmailAlreadyExistsException } from "../user/exception/user-email-already-exists.exception";
 import { UsingRefreshTokenDto } from "./dto/using-refresh-token.dto";
 import { UserSingUpDto } from "../user/dto/user-signup.dto";
 import { UserService } from "../user/user.service";
 import { TokenService } from "@app/msg-core/jwt/token.service";
 import { MsgTokenDto } from "@app/msg-core/jwt/dto/msg-token.dto";
-import { TokenPayload } from "@app/msg-core/jwt/token-payload";
-import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
 
 @Injectable()
 export class AuthService {
@@ -35,11 +33,12 @@ export class AuthService {
             throw new UserEmailAlreadyExistsException();
         }
 
+        const user = await dto.toEntity();
+
         /**
          * user를 DB에 저장합니다. (회원가입)
          */
-        const user = await dto.toEntity();
-        const savedUser = await this.userService.save(user);
+        const savedUser = await this.userService.saveByEntity(user);
 
         return savedUser;
     }
@@ -49,19 +48,25 @@ export class AuthService {
      */
     async signin(dto: UserSigninDto): Promise<MsgTokenDto> {
         /**
-         * client가 보낸 dto에 있는 email로 user를 가져옵니다. 
+         * dto.email로 user를 가져옵니다. 
          */
         const user = await this.userService.findByEmailOrThrow(dto.emailInfoDto);
 
         /**
-         * user.password와 dto.password가 일치하는지 확인합니다.
+         * dto.password와 user.password를 비교합니다.
          */
         const isValidPassword = await compare(dto.password, user.password);
+
         if (!isValidPassword) {
             throw new UserIncorrectPasswordException();
         }
 
-        return await this.generateToken(user);
+        /**
+         * 새 토큰을 발급받습니다.
+         */
+        const tokenDto = await this.generateToken(user);
+
+        return tokenDto;
     }
 
     /**
@@ -69,7 +74,7 @@ export class AuthService {
      */
     async logout(id: number): Promise<boolean> {
         /**
-         * id에 해당되는 user가 있는지 확인합니다.
+         * id로 user를 가져옵니다. 
          */
         const user = await this.userService.findByIdOrThrow(id);
 
@@ -77,7 +82,11 @@ export class AuthService {
          * refreshToken을 폐기합니다.
          */
         user.removeRefreshToken();
-        await this.userService.save(user);
+
+        /**
+         * 변경사항을 DB에 저장합니다.
+         */
+        await this.userService.saveByEntity(user);
 
         return true;
     }
@@ -87,43 +96,45 @@ export class AuthService {
      */
     async refreshToken(dto: UsingRefreshTokenDto): Promise<MsgTokenDto> {
         /**
-         * id에 해당되는 user가 있는지 확인합니다.
+         * dto.id로 user를 가져옵니다. 
          */
-        const user = await this.userService.findByIdOrThrow(dto.id);
+        const user = await this.userService.findByIdOrThrow(dto.userId);
 
         /**
          * user.refreshToken과 dto.refreshToken이 일치하는지 확인합니다.
          */
-        const isValidRefreshToken = dto.refreshToken === user.refreshToken
-        if (!isValidRefreshToken) {
-            throw new TokenExpiredException();
-        }
+        user.validateRefreshToken(dto.refreshToken);
 
-        return await this.generateToken(user);
+        /**
+         * 새 토큰을 발급받습니다.
+         */
+        const tokenDto = await this.generateToken(user);
+
+        return tokenDto;
     }
 
     /**
      * 새 토큰 발행
      */
-    private async generateToken(user: User): Promise<MsgTokenDto> {
+    async generateToken(user: User): Promise<MsgTokenDto> {
         /**
          * 토큰을 생성합니다.
          */
-        const payload: TokenPayload = {
+        const tokenDto = this.tokenService.generateToken({
             sub: user.id,
             email: user.emailInfo.email
-        };
-        const msgToken = this.tokenService.generateToken(payload);
+        });
 
         /**
          * refreshToken을 등록합니다.
          */
-        user.createRefreshToken(msgToken.refreshToken);
-        await this.userService.save(user);
+        user.createRefreshToken(tokenDto.refreshToken);
 
         /**
-         * 토큰을 반환합니다.
+         * DB에 변경사항을 저장합니다.
          */
-        return msgToken;
+        await this.userService.saveByEntity(user);
+
+        return tokenDto;
     }
 }

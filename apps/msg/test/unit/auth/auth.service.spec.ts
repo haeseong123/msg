@@ -1,13 +1,12 @@
 import { EmailInfo } from "@app/msg-core/entities/user/email-info";
 import { User } from "@app/msg-core/entities/user/user.entity";
 import { MsgTokenDto } from "@app/msg-core/jwt/dto/msg-token.dto";
-import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
 import { TokenService } from "@app/msg-core/jwt/token.service";
 import { TestingModule, Test } from "@nestjs/testing";
 import { AuthService } from "apps/msg/src/auth/auth.service";
 import { UsingRefreshTokenDto } from "apps/msg/src/auth/dto/using-refresh-token.dto";
-import { UserEmailAlreadyExistsException } from "apps/msg/src/auth/exceptions/user-email-already-exists.exception";
-import { UserIncorrectPasswordException } from "apps/msg/src/auth/exceptions/user-incorrect-password.exception";
+import { UserEmailAlreadyExistsException } from "apps/msg/src/user/exception/user-email-already-exists.exception";
+import { UserIncorrectPasswordException } from "apps/msg/src/user/exception/user-incorrect-password.exception";
 import { UserEmailInfoDto } from "apps/msg/src/user/dto/user-email-info.dto";
 import { UserSigninDto } from "apps/msg/src/user/dto/user-signin.dto";
 import { UserSingUpDto } from "apps/msg/src/user/dto/user-signup.dto";
@@ -22,7 +21,7 @@ describe('AuthService', () => {
     beforeEach(async () => {
         const userServiceMock = {
             findByEmail: jest.fn(),
-            save: jest.fn(),
+            saveByEntity: jest.fn(),
             findByEmailOrThrow: jest.fn(),
             findByIdOrThrow: jest.fn(),
         };
@@ -48,7 +47,7 @@ describe('AuthService', () => {
         tokenService = module.get<TokenService>(TokenService);
     });
 
-    describe('회원_가입', () => {
+    describe('회원가입', () => {
         let userSingupDto: UserSingUpDto;
         let user: User;
 
@@ -64,7 +63,8 @@ describe('AuthService', () => {
         it('성공', async () => {
             // Given
             jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
-            jest.spyOn(userService, 'save').mockResolvedValue(user);
+            jest.spyOn(userSingupDto, 'toEntity').mockImplementation(async () => user);
+            jest.spyOn(userService, 'saveByEntity').mockResolvedValue(user);
 
             // When
             const result = await authService.signup(userSingupDto);
@@ -99,16 +99,17 @@ describe('AuthService', () => {
 
         it('성공', async () => {
             // Given
-            const token = new MsgTokenDto('token', 'ref_token');
+            const tokenDto = new MsgTokenDto('token', 'ref_token');
+
             jest.spyOn(userService, 'findByEmailOrThrow').mockResolvedValue(user);
             jest.spyOn(bcrypt, 'compare').mockImplementation(() => true);
-            jest.spyOn(tokenService, 'generateToken').mockReturnValue(token);
+            jest.spyOn(tokenService, 'generateToken').mockReturnValue(tokenDto);
 
             // When
             const result = await authService.signin(userSigninDto);
 
             // Then
-            expect(result).toStrictEqual(token);
+            expect(result).toStrictEqual(tokenDto);
         });
 
         it('실패: 비밀번호 불일치', async () => {
@@ -124,7 +125,7 @@ describe('AuthService', () => {
         });
     })
 
-    describe('로그_아웃', () => {
+    describe('로그아웃', () => {
         let userId: number;
         let user: User;
 
@@ -136,6 +137,8 @@ describe('AuthService', () => {
         it('성공', async () => {
             // Given
             jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
+            jest.spyOn(user, 'removeRefreshToken').mockImplementation(() => { });
+            jest.spyOn(userService, 'saveByEntity').mockImplementation(async (user) => user);
 
             // When
             const result = await authService.logout(userId);
@@ -145,7 +148,7 @@ describe('AuthService', () => {
         })
     })
 
-    describe('토큰_재발급', () => {
+    describe('refreshToken을 사용하여 새 토큰 발행', () => {
         let usingRefreshTokenDto: UsingRefreshTokenDto;
         let user: User;
 
@@ -159,27 +162,36 @@ describe('AuthService', () => {
 
         it('성공', async () => {
             // Given
-            const token = new MsgTokenDto('new_token', 'new_ref_token');
+            const tokenDto = new MsgTokenDto('new_token', 'new_ref_token');
+            
             jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
-            jest.spyOn(tokenService, 'generateToken').mockReturnValue(token);
+            jest.spyOn(user, 'validateRefreshToken').mockImplementation(() => { });
+            jest.spyOn(tokenService, 'generateToken').mockReturnValue(tokenDto);
 
             // When
             const result = await authService.refreshToken(usingRefreshTokenDto);
 
             // Then
-            expect(result).toStrictEqual(token);
+            expect(result).toStrictEqual(tokenDto);
         });
-
-        it('실패: dto.refreshToken과 entity.refreshToken이 다름', async () => {
+    });
+    
+    describe('새 토큰 발행', () => {
+        it('성공', async () => {
             // Given
-            const dummyUsingRefreshTokenDto = new UsingRefreshTokenDto(1, 'dummy_refresh_token');
-            jest.spyOn(userService, 'findByIdOrThrow').mockResolvedValue(user);
+            const user = User.of(EmailInfo.of('local', 'domain'), '', '', '', []);
+            user.id = 1;
+            const tokenDto = new MsgTokenDto('new_token', 'new_ref_token');
+            
+            jest.spyOn(tokenService, 'generateToken').mockReturnValue(tokenDto);
+            jest.spyOn(user, 'createRefreshToken').mockImplementation((_refToken) => { });
+            jest.spyOn(userService, 'saveByEntity').mockResolvedValue(user);
 
             // When
-            const resultPromise = authService.refreshToken(dummyUsingRefreshTokenDto);
+            const result = await authService.generateToken(user);
 
             // Then
-            await expect(resultPromise).rejects.toThrow(TokenExpiredException);
+            expect(result).toStrictEqual(tokenDto);
         });
     });
 });

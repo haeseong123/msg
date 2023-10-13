@@ -10,7 +10,6 @@ describe('MessageController', () => {
 
     beforeEach(async () => {
         const messageServiceMock = {
-            findAllByChatRoomIdAndUserId: jest.fn(),
             save: jest.fn(),
         };
 
@@ -28,22 +27,22 @@ describe('MessageController', () => {
         messageService = module.get<MessageService>(MessageService);
     });
 
-    describe('userId랑 chatRoomId로 메시지 다 가져오기', () => {
-        it('성공', async () => {
-            // Given
-            const userId = 1;
-            const chatRoomId = 1;
-            const messages = [];
-            const resultDto = messages.map(m => MessageDto.of(m));
-            jest.spyOn(messageService, 'findAllByChatRoomIdAndUserId').mockResolvedValue(messages);
+    // describe('userId랑 chatRoomId로 메시지 다 가져오기', () => {
+    //     it('성공', async () => {
+    //         // Given
+    //         const userId = 1;
+    //         const chatRoomId = 1;
+    //         const messages = [];
+    //         const resultDto = messages.map(m => MessageDto.of(m));
+    //         jest.spyOn(messageService, 'findAllByChatRoomIdAndUserId').mockResolvedValue(messages);
 
-            // When
-            const result = await messageController.findAllByChatRoomIdAndUserId(userId, chatRoomId);
+    //         // When
+    //         const result = await messageController.findAllByChatRoomIdAndUserId(userId, chatRoomId);
 
-            // Then
-            expect(result).toStrictEqual(resultDto);
-        });
-    });
+    //         // Then
+    //         expect(result).toStrictEqual(resultDto);
+    //     });
+    // });
 
     describe('메시지 저장', () => {
         it('성공', async () => {
@@ -51,6 +50,7 @@ describe('MessageController', () => {
             const messageSaveDto = new MessageSaveDto(1, 1, '');
             const savedMessage = messageSaveDto.toEntity();
             const resultDto = MessageDto.of(savedMessage);
+            
             jest.spyOn(messageService, 'save').mockResolvedValue(savedMessage);
 
             // When

@@ -1,4 +1,4 @@
-export class ChatRoomLeaveDto {
+export class ChatRoomWithMessagesSearchDto {
     private readonly _userId: number;
     private readonly _chatRoomId: number;
 

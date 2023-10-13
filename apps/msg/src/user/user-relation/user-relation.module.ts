@@ -10,14 +10,8 @@ import { UserRelationService } from './user-relation.service';
         UserModule,
         TypeOrmModule.forFeature([UserRelation])
     ],
-    controllers: [
-        UserRelationController,
-    ],
-    providers: [
-        UserRelationService,
-    ],
-    exports: [
-        UserRelationService,
-    ]
+    controllers: [UserRelationController],
+    providers: [UserRelationService],
+    exports: [UserRelationService],
 })
 export class UserRelationModule { }

@@ -12,15 +12,23 @@ export class UserRelationUpdateGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest<Request>();
         const user = plainToInstance(MsgUser, request.user);
-        const relationDto = plainToInstance(UserRelationDto, request.body);
+        const dto = plainToInstance(UserRelationDto, request.body);
         const relationIdFromParam = parseInt(request.params.id, 10);
 
-        const isValidUserId = user.sub === relationDto.fromUserId;
+        /**
+         * token.id 와 dto.fromUserId는 같아야 합니다.
+         */
+        const isValidUserId = user.sub === dto.fromUserId;
+
+        /**
+         * dto.id와 param의 relationId는 같아야 합니다.
+         */
+        const isValidRelationId = dto.id === relationIdFromParam;
+
         if (!isValidUserId) {
             throw new UserRelationFromIdUserIdMismatchException();
         }
 
-        const isValidRelationId = relationDto.id === relationIdFromParam;
         if (!isValidRelationId) {
             throw new UserRelationIdParamMismatchException();
         }

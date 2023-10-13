@@ -1,8 +1,8 @@
-import { ChatRoom } from "@app/msg-core/entities/chat-room/chat-room.entity";
 import { TestingModule, Test } from "@nestjs/testing";
 import { ChatRoomController } from "apps/msg/src/chat-room/chat-room.controller";
 import { ChatRoomService } from "apps/msg/src/chat-room/chat-room.service";
 import { ChatRoomSaveDto } from "apps/msg/src/chat-room/dto/chat-room-save.dto";
+import { ChatRoomWithMessagesDto } from "apps/msg/src/chat-room/dto/chat-room-with-messages.dto";
 import { ChatRoomDto } from "apps/msg/src/chat-room/dto/chat-room.dto";
 
 describe('ChatRoomController', () => {
@@ -11,10 +11,9 @@ describe('ChatRoomController', () => {
 
     beforeEach(async () => {
         const serviceMock = {
-            findById: jest.fn(),
             findAllByUserId: jest.fn(),
+            findChatRoomWithMessages: jest.fn(),
             save: jest.fn(),
-            leaveChatRoom: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -31,52 +30,48 @@ describe('ChatRoomController', () => {
         chatRoomService = module.get<ChatRoomService>(ChatRoomService);
     });
 
-    describe('채팅방_전부_가져오기', () => {
+    describe('채팅방 전부 가져오기', () => {
         it('성공', async () => {
             // Given
-            const userId = 1;
             const chatRooms = [];
             const chatRoomDtos = chatRooms.map(cr => ChatRoomDto.of(cr));
+
             jest.spyOn(chatRoomService, 'findAllByUserId').mockResolvedValue(chatRooms);
 
             // When
-            const result = await controller.findAllByUserId(userId);
+            const result = await controller.findAllByUserId(1);
 
             // Then
             expect(result).toStrictEqual(chatRoomDtos);
         });
     });
 
-    describe('채팅방_생성하기', () => {
+    describe('채팅방 상세 가져오기', () => {
         it('성공', async () => {
             // Given
-            const hostUserId = 1;
-            const title = 'title';
-            const invitedUserIds = [];
-            const chatRoomSaveDto = new ChatRoomSaveDto(hostUserId, title, invitedUserIds);
-            const chatRoom = ChatRoom.of(title, []);
-            const chatRoomDto = ChatRoomDto.of(chatRoom);
-            jest.spyOn(chatRoomService, 'save').mockResolvedValue(chatRoom);
+            const chatRoomWithMessagesDto = new ChatRoomWithMessagesDto(1, '', [], []);
+            
+            jest.spyOn(chatRoomService, 'findChatRoomWithMessages').mockResolvedValue(chatRoomWithMessagesDto);
 
             // When
-            const result = await controller.save(chatRoomSaveDto);
+            const result = await controller.findByIdWithMessages(1, 2);
 
             // Then
-            expect(result).toStrictEqual(chatRoomDto);
+            expect(result).toStrictEqual(chatRoomWithMessagesDto);
         });
     });
 
-    describe('채팅방_나가기', () => {
+    describe('채팅방 생성하기', () => {
         it('성공', async () => {
             // Given
-            const userId = 1;
-            const id = 2;
-            const leftChatRoom = ChatRoom.of('title', []);
-            const chatRoomDto = ChatRoomDto.of(leftChatRoom);
-            jest.spyOn(chatRoomService, 'leaveChatRoom').mockResolvedValue(leftChatRoom);
+            const chatRoomSaveDto = new ChatRoomSaveDto(1, '', []);
+            const savedChatRoom = chatRoomSaveDto.toEntity();
+            const chatRoomDto = ChatRoomDto.of(savedChatRoom);
+
+            jest.spyOn(chatRoomService, 'save').mockResolvedValue(savedChatRoom);
 
             // When
-            const result = await controller.leave(userId, id);
+            const result = await controller.save(chatRoomSaveDto);
 
             // Then
             expect(result).toStrictEqual(chatRoomDto);

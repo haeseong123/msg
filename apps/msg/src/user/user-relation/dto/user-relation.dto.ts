@@ -7,7 +7,7 @@ export class UserRelationDto {
     @Expose({ name: 'id' })
     @IsNumber()
     @IsOptional()
-    private readonly _id: number | null;
+    private readonly _id: number;
 
     @Expose({ name: 'fromUserId' })
     @IsNumber()
@@ -23,7 +23,7 @@ export class UserRelationDto {
     private readonly _status: UserRelationStatusEnum;
 
     constructor(
-        id: number | null,
+        id: number,
         fromUserId: number,
         toUserId: number,
         status: UserRelationStatusEnum,
@@ -43,27 +43,19 @@ export class UserRelationDto {
         );
     }
 
-    toEntity(): UserRelation {
-        return UserRelation.of(
-            this._fromUserId,
-            this._toUserId,
-            this._status,
-        );
-    }
-
-    get id() {
+    get id(): number {
         return this._id;
     }
 
-    get fromUserId() {
+    get fromUserId(): number {
         return this._fromUserId;
     }
 
-    get toUserId() {
+    get toUserId(): number {
         return this._toUserId;
     }
 
-    get status() {
+    get status(): UserRelationStatusEnum {
         return this._status;
     }
 }

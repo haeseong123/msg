@@ -18,8 +18,11 @@ import { MessageService } from "./message.service";
         {
             provide: MessageRepository,
             useClass: MessageRepositoryImpl
-        }
+        },
     ],
-    exports: [MessageService]
+    exports: [
+        MessageService,
+        MessageRepository,
+    ],
 })
 export class MessageModule { }

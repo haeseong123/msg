@@ -2,6 +2,8 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 import { UserRelation } from "./user-relation/user-relation.entity";
 import { EmailInfo } from "./email-info";
+import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
+import { UnauthorizedInvitationException } from "./exception/unauthorized-invitation.exception";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
@@ -40,19 +42,26 @@ export class User extends AssignedIdAndTimestampBaseEntity {
         return user;
     }
 
+    /**
+     * 새 refreshToken을 등록합니다.
+     */
     createRefreshToken(refreshToken: string) {
         this.refreshToken = refreshToken;
     }
 
+    /**
+     * 기존 refreshToken을 폐기합니다.
+     */
     removeRefreshToken() {
         this.refreshToken = null;
     }
 
+    /**
+     * 관계를 생성합니다.
+     */
     createRelation(relation: UserRelation) {
-        /**
-         * relations에 해당 relation이 존재하면 아무 일도 하지 않습니다.
-         */
-        const existingRelation = this.findRelation(this.relations, relation);
+        const existingRelation = this.findRelationByToUserId(relation.toUserId);
+
         if (existingRelation) {
             return;
         }
@@ -60,11 +69,12 @@ export class User extends AssignedIdAndTimestampBaseEntity {
         this.relations.push(relation);
     }
 
+    /**
+     * 관계의 상태를 수정합니다.
+     */
     updateRelationStatus(relation: UserRelation) {
-        /**
-         * relations에 해당 relation이 존재하지 않으면 아무 일도 하지 않습니다.
-         */
-        const existingRelation = this.findRelation(this.relations, relation);
+        const existingRelation = this.findRelationByToUserId(relation.toUserId);
+
         if (!existingRelation) {
             return;
         }
@@ -72,11 +82,12 @@ export class User extends AssignedIdAndTimestampBaseEntity {
         existingRelation.updaetStatus(relation.status);
     }
 
+    /**
+     * 관계를 삭제합니다.
+     */
     removeRelation(relation: UserRelation) {
-        /**
-         * relations에 해당 relation이 존재하지 않으면 아무 일도 하지 않습니다.
-         */
-        const index = this.findRelationIndex(this.relations, relation);
+        const index = this.findRelationIndexByToUserId(relation.toUserId);
+
         if (index < 0) {
             return
         }
@@ -84,19 +95,64 @@ export class User extends AssignedIdAndTimestampBaseEntity {
         this.relations.splice(index, 1);
     }
 
-    private findRelationIndex(relations: UserRelation[], relation: UserRelation): number {
-        const index = relations.findIndex(r => r.id === relation.id);
+    /**
+     * userId에 해당되는 관계의 인덱스를 찾습니다.
+     */
+    findRelationIndexByToUserId(toUserId: number): number {
+        const index = this.relations.findIndex(r => r.toUserId === toUserId);
 
         return index;
     }
 
-    private findRelation(relations: UserRelation[], relation: UserRelation): UserRelation | undefined {
-        const index = this.findRelationIndex(relations, relation);
+    /**
+     * userId에 해당되는 관계를 찾습니다.
+     */
+    findRelationByToUserId(toUserId: number): UserRelation | undefined {
+        const index = this.findRelationIndexByToUserId(toUserId);
 
         if (index < 0) {
             return undefined
         }
 
-        return relations[index];
+        return this.relations[index];
+    }
+
+    /**
+     * userId에 해당되는 관계를 찾습니다.
+     * 
+     * 없으면 예외를 던집니다.
+     */
+    findRelationByToUserIdOrThrow(toUserId: number): UserRelation {
+        const relation = this.findRelationByToUserId(toUserId);
+
+        if (!relation) {
+            throw new Error("");
+        }
+
+        return relation;
+    }
+
+    /**
+     * targetIdSet에 있는 id를 전부 FOLLOW하고 있는지 확인합니다.
+     */
+    validateTargetIdsAllFollowing(targetIdSet: Set<number>) {
+        const relationToUserIdSet = new Set(this.relations.map(r => r.toUserId))
+
+        for (const toUserId of targetIdSet) {
+            if (!relationToUserIdSet.has(toUserId)) {
+                throw new UnauthorizedInvitationException();
+            }
+        }
+    }
+
+    /**
+     * 가지고있는 refreshToken과 전달받은 refreshToken이 동일한지 확인합니다.
+     */
+    validateRefreshToken(refreshToken: string) {
+        const isValidRefreshToken = this.refreshToken === refreshToken;
+
+        if (!isValidRefreshToken) {
+            throw new TokenExpiredException();
+        }
     }
 }

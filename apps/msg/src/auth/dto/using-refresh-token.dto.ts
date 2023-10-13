@@ -1,17 +1,17 @@
 export class UsingRefreshTokenDto {
-    private readonly _id: number;
+    private readonly _userId: number;
     private readonly _refreshToken: string;
 
     constructor(
-        id: number,
+        userId: number,
         refreshToken: string,
     ) {
-        this._id = id;
+        this._userId = userId;
         this._refreshToken = refreshToken;
     }
 
-    get id() {
-        return this._id;
+    get userId() {
+        return this._userId;
     }
 
     get refreshToken() {

@@ -18,10 +18,10 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     
     "build:msg": "nest build msg",
-    "start:msg:local": "dotenv -e apps/msg/.env.local nest start msg --watch",
-    "start:msg:dev": "dotenv -e apps/msg/.env.dev nest start msg --watch",
-    "start:msg:prod": "dotenv -e apps/msg/.env.prod node dist/apps/msg/main",
-    "start:msg:dev:infra": "docker-compose --env-file apps/msg/.env.dev -f apps/msg/msg-docker-compose.dev.yml up --build",
+    "start:msg:local": "dotenv -e apps/msg/src/common/config/env/.env.local nest start msg --watch",
+    "start:msg:dev": "dotenv -e apps/msg/src/common/config/env/.env.dev nest start msg --watch",
+    "start:msg:prod": "dotenv -e apps/msg/src/common/config/env/.env.prod node dist/apps/msg/main",
+    "start:msg:dev:infra": "docker-compose --env-file apps/msg/src/common/config/env/.env.dev -f apps/msg/msg-docker-compose.dev.yml up --build",
     "test:msg": "npm test apps/msg/test",
     "test:msg:unit": "npm test apps/msg/test/unit",
     

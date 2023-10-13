@@ -24,6 +24,9 @@ import { TransactionModule } from "../common/database/transaction/transaction.mo
             useClass: ChatRoomRepositoryImpl
         }
     ],
-    exports: [ChatRoomService]
+    exports: [
+        ChatRoomService,
+        ChatRoomRepository,
+    ],
 })
 export class ChatRoomModule { }

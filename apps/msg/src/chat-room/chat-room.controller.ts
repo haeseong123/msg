@@ -3,14 +3,18 @@ import { ChatRoomService } from "./chat-room.service";
 import { ChatRoomSaveDto } from "./dto/chat-room-save.dto";
 import { ChatRoomDto } from "./dto/chat-room.dto";
 import { UserGuard } from "../user/guard/user.guard";
-import { ChatRoomLeaveDto } from "./dto/chat-room-leave.dto";
 import { JwtGuard } from "@app/msg-core/jwt/guard/jwt.guard";
+import { ChatRoomWithMessagesSearchDto } from "./dto/chat-room-with-messages-search.dto";
+import { ChatRoomWithMessagesDto } from "./dto/chat-room-with-messages.dto";
 
 @UseGuards(JwtGuard, UserGuard)
 @Controller('users/:userId/chat-rooms')
 export class ChatRoomController {
     constructor(private chatRoomService: ChatRoomService) { }
 
+    /**
+     * 채팅방 전부 가져오기
+     */
     @Get()
     async findAllByUserId(
         @Param('userId', ParseIntPipe) userId: number,
@@ -20,6 +24,23 @@ export class ChatRoomController {
         return chatRooms.map(cr => ChatRoomDto.of(cr));
     }
 
+    /**
+     * 채팅방 상세 가져오기
+     */
+    @Get(':id')
+    async findByIdWithMessages(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<ChatRoomWithMessagesDto> {
+        const dto = new ChatRoomWithMessagesSearchDto(userId, id);
+        const chatRoomWithMessagesDto = this.chatRoomService.findChatRoomWithMessages(dto);
+
+        return chatRoomWithMessagesDto;
+    }
+
+    /**
+     * 채팅방 생성하기
+     */
     @Post()
     async save(
         @Body() dto: ChatRoomSaveDto
@@ -27,16 +48,5 @@ export class ChatRoomController {
         const savedChatRoom = await this.chatRoomService.save(dto);
 
         return ChatRoomDto.of(savedChatRoom);
-    }
-
-    @Delete(':id')
-    async leave(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<ChatRoomDto> {
-        const dto = new ChatRoomLeaveDto(userId, id);
-        const leftChatRoom = await this.chatRoomService.leaveChatRoom(dto);
-
-        return ChatRoomDto.of(leftChatRoom);
     }
 }
