@@ -32,6 +32,7 @@
     "test:msg-realtime:unit": "npm test apps/msg-realtime/test/unit"
   },
   "dependencies": {
+    "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
@@ -41,6 +42,7 @@
     "@nestjs/platform-socket.io": "^9.4.3",
     "@nestjs/typeorm": "^9.0.1",
     "@nestjs/websockets": "^9.4.3",
+    "axios": "^1.5.1",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",

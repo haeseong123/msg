@@ -9,10 +9,10 @@ import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { databaseConfig } from './common/config/database.config';
 import { ArgumentInvalidException } from './common/exception/argument-invalid.exception';
 import { MessageModule } from './message/message.module';
-// import { ChatModule } from './websocket/chat/chat.module';
 import { UserRelationModule } from './user/user-relation/user-relation.module';
 import { TransactionModule } from './common/database/transaction/transaction.module';
 import { ChatRoomParticipantModule } from './chat-room/chat-room-participant/chat-room-participant.module';
+import { ChatModule } from './websocket/chat/chat.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { ChatRoomParticipantModule } from './chat-room/chat-room-participant/cha
     UserRelationModule,
     MessageModule,
     TransactionModule,
-    // ChatModule,
+    ChatModule,
   ],
   providers: [
     /** Incoming request
@@ -41,11 +41,7 @@ import { ChatRoomParticipantModule } from './chat-room/chat-room-participant/cha
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
-        exceptionFactory: (err) => {
-          console.log(err);
-
-          return new ArgumentInvalidException()
-        }
+        exceptionFactory: (err) => new ArgumentInvalidException()
       })
     },
     {

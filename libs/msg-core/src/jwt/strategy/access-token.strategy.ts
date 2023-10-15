@@ -16,14 +16,14 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
         })
     }
 
-    async validate(req: Request, payload: TokenPayload) {
+    validate(req: Request, payload: TokenPayload): MsgUser {
         const token = req.headers['authorization']?.replace('Bearer ', '').trim();
 
         if (!token) {
             throw new UnauthorizedAccessException();
         }
 
-        const user = new MsgUser(payload.sub, payload.email, token);
+        const user = new MsgUser(payload.sub, payload.email, payload.nickname, token);
 
         return user;
     }

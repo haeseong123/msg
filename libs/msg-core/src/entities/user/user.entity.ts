@@ -4,6 +4,7 @@ import { UserRelation } from "./user-relation/user-relation.entity";
 import { EmailInfo } from "./email-info";
 import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
 import { UnauthorizedInvitationException } from "./exception/unauthorized-invitation.exception";
+import { UserRelationStatusEnum } from "./user-relation/user-relation-status.enum";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
@@ -137,10 +138,13 @@ export class User extends AssignedIdAndTimestampBaseEntity {
      * 하나라도 FOLOOW하고 있지 않다면 예외를 던집니다.
      */
     validateTargetIdsAllFollowing(toUserIds: Iterable<number>) {
-        const relationToUserIdSet = new Set(this.relations.map(r => r.toUserId))
+        const followingRelationSet = new Set(this.relations
+            .filter(r => r.status === UserRelationStatusEnum.FOLLOW)
+            .map(r => r.toUserId)
+        );
 
         for (const toUserId of toUserIds) {
-            if (!relationToUserIdSet.has(toUserId)) {
+            if (!followingRelationSet.has(toUserId)) {
                 throw new UnauthorizedInvitationException();
             }
         }

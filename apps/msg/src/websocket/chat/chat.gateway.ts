@@ -1,111 +1,89 @@
-// import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets';
-// import { Namespace } from 'socket.io';
-// import { UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-// import { ChatGuard } from './guard/chat.guard';
-// import { ChatMessageGuard } from './guard/chat-message.guard';
-// import { ChatRoomService } from '../../chat-room/chat-room.service';
-// import { ArgumentInvalidException } from '../../common/exception/argument-invalid.exception';
-// import { MessageDto } from '../../message/dto/message.dto';
-// import { MessageConverter } from '../../message/message-converter';
-// import { MessageService } from '../../message/message.service';
-// import { SocketWithAuthAndChatRoomId } from '../socketIO/socket-types';
+import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets';
+import { Namespace } from 'socket.io';
+import { UseGuards } from '@nestjs/common';
+import { ChatRoomService } from '../../chat-room/chat-room.service';
+import { MessageDto } from '../../message/dto/message.dto';
+import { MessageService } from '../../message/message.service';
+import { SocketWithAuthAndChatRoomId } from '../socketIO/socket-types';
+import { MessageSaveDto } from '../../message/dto/message-save.dto';
+import { ChatMessageSaveGuard } from './guard/chat-message-save.guard';
+import { instanceToPlain } from 'class-transformer';
 
-// @WebSocketGateway({ namespace: 'chat' })
-// // 이거 정리해야 됨
-// @UsePipes(new ValidationPipe({
-//     transformOptions: {
-//         enableImplicitConversion: true
-//     },
-//     whitelist: true,
-//     forbidNonWhitelisted: true,
-//     transform: true,
-//     exceptionFactory: (_error) => new ArgumentInvalidException()
-// }))
-// @UseGuards(ChatGuard)
-// export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-//     constructor(
-//         private readonly chatRoomService: ChatRoomService,
-//         private readonly messageService: MessageService
-//     ) { }
+/**
+ * 지금은 controller, service, repository 코드가 마구 섞여 있는데,
+ * 
+ * 이거 나눠야 함
+ */
+@WebSocketGateway({ namespace: 'chat' })
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+    constructor(
+        private readonly chatRoomService: ChatRoomService,
+        private readonly messageService: MessageService
+    ) { }
 
-//     // IO -> NameSpace -> Room -> Socket
-//     @WebSocketServer()
-//     nsp: Namespace
+    // IO -> NameSpace -> Room -> Socket
+    @WebSocketServer()
+    nsp: Namespace
 
-//     // 소켓이 연결될 때 실행
-//     async handleConnection(client: SocketWithAuthAndChatRoomId, ...args: any[]) {
-//         // 채팅방에 속한 유저인지 확인
-//         const chatRoom = await this.chatRoomService.findOne(client.chatRoomId, client.sub)
-//         if (!chatRoom) {
-//             client.disconnect(true)
-//             return
-//         }
+    /**
+     * 소켓 연결이 수립될 때 해당 메서드가 호출됩니다.
+     */
+    async handleConnection(client: SocketWithAuthAndChatRoomId, ...args: any[]) {
+        /**
+         * client가 해당 채팅방에 참여중인지 확인합니다.
+         */
+        const chatRoom = await this.chatRoomService.findById(client.chatRoomId);
+        const participant = chatRoom?.findparticipantByUserId(client.sub);
 
-//         // 해당 채팅방(room)에 입장시킴
-//         const roomName = this.getRoomNameByChatRoomId(client.chatRoomId);
-//         client.join(roomName);
+        if (!chatRoom || !participant) {
+            client.disconnect(true);
+            return;
+        }
 
-//         // 해당 유저를 제외한 room의 다른 모든 유저에게 아래 메시지 발송
-//         //  "XXX님이 입장했습니다."
-//         client.to(roomName).emit("newbie", `${client.email}님이 입장했습니다.`)
+        /**
+         * client를 채팅방에 입장시킵니다.
+         */
+        const roomName = client.chatRoomId.toString();
+        client.join(roomName);
 
-//         // 해당 유저에게만 해당 채팅방의 모든 메시지 발송
-//         client.emit("messages", chatRoom.messages.map(m => MessageConverter.toMessageDto(m)))
-//     }
+        /**
+         * client가 입장했음을 해당 채팅방에 있는 모든 사용자에게 알립니다.
+         */
+        this.nsp.to(roomName).emit("newbie", `${client.nickname}님이 입장했습니다.`);
+    }
 
-//     // 메시지 전송
-//     @SubscribeMessage("postMessage")
-//     async onPostMessage(
-//         @ConnectedSocket() client: SocketWithAuthAndChatRoomId,
-//         @MessageBody() messageDto: MessageDto
-//     ) {
-//         const roomName = this.getRoomNameByChatRoomId(client.chatRoomId);
+    /**
+     * postMessage 이벤트를 수신하면 해당 메서드가 호출됩니다.
+     */
+    @UseGuards(ChatMessageSaveGuard)
+    @SubscribeMessage("postMessage")
+    async onPostMessage(
+        @ConnectedSocket() client: SocketWithAuthAndChatRoomId,
+        @MessageBody() messageSaveDto: MessageSaveDto,
+    ) {
+        /**
+         * message를 DB에 저장합니다.
+         */
+        const message = await this.messageService.save(messageSaveDto);
+        const messageDto = MessageDto.of(message);
 
-//         // DB에 메시지 저장
-//         const message = await this.messageService.save(messageDto);
-//         // room에 메시지 전송
-//         this.nsp.to(roomName).emit("newMessage", MessageConverter.toMessageDto(message));
-//     }
+        /**
+         * message를 채팅방에 브로드캐스트합니다.
+         */
+        const roomName = client.chatRoomId.toString();
+        this.nsp.to(roomName).emit("newMessage", instanceToPlain(messageDto));
+    }
 
-//     // 메시지 수정
-//     @SubscribeMessage("updateMessage")
-//     @UseGuards(ChatMessageGuard)
-//     async onUpdateMessage(
-//         @ConnectedSocket() client: SocketWithAuthAndChatRoomId,
-//         @MessageBody() messageDto: MessageDto
-//     ) {
-//         const roomName = this.getRoomNameByChatRoomId(client.chatRoomId);
-
-//         // DB에 있는 메시지 업데이트
-//         await this.messageService.update(messageDto);
-//         // room에 해당 내용 전달
-//         this.nsp.to(roomName).emit("updateMessage", messageDto);
-//     }
-
-//     // 메시지 삭제
-//     @SubscribeMessage("deleteMessage")
-//     @UseGuards(ChatMessageGuard)
-//     async onDeleteMessage(
-//         @ConnectedSocket() client: SocketWithAuthAndChatRoomId,
-//         @MessageBody() messageDto: MessageDto
-//     ) {
-//         const roomName = this.getRoomNameByChatRoomId(client.chatRoomId);
-
-//         // DB에 있는 메시지 삭제
-//         this.messageService.delete(messageDto.id);
-//         // room에 해당 내용 전달
-//         this.nsp.to(roomName).emit("deleteMessage", messageDto)
-//     }
-
-//     // 소켓 연결이 끊길 때 실행됨
-//     handleDisconnect(
-//         @ConnectedSocket() client: SocketWithAuthAndChatRoomId,
-//     ) {
-//         const roomName = this.getRoomNameByChatRoomId(client.chatRoomId);
-//         client.to(roomName).emit("leave", `${client.email}님이 퇴장했습니다.`);
-//     }
-
-//     private getRoomNameByChatRoomId(chatRoomId): string {
-//         return `chatroom/${chatRoomId}`
-//     }
-// }
+    /**
+     * 소켓 연결이 끊길 때 해당 메서드가 호출됩니다.
+     */
+    handleDisconnect(
+        @ConnectedSocket() client: SocketWithAuthAndChatRoomId,
+    ) {
+        /**
+         * client가 퇴장했음을 해당 채팅방에 있는 모든 사용자에게 알립니다.
+         */
+        const roomName = client.chatRoomId.toString();
+        client.to(roomName).emit("leave", `${client.email}님이 퇴장했습니다.`);
+    }
+}

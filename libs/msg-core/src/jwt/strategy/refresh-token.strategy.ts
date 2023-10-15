@@ -16,14 +16,14 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
         })
     }
 
-    async validate(req: Request, payload: TokenPayload) {
+    validate(req: Request, payload: TokenPayload): MsgUser {
         const refreshToken = req.headers['authorization']?.replace('Bearer ', '').trim();
 
         if (!refreshToken) {
             throw new UnauthorizedAccessException();
         }
 
-        const user = new MsgUser(payload.sub, payload.email, refreshToken);
+        const user = new MsgUser(payload.sub, payload.email, payload.nickname, refreshToken);
 
         return user;
     }

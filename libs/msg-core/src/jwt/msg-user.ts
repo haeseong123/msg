@@ -8,16 +8,21 @@ export class MsgUser implements TokenPayload {
     @Expose({ name: 'email' })
     private readonly _email: string;
 
+    @Expose({ name: 'nickname' })
+    private readonly _nickname: string;
+
     @Expose({ name: 'token' })
     private readonly _token: string;
 
     constructor(
         sub: number,
         email: string,
+        nickname: string,
         token: string,
     ) {
         this._sub = sub;
         this._email = email;
+        this._nickname = nickname;
         this._token = token;
     }
 
@@ -26,6 +31,10 @@ export class MsgUser implements TokenPayload {
     }
 
     get email(): string {
+        return this._email;
+    }
+
+    get nickname(): string {
         return this._email;
     }
 

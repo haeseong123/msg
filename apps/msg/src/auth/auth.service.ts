@@ -122,7 +122,8 @@ export class AuthService {
          */
         const tokenDto = this.tokenService.generateToken({
             sub: user.id,
-            email: user.emailInfo.email
+            email: user.emailInfo.email,
+            nickname: user.nickname,
         });
 
         /**
