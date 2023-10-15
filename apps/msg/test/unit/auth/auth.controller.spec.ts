@@ -91,7 +91,7 @@ describe('AuthController', () => {
     describe('토큰 갱신', () => {
         it('성공', async () => {
             // Given
-            const user = new MsgUser(1, 'email', 'refresh_token');
+            const user = new MsgUser(1, 'email', 'nickname', 'refresh_token');
             const newToken = new MsgTokenDto('new_token', 'new_ref_token');
 
             jest.spyOn(authService, 'refreshToken').mockResolvedValue(newToken);

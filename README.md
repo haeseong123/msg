@@ -1,18 +1,4 @@
-## 프로젝트 관련 포스팅
-
-- [NestJS - Guards](https://hs-archive.tistory.com/98)
-- [NestJS - Passport](https://hs-archive.tistory.com/99)
-- [NestJS - @Module(), @Injectable(), @InjectRepository()](https://hs-archive.tistory.com/100)
-- [Entity -> Dto 변환은 어디서?](https://hs-archive.tistory.com/102)
-- [클린 아키텍처 번역](https://hs-archive.tistory.com/103)
-- [service에서의 repository 의존 역전하기 - 클린 아키텍처 적용하기](https://hs-archive.tistory.com/104)
-- [CI/CD](https://hs-archive.tistory.com/106)
-- [깃허브 액션](https://hs-archive.tistory.com/107)
-- [Docker Compose](https://hs-archive.tistory.com/108)
-- [실시간 통신 - WebSocket이란](https://hs-archive.tistory.com/125)
-- [Socket.IO 소개 1 - Server](https://hs-archive.tistory.com/127)
-- [Socket.IO 소개 2 - Event](https://hs-archive.tistory.com/128)
-- [Socket.IO 소개 3 - adapter](https://hs-archive.tistory.com/129)
+# 메시지 프로젝트
 
 ## 프로젝트 주제
 
@@ -26,10 +12,16 @@
 
 ## 사용 기술
 
-- Backend: NestJS
+- Backend: NestJS, Socket.IO
 - Database: MySQL
 - ORM: TypeORM
 - Testing: Jest
+
+## 도메인 설계
+
+
+
+![erd](https://github.com/haeseong123/msg/assets/50406129/ccbd06f4-2677-4051-9e85-49d15f16fe78)
 
 ## 핵심 원칙
 
@@ -97,32 +89,11 @@ export class MessageRepositoryImpl extends MessageRepository {
 1. 클라이언트는 `postMessage` 이벤트를 통해 서버로 메시지를 전송합니다.
 2. 서버는 메시지를 DB에 저장하고 `newMessage` 이벤트를 통해 채팅방에 해당 메시지를 전송합니다.
 
-### 메시지 수정 (event: updateMessage)
-
-1. 클라이언트는 `updateMessage` 이벤트를 통해 서버로 수정 메시지를 전송합니다.
-2. 서버는 수정 사항을 DB에 기록하고 수정 내용을 `updateMessage`를 통해 해당 채팅방에 알립니다.
-
-### 메시지 삭제 (event: deleteMessage)
-
-1. 클라이언트는 `deleteMessage` 이벤트를 통해 서버로 삭제할 메시지의 정보를 보냅니다.
-2. 서버는 해당 메시지를 DB에서 삭제하고 그 내용을 `deleteMessage`를 통해 해당 채팅방에 알립니다.
-
 ### 연결 끊기 (event: disconnect)
 
 1. 클라이언트가 socket 연결을 끊습니다.
 2. 이때 해당 socket의 `disconnect`이벤트가 발생합니다.
 3. `disconnect` 이벤트가 발생 시 socket이 속했던 채팅방에 해당 클라이언트가 나갔다고 알립니다.
-
-### 실제 동작 모습
-
-- 입장 및 퇴장
-
-![newbie](https://github.com/haeseong123/msg/assets/50406129/d78cb57f-1bb7-4ee8-8112-23c5b1067690)
-
-
-- 메시지 전송/수정/삭제
-
-![crud](https://github.com/haeseong123/msg/assets/50406129/b70c8709-749c-4ca5-ad9d-a7abc6cc1efd)
 
 ## RestAPI
 
@@ -151,128 +122,9 @@ export class MessageRepositoryImpl extends MessageRepository {
 
 2. MessageController에서 @Get(), @Post(), @Put(), @Delete() 데코레이터를 사용하여 메세지를 가져오기, 생성, 변경 및 삭제합니다.
 
-## 도메인 설계
-
-![erd](https://github.com/haeseong123/msg/assets/50406129/ccbd06f4-2677-4051-9e85-49d15f16fe78)
-
-
 ## 예외 처리
 
-모든 예외는 GlobalExceptionFIlter를 거칩니다.
-
-GlobalExceptionFIlter는 예외에 맞게 로그를 생성하고 응답 폼에 맞게 Response를 생성한 뒤 발송합니다.
-
-``` typescript
-// ErrorMessage
-export enum ErrorMessage {
-    ARGUMENT_INVALID = '잘못된 파라미터 입니다.',
-}
-
-
-// ArgumentInvalidException
-export class ArgumentInvalidException extends BadRequestException {
-    constructor() {
-        super(ErrorMessage.ARGUMENT_INVALID);
-    }
-}
-
-
-// SomeClass
-export class SomeClass {
-    async hi() {
-      if(someNotValidByArg) {
-        throw new ArgumentInvalidException();
-      }
-    }
-}
-
-
-// GlobalExceptionFIlter
-@Catch()
-export class GlobalExceptionFIlter implements ExceptionFilter {
-    private readonly logger = new Logger('GlobalExceptionFIlter');
-    catch(exception: unknown, host: ArgumentsHost): void {
-        const ctx = host.switchToHttp();
-        const response = ctx.getResponse<Response>();
-        const statusCode = exception instanceof HttpException
-            ? exception.getStatus()
-            : HttpStatus.INTERNAL_SERVER_ERROR
-        const message = exception instanceof HttpException
-            ? exception.message
-            : "Internal server error"
-        const timestamp = new Date().toISOString();
-        const responseBody: MsgResponse<null> = {
-            statusCode,
-            message,
-            result: null,
-            timestamp,
-        }
-
-        this.logger.error(`HTTP Error: ${statusCode} - Message: ${message}`);
-        this.logger.error(exception);
-
-        response.json(responseBody)
-    }
-}
-```
-
-
 ## 응답 래핑
-
-NestJS에서 요청의 일반적인 흐름은 아래와 같습니다. 일관적인 구조를 갖는 응답을 만들기 위해 Global Interceptor(post-request)에서 응답을 래핑하는 ResponseInterceptor 클래스를 생성하였습니다.
-
-1. Incoming request
-2. Globally bound middleware
-3. Module bound middleware
-4. Global guards
-5. Controller guards
-6. Route guards
-7. Global interceptors (pre-controller)
-8. Controller interceptors (pre-controller)
-9. Route interceptors (pre-controller)
-10. Global pipes
-11. Controller pipes
-12. Route pipes
-13. Route parameter pipes
-14. Controller (method handler)
-15. Service (if exists)
-16. Route interceptor (post-request)
-17. Controller interceptor (post-request)
-18. Global interceptor (post-request)
-19. Exception filters (route, then controller, then global)
-20. Server response
-
-``` typescript
-// 응답 폼
-export interface MsgResponse<T> {
-    statusCode: number,
-    message: string,
-    result: T | null,
-    timestamp: string
-}
-
-// ResponseInterceptor
-@Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<T, MsgResponse<T>> {
-    intercept(context: ExecutionContext, next: CallHandler): Observable<MsgResponse<T>> {
-        return next.handle().pipe(
-            map((result: T) => {
-                const statusCode = context.switchToHttp().getResponse().statusCode || 200;
-                const message = getSuccessResponseMessageForStatusCode(statusCode)
-                const timestamp = new Date().toISOString();
-                const successResponse: MsgResponse<T> = {
-                    statusCode,
-                    message,
-                    result: result || null,
-                    timestamp,
-                };
-                return successResponse;
-            }),
-        );
-    }
-}
-```
-
 
 ## 서버 실행
 
@@ -288,3 +140,19 @@ $ npm run start:msg:dev:infra
 # 단위 테스트
 $ npm run test
 ```
+
+## 프로젝트 관련 포스팅
+
+- [NestJS - Guards](https://hs-archive.tistory.com/98)
+- [NestJS - Passport](https://hs-archive.tistory.com/99)
+- [NestJS - @Module(), @Injectable(), @InjectRepository()](https://hs-archive.tistory.com/100)
+- [Entity -> Dto 변환은 어디서?](https://hs-archive.tistory.com/102)
+- [클린 아키텍처 번역](https://hs-archive.tistory.com/103)
+- [service에서의 repository 의존 역전하기 - 클린 아키텍처 적용하기](https://hs-archive.tistory.com/104)
+- [CI/CD](https://hs-archive.tistory.com/106)
+- [깃허브 액션](https://hs-archive.tistory.com/107)
+- [Docker Compose](https://hs-archive.tistory.com/108)
+- [실시간 통신 - WebSocket이란](https://hs-archive.tistory.com/125)
+- [Socket.IO 소개 1 - Server](https://hs-archive.tistory.com/127)
+- [Socket.IO 소개 2 - Event](https://hs-archive.tistory.com/128)
+- [Socket.IO 소개 3 - adapter](https://hs-archive.tistory.com/129)
