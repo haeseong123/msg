@@ -3,7 +3,7 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ChatRoomModule } from './chat-room/chat-room.module';
-import { GlobalExceptionFIlter } from './common/filter/global-exception.filter';
+import { GlobalExceptionFilter } from './common/filter/global-exception.filter';
 import { UserModule } from './user/user.module';
 import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { databaseConfig } from './common/config/database.config';
@@ -50,7 +50,7 @@ import { ChatModule } from './websocket/chat/chat.module';
     },
     {
       provide: APP_FILTER,
-      useClass: GlobalExceptionFIlter,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })

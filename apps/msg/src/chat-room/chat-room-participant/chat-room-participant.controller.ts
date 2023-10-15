@@ -28,9 +28,9 @@ export class ChatRoomParticipantController {
      */
     @Delete(':id')
     async leave(
-        @Param('id', ParseIntPipe) id: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('chatRoomId', ParseIntPipe) chatRoomId: number,
+        @Param('id', ParseIntPipe) id: number,
     ): Promise<ChatRoomParticipantDto> {
         const dto = new ChatRoomParticipantRemoveDto(id, userId, chatRoomId);
         const leavedParticipant = await this.chatRoomParticipantService.remove(dto);

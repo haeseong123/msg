@@ -47,6 +47,11 @@ export class ChatRoomParticipantService {
         chatRoom.findParticipantByUserIdOrThrow(dto.inviterUserId);
 
         /**
+         * invitee가 이미 해당 채팅방에 참석중인지 확인합니다.
+         */
+        chatRoom.findParticipantByUserIdThrowIfExist(dto.inviteeUserId);
+
+        /**
          * 채팅방에 invitee를 초대할 공간이 남아있는지 확인합니다. 
          */
         this.chatRoomService.validateChatRoomCapacityForParticipants(chatRoom.getParticipantsSize() + 1);
@@ -103,7 +108,7 @@ export class ChatRoomParticipantService {
          * 그게 아니라면 채팅방에서 참여자를 내보내기만 합니다.
          */
         const participantsSize = chatRoom.getParticipantsSize();
-        
+
         if (participantsSize <= 1) {
             /** 
              * 채팅방과 해당 채팅방의 모든 메시지를 삭제합니다. 

@@ -35,6 +35,11 @@ export class UserRelationService {
         ]);
 
         /**
+         * 이미 존재하는 관계는 중복하여 생성할 수 없습니다.
+         */
+        fromUser.findRelationByToUserIdThrowIfExist(dto.toUserId);
+
+        /**
          * 관계를 생성합니다.
          */
         const relation = dto.toEntity();

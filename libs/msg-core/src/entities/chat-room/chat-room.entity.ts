@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { AssignedIdAndTimestampBaseEntity } from "../assigned-id-and-timestamp-base.entity";
 import { ChatRoomParticipant } from "./chat-room-participant/chat-room-participant.entity";
 import { UserNotInChatRoomException } from "./exception/user-not-in-chat-room.exception";
+import { DuplicateParticipantException } from "./exception/duplicate-participant.exception";
 
 @Entity()
 export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
@@ -47,6 +48,8 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         if (index < 0) {
             return
         }
+
+        this.participants.splice(index, 1);
     }
 
     /**
@@ -84,6 +87,19 @@ export class ChatRoom extends AssignedIdAndTimestampBaseEntity {
         }
 
         return participant;
+    }
+    
+    /**
+     * userId에 해당되는 참여자를 찾습니다.
+     * 
+     * 찾으면 예외를 던집니다.
+     */
+    findParticipantByUserIdThrowIfExist(userId: number) {
+        const participant = this.findparticipantByUserId(userId);
+
+        if (participant) {
+            throw new DuplicateParticipantException();
+        }
     }
     
     /**

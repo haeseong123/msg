@@ -1,11 +1,11 @@
 import { ExceptionFilter, Catch, ArgumentsHost, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import { MsgResponse } from '../interceptor/response.interceptor';
 import { instanceToPlain } from 'class-transformer';
+import { MsgResponse } from '../interceptor/msg-response';
 
 @Catch()
-export class GlobalExceptionFIlter implements ExceptionFilter {
-    private readonly logger = new Logger('GlobalExceptionFIlter');
+export class GlobalExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger('GlobalExceptionFilter');
     catch(exception: unknown, host: ArgumentsHost): void {
         const context = host.switchToHttp();
         const response = context.getResponse<Response>();

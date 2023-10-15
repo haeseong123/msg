@@ -5,6 +5,8 @@ import { EmailInfo } from "./email-info";
 import { TokenExpiredException } from "@app/msg-core/jwt/exception/token-expired.exception";
 import { UnauthorizedInvitationException } from "./exception/unauthorized-invitation.exception";
 import { UserRelationStatusEnum } from "./user-relation/user-relation-status.enum";
+import { NotFoundRelationException } from "./exception/not-found-relation.exception";
+import { DuplicateRelationException } from "./exception/duplicate-relation.exception";
 
 @Entity()
 export class User extends AssignedIdAndTimestampBaseEntity {
@@ -120,16 +122,29 @@ export class User extends AssignedIdAndTimestampBaseEntity {
     /**
      * userId에 해당되는 관계를 찾습니다.
      * 
-     * 없으면 예외를 던집니다.
+     * 찾지 못하면 예외를 던집니다.
      */
     findRelationByToUserIdOrThrow(toUserId: number): UserRelation {
         const relation = this.findRelationByToUserId(toUserId);
 
         if (!relation) {
-            throw new Error("");
+            throw new NotFoundRelationException();
         }
 
         return relation;
+    }
+
+    /**
+     * userId에 해당되는 관계를 찾습니다.
+     * 
+     * 찾으면 예외를 던집니다.
+     */
+    findRelationByToUserIdThrowIfExist(toUserId) {
+        const relation = this.findRelationByToUserId(toUserId);
+
+        if (relation) {
+            throw new DuplicateRelationException();
+        }
     }
 
     /**
