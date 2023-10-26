@@ -28,25 +28,26 @@ import { ChatModule } from './websocket/chat/chat.module';
   ],
   providers: [
     /** Incoming request
-     *    -> Middleware -> Guards -> Interceptors 
-     *    -> Pipes -> Controller -> Service 
+     *    -> Middleware -> Guards -> Interceptors
+     *    -> Pipes -> Controller -> Service
      *    -> Interceptor -> filters -> Server Response
-    */
+     */
     {
       provide: APP_PIPE,
-      useFactory: () => new ValidationPipe({
-        transformOptions: {
-          enableImplicitConversion: true
-        },
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        exceptionFactory: (err) => new ArgumentInvalidException()
-      })
+      useFactory: () =>
+        new ValidationPipe({
+          transformOptions: {
+            enableImplicitConversion: true,
+          },
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          transform: true,
+          exceptionFactory: (err) => new ArgumentInvalidException(),
+        }),
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ResponseInterceptor
+      useClass: ResponseInterceptor,
     },
     {
       provide: APP_FILTER,
@@ -54,4 +55,4 @@ import { ChatModule } from './websocket/chat/chat.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

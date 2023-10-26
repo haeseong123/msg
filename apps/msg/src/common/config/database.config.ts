@@ -15,13 +15,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [
-    User,
-    UserRelation,
-    ChatRoom,
-    ChatRoomParticipant,
-    Message,
-  ],
+  entities: [User, UserRelation, ChatRoom, ChatRoomParticipant, Message],
   synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
   logging: process.env.DATABASE_LOGGING === 'true',
 };

@@ -1,30 +1,40 @@
-import { Injectable } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { Request } from "express";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { TokenPayload } from "../token-payload";
-import { MsgUser } from "../msg-user";
-import { UnauthorizedAccessException } from "../exception/unauthorizated-access.exception";
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { Request } from 'express';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { TokenPayload } from '../token-payload';
+import { MsgUser } from '../msg-user';
+import { UnauthorizedAccessException } from '../exception/unauthorizated-access.exception';
 
 @Injectable()
-export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-    constructor() {
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: process.env.JWT_REFRESH_SECRET,
-            passReqToCallback: true,
-        })
+export class RefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT_REFRESH_SECRET,
+      passReqToCallback: true,
+    });
+  }
+
+  validate(req: Request, payload: TokenPayload): MsgUser {
+    const refreshToken = req.headers['authorization']
+      ?.replace('Bearer ', '')
+      .trim();
+
+    if (!refreshToken) {
+      throw new UnauthorizedAccessException();
     }
 
-    validate(req: Request, payload: TokenPayload): MsgUser {
-        const refreshToken = req.headers['authorization']?.replace('Bearer ', '').trim();
+    const user = new MsgUser(
+      payload.sub,
+      payload.email,
+      payload.nickname,
+      refreshToken,
+    );
 
-        if (!refreshToken) {
-            throw new UnauthorizedAccessException();
-        }
-
-        const user = new MsgUser(payload.sub, payload.email, payload.nickname, refreshToken);
-
-        return user;
-    }
+    return user;
+  }
 }

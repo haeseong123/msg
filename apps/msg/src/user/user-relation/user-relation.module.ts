@@ -6,12 +6,9 @@ import { UserModule } from '../user.module';
 import { UserRelationService } from './user-relation.service';
 
 @Module({
-    imports: [
-        UserModule,
-        TypeOrmModule.forFeature([UserRelation])
-    ],
-    controllers: [UserRelationController],
-    providers: [UserRelationService],
-    exports: [UserRelationService],
+  imports: [UserModule, TypeOrmModule.forFeature([UserRelation])],
+  controllers: [UserRelationController],
+  providers: [UserRelationService],
+  exports: [UserRelationService],
 })
-export class UserRelationModule { }
+export class UserRelationModule {}

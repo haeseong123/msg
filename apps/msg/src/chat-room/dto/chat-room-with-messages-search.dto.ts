@@ -1,20 +1,17 @@
 export class ChatRoomWithMessagesSearchDto {
-    private readonly _userId: number;
-    private readonly _chatRoomId: number;
+  private readonly _userId: number;
+  private readonly _chatRoomId: number;
 
-    constructor(
-        userId: number,
-        chatRoomId: number,
-    ) {
-        this._userId = userId;
-        this._chatRoomId = chatRoomId;
-    }
+  constructor(userId: number, chatRoomId: number) {
+    this._userId = userId;
+    this._chatRoomId = chatRoomId;
+  }
 
-    get userId(): number {
-        return this._userId;
-    }
+  get userId(): number {
+    return this._userId;
+  }
 
-    get chatRoomId(): number {
-        return this._chatRoomId;
-    }
+  get chatRoomId(): number {
+    return this._chatRoomId;
+  }
 }

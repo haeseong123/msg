@@ -1,4 +1,4 @@
 export enum UserRelationStatusEnum {
-    FOLLOW = 'FOLLOW',
-    BLOCK = 'BLOCK'
+  FOLLOW = 'FOLLOW',
+  BLOCK = 'BLOCK',
 }

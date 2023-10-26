@@ -7,56 +7,59 @@ import { UserIncorrectEmailException } from './exception/user-incorrect-email.ex
 
 @Injectable()
 export class UserService {
-    constructor(private userRepository: UserRepository) { }
+  constructor(private userRepository: UserRepository) {}
 
-    /**
-     * 이메일로 유저를 가져옵니다.
-     */
-    async findByEmail(dto: UserEmailInfoDto): Promise<User | null> {
-        return await this.userRepository.findByEmail(dto.emailLocal, dto.emailDomain);
+  /**
+   * 이메일로 유저를 가져옵니다.
+   */
+  async findByEmail(dto: UserEmailInfoDto): Promise<User | null> {
+    return await this.userRepository.findByEmail(
+      dto.emailLocal,
+      dto.emailDomain,
+    );
+  }
+
+  /**
+   * 이메일로 유저를 가져옵니다.
+   *
+   * 없으면 예외를 던집니다.
+   */
+  async findByEmailOrThrow(dto: UserEmailInfoDto): Promise<User> {
+    const user = await this.findByEmail(dto);
+
+    if (!user) {
+      throw new UserIncorrectEmailException();
     }
 
-    /**
-     * 이메일로 유저를 가져옵니다.
-     * 
-     * 없으면 예외를 던집니다.
-     */
-    async findByEmailOrThrow(dto: UserEmailInfoDto): Promise<User> {
-        const user = await this.findByEmail(dto);
+    return user;
+  }
 
-        if (!user) {
-            throw new UserIncorrectEmailException();
-        }
+  /**
+   * id로 user를 가져옵니다.
+   *
+   * 없으면 예외를 던집니다.
+   */
+  async findByIdOrThrow(id: number): Promise<User> {
+    const user = await this.userRepository.findById(id);
 
-        return user;
+    if (!user) {
+      throw new UserNotFoundedException();
     }
 
-    /**
-     * id로 user를 가져옵니다.
-     * 
-     * 없으면 예외를 던집니다.
-     */
-    async findByIdOrThrow(id: number): Promise<User> {
-        const user = await this.userRepository.findById(id);
+    return user;
+  }
 
-        if (!user) {
-            throw new UserNotFoundedException();
-        }
+  /**
+   * ids로 user를 가져옵니다.
+   */
+  async findByIds(ids: number[]): Promise<User[]> {
+    return await this.userRepository.findByIds(ids);
+  }
 
-        return user;
-    }
-
-    /**
-     * ids로 user를 가져옵니다.
-     */
-    async findByIds(ids: number[]): Promise<User[]> {
-        return await this.userRepository.findByIds(ids);
-    }
-
-    /**
-     * user 엔티티를 받아서 그대로 저장합니다.
-     */
-    async saveByEntity(user: User): Promise<User> {
-        return await this.userRepository.save(user);
-    }
+  /**
+   * user 엔티티를 받아서 그대로 저장합니다.
+   */
+  async saveByEntity(user: User): Promise<User> {
+    return await this.userRepository.save(user);
+  }
 }
