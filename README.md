@@ -98,101 +98,6 @@ domain 컬럼에 들어가는 데이터는 대부분 중복일 거로 생각합�
 
 * * *
 
-## aggregate와 aggregate root 설정
-
-처음에는 aggretate와 aggregate root라는 개념 없이 DB 스키마에 적힌 그대로 엔티티를 작성하고 관련 로직을 작성했습니다.
-
-코드로 표현하면 아래와 같습니다.
-
-``` typescript
-@Entity()
-export class User extends AssignedIdAndTimestampBaseEntity {
-    @Column(() => EmailInfo, { prefix: false })
-    emailInfo: EmailInfo;
-
-    @Column({ name: 'nickname', type: 'varchar', length: 15 })
-    nickname: string;
-
-    @Column({ name: 'password', type: 'varchar' })
-    password: string;
-
-    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.user)
-    userChatRooms: UserChatRoom[];
-
-    @OneToMany(() => Message, message => message.sender)
-    sentMessages: Message[];
-    
-    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.fromUser)
-    relationshipFromMe: UserRelationship[];
-
-    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.toUser)
-    relationshipToMe: UserRelationship[];
-}
-```
-
-하지만 이렇게 작성을 하니 과연 어디까지 함께 조회해야 하는 것인지에 대한 의문이 발생했습니다.
-
-위 `User` 엔티티를 보면 User는 `relation`, `message`, `userChatRoom` 과 직접적인 참조를 갖고 있습니다. 그리고 `userChatRoom`은 `chatRoom`을 참조하고 있어서 사실상 `User`는 모든 곳으로의 접근이 가능합니다.
-
-이는 `User` 엔티티 뿐만이 아닙니다. 모든 엔티티는 직접적으로 혹은 간접적으로 연관관계를 맺고있기 때문에 어느 엔티티를 조회하던 다른 모든 엔티티로의 이동이 가능하고, 따라서 조회를 어디까지 해야하는지에 대한 의문이 발생하는 것입니다.
-
-만약 전부 조회를 하면 필요 없는 것까지 조회를 하게 되는 것이고, 그렇다고 딱 하나의 엔티티만 조회를 하면 관련 엔티티로의 접근이 필요할 때 DB로 보내는 요청이 여러개가 나가게 됩니다.
-
-한마디로 조회의 경계가 필요했습니다.
-
-저는 이 문제를 `aggregate`와 `aggregate root`를 설정하여서 해결했습니다.
-
-`aggregate`는 관련된 엔티티를 하나로 묶은 문집입니다.
-
-동일한 혹은 비슷한 생명주기를 갖는 것을 동일한 `aggregate`로 분류했습니다.
-
-아래는 이러한 기준을 토대로 메시지 서비스를 `aggregate` 단위로 분류한 것입니다.
-
-- 유저 aggregate
-    - 유저
-    - 관계
-- 채팅방 aggregate
-    - 채팅방
-    - 채팅방 참여
-- 채팅 aggregate
-    - 메시지
-
-`aggregate root`는 해당 `aggregate`를 관리할 주체/주인을 의미합니다. `유저`가 삭제되면 연관된 `관계`가 함께 삭제되어야 하고,
-`채팅방`이 삭제되면 연관된 `채팅방 참여`가 함께 삭제되어야 하므로 `aggregate root`는 `유저`, `채팅방`, `메시지`로 설정했습니다.
-
-이제 조회를 할때에는 한 `aggregate` 전체를 조회하는 방식으로 조회를 하면 됩니다. 
-
-참고로, `aggregate`의 주체가 `aggregate root`이기 때문에, `aggregate`를 조회/업데이트/삭제 등의 작업 시 반드시 `aggregate root`를 기준으로 동작해야 합니다.
-
-이를 반영한 `User` 엔티티 코드는 아래와 같습니다.
-
-```typescript
-/**
- * User 엔티티
- */
-@Entity()
-export class User extends AssignedIdAndTimestampBaseEntity {
-    @Column(() => EmailInfo, { prefix: false })
-    emailInfo: EmailInfo;
-
-    @Column({ name: 'password', type: 'varchar' })
-    password: string;
-
-    @Column({ name: 'nickname', type: 'varchar', length: 15 })
-    nickname: string;
-
-    @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
-    refreshToken: string | null;
-
-    @OneToMany(() => UserRelation, (userRelation) => userRelation.fromUser, {
-        cascade: true,
-    })
-    relations: UserRelation[]
-}
-```
-
-* * *
-
 ## 객체 지향 기반 프로젝트
 
 객체 지향의 핵심은 프로그램을 `객체`와 `객체 간의 상호작용`으로 구성하는 것입니다.
@@ -366,6 +271,101 @@ export class ChatRoomRepositoryImpl implements ChatRoomRepository {
     ) { }
 
     /** ... 내부 구현 ... */
+}
+```
+
+* * *
+
+## aggregate와 aggregate root 설정
+
+처음에는 aggretate와 aggregate root라는 개념 없이 DB 스키마에 적힌 그대로 엔티티를 작성하고 관련 로직을 작성했습니다.
+
+코드로 표현하면 아래와 같습니다.
+
+``` typescript
+@Entity()
+export class User extends AssignedIdAndTimestampBaseEntity {
+    @Column(() => EmailInfo, { prefix: false })
+    emailInfo: EmailInfo;
+
+    @Column({ name: 'nickname', type: 'varchar', length: 15 })
+    nickname: string;
+
+    @Column({ name: 'password', type: 'varchar' })
+    password: string;
+
+    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.user)
+    userChatRooms: UserChatRoom[];
+
+    @OneToMany(() => Message, message => message.sender)
+    sentMessages: Message[];
+    
+    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.fromUser)
+    relationshipFromMe: UserRelationship[];
+
+    @OneToMany(() => UserRelationship, (userRelationship) => userRelationship.toUser)
+    relationshipToMe: UserRelationship[];
+}
+```
+
+하지만 이렇게 작성을 하니 과연 어디까지 함께 조회해야 하는 것인지에 대한 의문이 발생했습니다.
+
+위 `User` 엔티티를 보면 User는 `relation`, `message`, `userChatRoom` 과 직접적인 참조를 갖고 있습니다. 그리고 `userChatRoom`은 `chatRoom`을 참조하고 있어서 사실상 `User`는 모든 곳으로의 접근이 가능합니다.
+
+이는 `User` 엔티티 뿐만이 아닙니다. 모든 엔티티는 직접적으로 혹은 간접적으로 연관관계를 맺고있기 때문에 어느 엔티티를 조회하던 다른 모든 엔티티로의 이동이 가능하고, 따라서 조회를 어디까지 해야하는지에 대한 의문이 발생하는 것입니다.
+
+만약 전부 조회를 하면 필요 없는 것까지 조회를 하게 되는 것이고, 그렇다고 딱 하나의 엔티티만 조회를 하면 관련 엔티티로의 접근이 필요할 때 DB로 보내는 요청이 여러개가 나가게 됩니다.
+
+한마디로 조회의 경계가 필요했습니다.
+
+저는 이 문제를 `aggregate`와 `aggregate root`를 설정하여서 해결했습니다.
+
+`aggregate`는 관련된 엔티티를 하나로 묶은 문집입니다.
+
+동일한 혹은 비슷한 생명주기를 갖는 것을 동일한 `aggregate`로 분류했습니다.
+
+아래는 이러한 기준을 토대로 메시지 서비스를 `aggregate` 단위로 분류한 것입니다.
+
+- 유저 aggregate
+    - 유저
+    - 관계
+- 채팅방 aggregate
+    - 채팅방
+    - 채팅방 참여
+- 채팅 aggregate
+    - 메시지
+
+`aggregate root`는 해당 `aggregate`를 관리할 주체/주인을 의미합니다. `유저`가 삭제되면 연관된 `관계`가 함께 삭제되어야 하고,
+`채팅방`이 삭제되면 연관된 `채팅방 참여`가 함께 삭제되어야 하므로 `aggregate root`는 `유저`, `채팅방`, `메시지`로 설정했습니다.
+
+이제 조회를 할때에는 한 `aggregate` 전체를 조회하는 방식으로 조회를 하면 됩니다. 
+
+참고로, `aggregate`의 주체가 `aggregate root`이기 때문에, `aggregate`를 조회/업데이트/삭제 등의 작업 시 반드시 `aggregate root`를 기준으로 동작해야 합니다.
+
+이를 반영한 `User` 엔티티 코드는 아래와 같습니다.
+
+```typescript
+/**
+ * User 엔티티
+ */
+@Entity()
+export class User extends AssignedIdAndTimestampBaseEntity {
+    @Column(() => EmailInfo, { prefix: false })
+    emailInfo: EmailInfo;
+
+    @Column({ name: 'password', type: 'varchar' })
+    password: string;
+
+    @Column({ name: 'nickname', type: 'varchar', length: 15 })
+    nickname: string;
+
+    @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
+    refreshToken: string | null;
+
+    @OneToMany(() => UserRelation, (userRelation) => userRelation.fromUser, {
+        cascade: true,
+    })
+    relations: UserRelation[]
 }
 ```
 
