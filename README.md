@@ -499,6 +499,8 @@ npm run start:msg:dev:infra
 
 ## 남은 과제
 
+- Transaction 코드 작성하기
+- e2e 테스트 작성하기
 - 실시간 통신 로직을 msg와 분리하여 msg-realtime으로 옮기기
 - 실시간 통신 로직을 책임에 맞게 분리하기
 - 여러 socketIO 서버를 띄우고 redis adapter로 조율하기
