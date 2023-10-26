@@ -78,6 +78,18 @@ URL: users/:userId/relations/:relationId
 
 덧붙여, 관계 테이블의 (from_user_id, to_user_id)와 채팅방 참여 테이블의 (chat_room_id, user_id)는 유니크해야 하기 때문에 unique index를 추가했습니다.
 
+### Email을 Local과 Domain으로 나눈 이유
+
+이메일을 `local@domain` 형식으로 하나의 컬럼에 저장하면 이메일 도메인에 관한 질의를 할 때 `WHERE email like ‘%@gmail.com’`과 같은 형식으로 질의가 이루어질 텐데, 이는 성능상 좋지 않습니다. 때문에 `local` 컬럼과 `domain` 컬럼으로 나누어서 저장하도록 유저 테이블을 설계했습니다.
+
+간단하게 말하면 email 컬럼에 대해 1NF를 수행했습니다.
+
+### 유저 테이블에서 Domain을 분리하지 않은 이유
+
+domain 컬럼에 들어가는 데이터는 대부분 중복일 거로 생각합니다. `google`, `naver`, `daum`, `kakao` 등 사람들이 많이 사용하는 domain이 어느 정도 정해져 있기 때문입니다. 중복을 방지하고 데이터의 수정을 용이하게 하기 위해 Domain을 따로 분리해도 좋습니다.
+
+하지만, 저는 그렇게 많은 사용자가 사용하는 이메일 Domain이 변경되는 일은 없다고 생각했기 때문에 분리하지 않았습니다.
+
 ### ERD
 
 컬럼명 / 타입 / 컬럼 설명을 담은 ERD는 아래와 같습니다. 
