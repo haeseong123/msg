@@ -7,7 +7,9 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(MsgRealtimeModule);
 
-  const port: number = process.env.SERVER_PORT ? +process.env.SERVER_PORT : 3000
+  const port: number = process.env.SERVER_PORT
+    ? +process.env.SERVER_PORT
+    : 3000;
   console.log(`listening at ${port}`);
 
   await app.listen(port);

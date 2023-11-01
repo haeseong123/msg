@@ -11,7 +11,9 @@ describe('MsgRealtimeController', () => {
       providers: [MsgRealtimeService],
     }).compile();
 
-    msgRealtimeController = app.get<MsgRealtimeController>(MsgRealtimeController);
+    msgRealtimeController = app.get<MsgRealtimeController>(
+      MsgRealtimeController,
+    );
   });
 
   describe('root', () => {
