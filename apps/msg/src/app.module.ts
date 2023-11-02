@@ -10,20 +10,29 @@ import { databaseConfig } from './common/config/database.config';
 import { ArgumentInvalidException } from './common/exception/argument-invalid.exception';
 import { MessageModule } from './message/message.module';
 import { UserRelationModule } from './user/user-relation/user-relation.module';
-import { TransactionModule } from './common/database/transaction/transaction.module';
 import { ChatRoomParticipantModule } from './chat-room/chat-room-participant/chat-room-participant.module';
 import { ChatModule } from './websocket/chat/chat.module';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(databaseConfig),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => databaseConfig,
+      dataSourceFactory: async (options) => {
+        if (!options) {
+          throw new Error('Invalid options passed');
+        }
+
+        return addTransactionalDataSource(new DataSource(options));
+      },
+    }),
     AuthModule,
     UserModule,
     ChatRoomModule,
     ChatRoomParticipantModule,
     UserRelationModule,
     MessageModule,
-    TransactionModule,
     ChatModule,
   ],
   providers: [
@@ -42,7 +51,7 @@ import { ChatModule } from './websocket/chat/chat.module';
           whitelist: true,
           forbidNonWhitelisted: true,
           transform: true,
-          exceptionFactory: (err) => new ArgumentInvalidException(),
+          exceptionFactory: (_err) => new ArgumentInvalidException(),
         }),
     },
     {

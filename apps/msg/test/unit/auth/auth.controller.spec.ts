@@ -5,6 +5,7 @@ import { MsgUser } from '@app/msg-core/jwt/msg-user';
 import { TestingModule, Test } from '@nestjs/testing';
 import { AuthController } from 'apps/msg/src/auth/auth.controller';
 import { AuthService } from 'apps/msg/src/auth/auth.service';
+import { SigninResponseDto } from 'apps/msg/src/auth/dto/signin-response.dto';
 import { UserEmailInfoDto } from 'apps/msg/src/user/dto/user-email-info.dto';
 import { UserSigninDto } from 'apps/msg/src/user/dto/user-signin.dto';
 import { UserSingUpDto } from 'apps/msg/src/user/dto/user-signup.dto';
@@ -73,15 +74,20 @@ describe('AuthController', () => {
         new UserEmailInfoDto('hs@naver.com'),
         'password',
       );
-      const token = new MsgTokenDto('token', 'refresh_token');
+      const tokenDto = new MsgTokenDto('token', 'refresh_token');
+      const signinResponseDto = new SigninResponseDto(
+        1,
+        tokenDto.accessToken,
+        tokenDto.refreshToken,
+      );
 
-      jest.spyOn(authService, 'signin').mockResolvedValue(token);
+      jest.spyOn(authService, 'signin').mockResolvedValue(signinResponseDto);
 
       // When
       const result = await authController.signin(signinDto);
 
       // Then
-      expect(result).toBe(token);
+      expect(result).toBe(signinResponseDto);
     });
   });
 

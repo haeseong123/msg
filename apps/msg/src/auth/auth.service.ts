@@ -9,6 +9,7 @@ import { UserSingUpDto } from '../user/dto/user-signup.dto';
 import { UserService } from '../user/user.service';
 import { TokenService } from '@app/msg-core/jwt/token.service';
 import { MsgTokenDto } from '@app/msg-core/jwt/dto/msg-token.dto';
+import { SigninResponseDto } from './dto/signin-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +49,7 @@ export class AuthService {
   /**
    * 로그인
    */
-  async signin(dto: UserSigninDto): Promise<MsgTokenDto> {
+  async signin(dto: UserSigninDto): Promise<SigninResponseDto> {
     /**
      * dto.email로 user를 가져옵니다.
      */
@@ -66,9 +67,9 @@ export class AuthService {
     /**
      * 새 토큰을 발급받습니다.
      */
-    const tokenDto = await this.generateToken(user);
+    const msgToken = await this.generateToken(user);
 
-    return tokenDto;
+    return SigninResponseDto.of(user, msgToken);
   }
 
   /**

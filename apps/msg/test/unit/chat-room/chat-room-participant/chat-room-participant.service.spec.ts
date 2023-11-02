@@ -7,16 +7,18 @@ import { ChatRoomParticipantService } from 'apps/msg/src/chat-room/chat-room-par
 import { ChatRoomParticipantRemoveDto } from 'apps/msg/src/chat-room/chat-room-participant/dto/chat-room-participant-remove.dto';
 import { ChatRoomParticipantSaveDto } from 'apps/msg/src/chat-room/chat-room-participant/dto/chat-room-participant-save.dto';
 import { ChatRoomService } from 'apps/msg/src/chat-room/chat-room.service';
-import { TransactionService } from 'apps/msg/src/common/database/transaction/transaction-service';
 import { MessageService } from 'apps/msg/src/message/message.service';
 import { UserService } from 'apps/msg/src/user/user.service';
+
+jest.mock('typeorm-transactional', () => ({
+  Transactional: () => () => ({}),
+}));
 
 describe('ChatRoomController', () => {
   let chatRoomParticipantService: ChatRoomParticipantService;
   let chatRoomService: ChatRoomService;
   let userService: UserService;
   let messageService: MessageService;
-  let transactionService: TransactionService;
 
   beforeEach(async () => {
     const chatRoomServiceMock = {
@@ -30,9 +32,6 @@ describe('ChatRoomController', () => {
     };
     const messageServiceMock = {
       removeAllByChatRoomId: jest.fn(),
-    };
-    const transactionServiceMock = {
-      withTransaction: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -50,10 +49,6 @@ describe('ChatRoomController', () => {
           provide: MessageService,
           useValue: messageServiceMock,
         },
-        {
-          provide: TransactionService,
-          useValue: transactionServiceMock,
-        },
       ],
     }).compile();
 
@@ -63,7 +58,6 @@ describe('ChatRoomController', () => {
     chatRoomService = module.get<ChatRoomService>(ChatRoomService);
     userService = module.get<UserService>(UserService);
     messageService = module.get<MessageService>(MessageService);
-    transactionService = module.get<TransactionService>(TransactionService);
   });
 
   describe('특정 채팅방에 유저를 한 명 초대합니다.', () => {
@@ -164,13 +158,19 @@ describe('ChatRoomController', () => {
       // Given
       jest.spyOn(chatRoom, 'getParticipantsSize').mockReturnValueOnce(1);
 
-      const transactionSpy = jest.spyOn(transactionService, 'withTransaction');
+      const messageServiceSpy = jest
+        .spyOn(messageService, 'removeAllByChatRoomId')
+        .mockResolvedValue([]);
+      const chatRoomServiceSpy = jest
+        .spyOn(chatRoomService, 'removeByEntity')
+        .mockResolvedValue(chatRoom);
 
       // When
       const result = await chatRoomParticipantService.remove(removeDto);
 
       // Then
-      expect(transactionSpy).toBeCalled();
+      expect(messageServiceSpy).toHaveBeenCalledWith(chatRoom.id);
+      expect(chatRoomServiceSpy).toHaveBeenCalledWith(chatRoom);
       expect(result).toStrictEqual(participant);
     });
   });

@@ -16,6 +16,7 @@ import { MsgTokenDto } from '@app/msg-core/jwt/dto/msg-token.dto';
 import { JwtGuard } from '@app/msg-core/jwt/guard/jwt.guard';
 import { JwtRefreshGuard } from '@app/msg-core/jwt/guard/jwt-refresh.guard';
 import { MsgUser } from '@app/msg-core/jwt/msg-user';
+import { SigninResponseDto } from './dto/signin-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -36,7 +37,7 @@ export class AuthController {
    */
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  async signin(@Body() signinDto: UserSigninDto): Promise<MsgTokenDto> {
+  async signin(@Body() signinDto: UserSigninDto): Promise<SigninResponseDto> {
     return await this.authService.signin(signinDto);
   }
 

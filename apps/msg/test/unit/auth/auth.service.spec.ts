@@ -12,6 +12,7 @@ import { UserSigninDto } from 'apps/msg/src/user/dto/user-signin.dto';
 import { UserSingUpDto } from 'apps/msg/src/user/dto/user-signup.dto';
 import { UserService } from 'apps/msg/src/user/user.service';
 import * as bcrypt from 'bcrypt';
+import { SigninResponseDto } from 'apps/msg/src/auth/dto/signin-response.dto';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -116,6 +117,11 @@ describe('AuthService', () => {
     it('성공', async () => {
       // Given
       const tokenDto = new MsgTokenDto('token', 'ref_token');
+      const signinResponseDto = new SigninResponseDto(
+        user.id,
+        tokenDto.accessToken,
+        tokenDto.refreshToken,
+      );
 
       jest.spyOn(userService, 'findByEmailOrThrow').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => true);
@@ -125,7 +131,7 @@ describe('AuthService', () => {
       const result = await authService.signin(userSigninDto);
 
       // Then
-      expect(result).toStrictEqual(tokenDto);
+      expect(result).toStrictEqual(signinResponseDto);
     });
 
     it('실패: 비밀번호 불일치', async () => {

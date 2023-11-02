@@ -2,10 +2,10 @@ import { ChatRoomParticipant } from '@app/msg-core/entities/chat-room/chat-room-
 import { ChatRoomService } from '../chat-room.service';
 import { ChatRoomParticipantSaveDto } from './dto/chat-room-participant-save.dto';
 import { ChatRoomParticipantRemoveDto } from './dto/chat-room-participant-remove.dto';
-import { TransactionService } from '../../common/database/transaction/transaction-service';
 import { MessageService } from '../../message/message.service';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class ChatRoomParticipantService {
@@ -19,7 +19,6 @@ export class ChatRoomParticipantService {
      */
     @Inject(forwardRef(() => MessageService))
     private messageService: MessageService,
-    private transactionService: TransactionService,
   ) {}
 
   /**
@@ -90,6 +89,7 @@ export class ChatRoomParticipantService {
    *
    * (채팅방 나가기 기능)
    */
+  @Transactional()
   async remove(
     dto: ChatRoomParticipantRemoveDto,
   ): Promise<ChatRoomParticipant> {
@@ -119,14 +119,8 @@ export class ChatRoomParticipantService {
       /**
        * 채팅방과 해당 채팅방의 모든 메시지를 삭제합니다.
        * */
-      const remove = async () => {
-        await Promise.all([
-          this.messageService.removeAllByChatRoomId(chatRoom.id),
-          this.chatRoomService.removeByEntity(chatRoom),
-        ]);
-      };
-
-      await this.transactionService.withTransaction(remove);
+      await this.messageService.removeAllByChatRoomId(chatRoom.id);
+      await this.chatRoomService.removeByEntity(chatRoom);
     } else {
       /**
        * 채팅방에서 나갑니다.
