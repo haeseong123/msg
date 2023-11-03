@@ -1,19 +1,19 @@
 import { User } from '@app/msg-core/entities/user/user.entity';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { UserRepository } from './user.repository';
 
 @Injectable()
-export class UserRepositoryImpl implements UserRepository {
-  constructor(
-    @InjectRepository(User)
-    private readonly repository: Repository<User>,
-  ) {}
+export class UserRepositoryImpl
+  extends Repository<User>
+  implements UserRepository
+{
+  constructor(dataSource: DataSource) {
+    super(User, dataSource.createEntityManager());
+  }
 
   async findById(id: number): Promise<User | null> {
-    const user = this.repository
-      .createQueryBuilder('u')
+    const user = this.createQueryBuilder('u')
       .leftJoinAndSelect('u.relations', 'ur')
       .where('u.id = :id', { id })
       .getOne();
@@ -22,19 +22,15 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async findByIds(ids: number[]): Promise<User[]> {
-    return await this.repository.findBy({ id: In(ids) });
+    return await this.findBy({ id: In(ids) });
   }
 
   async findByEmail(
     emailLocal: string,
     emailDomain: string,
   ): Promise<User | null> {
-    return await this.repository.findOneBy({
+    return await this.findOneBy({
       emailInfo: { emailLocal, emailDomain },
     });
-  }
-
-  async save(entity: User): Promise<User> {
-    return await this.repository.save(entity);
   }
 }

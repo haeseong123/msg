@@ -69,7 +69,7 @@ export class UserRelationService {
     /**
      * dto.frumUserId, dto.toUserId에 해당되는 user가 있는지 확인합니다.
      */
-    const [fromUser, toUser] = await Promise.all([
+    const [fromUser, _toUser] = await Promise.all([
       this.userService.findByIdOrThrow(dto.fromUserId),
       this.userService.findByIdOrThrow(dto.toUserId),
     ]);

@@ -1,9 +1,13 @@
 import { Message } from '@app/msg-core/entities/message/message.entity';
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
+import { MessageRepository } from './message.repository';
 
 @Injectable()
-export class MessageRepositoryImpl extends Repository<Message> {
+export class MessageRepositoryImpl
+  extends Repository<Message>
+  implements MessageRepository
+{
   constructor(dataSource: DataSource) {
     super(Message, dataSource.createEntityManager());
   }

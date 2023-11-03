@@ -36,7 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /**
    * 소켓 연결이 수립될 때 해당 메서드가 호출됩니다.
    */
-  async handleConnection(client: SocketWithAuthAndChatRoomId, ...args: any[]) {
+  async handleConnection(client: SocketWithAuthAndChatRoomId, ..._args: any[]) {
     /**
      * client가 해당 채팅방에 참여중인지 확인합니다.
      */

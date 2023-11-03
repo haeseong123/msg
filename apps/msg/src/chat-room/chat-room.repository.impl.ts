@@ -2,9 +2,13 @@ import { ChatRoom } from '@app/msg-core/entities/chat-room/chat-room.entity';
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { ChatRoomParticipant } from '@app/msg-core/entities/chat-room/chat-room-participant/chat-room-participant.entity';
+import { ChatRoomRepository } from './chat-room.repository';
 
 @Injectable()
-export class ChatRoomRepositoryImpl extends Repository<ChatRoom> {
+export class ChatRoomRepositoryImpl
+  extends Repository<ChatRoom>
+  implements ChatRoomRepository
+{
   constructor(dataSource: DataSource) {
     super(ChatRoom, dataSource.createEntityManager());
   }
